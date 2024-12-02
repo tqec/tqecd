@@ -1,5 +1,5 @@
 How to install ``tqecd``
-=======================
+========================
 
 Requirements before installing
 ------------------------------

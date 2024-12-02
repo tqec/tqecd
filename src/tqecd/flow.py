@@ -4,13 +4,13 @@ import typing as ty
 from dataclasses import dataclass
 
 from tqecd.boundary import BoundaryStabilizer
+from tqecd.exceptions import TQECDException
 from tqecd.fragment import Fragment, FragmentLoop
 from tqecd.match_utils.cover import (
     find_commuting_cover_on_target_qubits_sat,
 )
 from tqecd.measurement import get_relative_measurement_index
 from tqecd.pauli import PauliString, pauli_product
-from tqecd.exceptions import TQECDException
 
 
 def _anti_commuting_stabilizers_indices(flows: list[BoundaryStabilizer]) -> list[int]:
@@ -232,14 +232,14 @@ def build_flows_from_fragments(
     should be checked (recursively if there is any FragmentLoop instance in
     the provided fragments):
 
-    ```py
-    fragments: list[Fragment | FragmentLoop] = []  # anything here
-    flows = build_flows_from_fragments(fragments)
-    for frag, flow in zip(fragments, flows):
-        assert (isinstance(frag, Fragment) and isinstance(flow, FragmentFlow)) or (
-            isinstance(frag, FragmentLoop) and isinstance(flow, FragmentLoopFlow)
-        )
-    ```
+    .. code-block:: python
+
+        fragments: list[Fragment | FragmentLoop] = []  # anything here
+        flows = build_flows_from_fragments(fragments)
+        for frag, flow in zip(fragments, flows):
+            assert (isinstance(frag, Fragment) and isinstance(flow, FragmentFlow)) or (
+                isinstance(frag, FragmentLoop) and isinstance(flow, FragmentLoopFlow)
+            )
 
     Args:
         fragments: the fragments composing the circuit to study and for which this
