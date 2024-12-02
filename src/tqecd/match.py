@@ -277,7 +277,7 @@ def match_boundary_stabilizers(
             sets are not equal, an exception is raised. Defaults to True.
 
     Raises:
-        TQECException: if the sanity check does not pass.
+        TQECDException: if the sanity check does not pass.
 
     Returns:
         all matched detectors.
@@ -340,7 +340,7 @@ def match_boundary_stabilizers(
         # - if we are here, then should_sanity_check is True, and so
         #   matched_detectors_within_loop should be bound to a value.
         if set(matched_detectors_within_loop) != set(matched_detectors):  # type: ignore[reportPossiblyUnboundVariable]
-            raise TQECException(
+            raise TQECDException(
                 f"The set of detectors computed from measurements in\n{left_flows}\n"
                 f"and\n{right_flows}\nis not the same as the set of detectors computed "
                 "from measurements between two loop body repetitions. Is your QEC "

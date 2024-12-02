@@ -67,7 +67,7 @@ def annotate_detectors_automatically(circuit: stim.Circuit) -> stim.Circuit:
     """
     potential_error_reason = is_valid_input_circuit(circuit)
     if potential_error_reason is not None:
-        raise TQECException(potential_error_reason)
+        raise TQECDException(potential_error_reason)
 
     fragments = split_stim_circuit_into_fragments(circuit)
     qubit_coords_map: dict[int, tuple[float, ...]] = {

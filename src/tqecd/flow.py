@@ -31,7 +31,7 @@ def _try_merge_anticommuting_flows_inplace(flows: list[BoundaryStabilizer]) -> N
             anti-commute with its collapsing operations.
 
     Raises:
-        TQECException: if the provided flows have different collapsing
+        TQECDException: if the provided flows have different collapsing
             operations, hinting that they are not part of the same boundary,
             in which case it makes no sense to try to merge them together.
     """
@@ -54,7 +54,7 @@ def _try_merge_anticommuting_flows_inplace(flows: list[BoundaryStabilizer]) -> N
     # anti-commuting stabilizer and asserting that they are all equal.
     for i in range(1, len(collapsing_operations)):
         if collapsing_operations[0] != collapsing_operations[i]:
-            raise TQECException(
+            raise TQECDException(
                 "Cannot merge anti-commuting flows defined on different collapsing "
                 "operations. Found the following difference:\nFlow 0 has the "
                 "collapsing operations:\n\t"
@@ -291,7 +291,7 @@ def _build_flows_from_fragment(fragment: Fragment) -> FragmentFlows:
     destruction_flows: list[BoundaryStabilizer] = []
     for measurement in fragment.measurements:
         if measurement.non_trivial_pauli_count != 1:
-            raise TQECException(
+            raise TQECDException(
                 "Found a measurement applied on several qubits. "
                 "This is not implemented (yet?)."
             )

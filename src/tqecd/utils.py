@@ -199,7 +199,7 @@ def is_virtual_moment(moment: stim.Circuit) -> bool:
         else `False`.
     """
     if any(isinstance(inst, stim.CircuitRepeatBlock) for inst in moment):
-        raise TQECException(
+        raise TQECDException(
             "Breaking invariant: you provided a circuit with a stim.CircuitRepeatBlock "
             "instruction to is_virtual_moment. This is not supported."
         )
@@ -232,8 +232,8 @@ def _collapsing_inst_to_pauli_strings(
         inst: a collapsing instruction.
 
     Raises:
-        TQECException: If the provided collapsing instruction has any non-qubit target.
-        TQECException: If the provided instruction is not a collapsing instruction.
+        TQECDException: If the provided collapsing instruction has any non-qubit target.
+        TQECDException: If the provided instruction is not a collapsing instruction.
 
     Returns:
         a list of `PauliString` instances representing the collapsing instruction
@@ -242,7 +242,7 @@ def _collapsing_inst_to_pauli_strings(
     name = inst.name
     targets = inst.targets_copy()
     if any(not t.is_qubit_target for t in targets):
-        raise TQECException(
+        raise TQECDException(
             "Found a stim instruction with non-qubit target. This is not supported."
         )
     if name in ["RX", "MX", "MRX"]:
@@ -251,7 +251,7 @@ def _collapsing_inst_to_pauli_strings(
         return [PauliString({target.qubit_value: "Y"}) for target in targets]  # type: ignore
     if name in ["R", "RZ", "M", "MZ", "MR", "MRZ"]:
         return [PauliString({target.qubit_value: "Z"}) for target in targets]  # type: ignore
-    raise TQECException(
+    raise TQECDException(
         f"Not a supported collapsing instruction: {name}. "
         "See https://github.com/quantumlib/Stim/wiki/Stim-v1.13-Gate-Reference "
         "for a list of collapsing instructions."
@@ -277,7 +277,7 @@ def collapse_pauli_strings_at_moment(moment: stim.Circuit) -> list[PauliString]:
             instance.
 
     Raises:
-        TQECException: If the pre-conditions of this function are not met.
+        TQECDException: If the pre-conditions of this function are not met.
 
     Returns:
         instances of `PauliString` representing each collapsing operation found in the
@@ -285,7 +285,7 @@ def collapse_pauli_strings_at_moment(moment: stim.Circuit) -> list[PauliString]:
     """
     # Pre-condition check
     if any(isinstance(inst, stim.CircuitRepeatBlock) for inst in moment):
-        raise TQECException(
+        raise TQECDException(
             "Breaking pre-condition: collapse_pauli_strings_at_moment is expecting "
             f"moments without repeat blocks. Found:\n{moment}"
         )

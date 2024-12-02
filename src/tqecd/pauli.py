@@ -33,7 +33,7 @@ class PauliString:
     def __init__(self, pauli_by_qubit: dict[int, PAULI_STRING_TYPE]) -> None:
         for qubit, pauli in pauli_by_qubit.items():
             if pauli not in _IXYZ:
-                raise TQECException(
+                raise TQECDException(
                     f"Invalid Pauli operator {pauli} for qubit {qubit}, expected I, X, Y, or Z."
                 )
         self._pauli_by_qubit: dict[int, PAULI_STRING_TYPE] = {
@@ -52,7 +52,7 @@ class PauliString:
     @property
     def qubit(self) -> int:
         if len(self._pauli_by_qubit) != 1:
-            raise TQECException(
+            raise TQECDException(
                 "Cannot retrieve only one qubit from a Pauli string with "
                 f"{len(self._pauli_by_qubit)} qubits."
             )
@@ -82,7 +82,7 @@ class PauliString:
         max_qubit_index = max(self._pauli_by_qubit.keys())
         length = length or max_qubit_index + 1
         if length <= max_qubit_index:
-            raise TQECException(
+            raise TQECDException(
                 f"The length specified {length} <= the maximum qubit index {max_qubit_index} in the pauli string."
             )
         stim_pauli_string = stim.PauliString(length)
@@ -148,7 +148,7 @@ class PauliString:
                 with self and will collapse with self.
 
         Raises:
-            TQECException: if one of the provided operators does not commute with self.
+            TQECDException: if one of the provided operators does not commute with self.
 
         Returns:
             a copy of self, collapsed by the provided operators.
@@ -156,7 +156,7 @@ class PauliString:
         ret = PauliString(self._pauli_by_qubit.copy())
         for op in collapse_operators:
             if not ret.commutes(op):
-                raise TQECException(
+                raise TQECDException(
                     f"Cannot collapse {ret} by a non-commuting operator {op}."
                 )
             for qubit in op.qubits:

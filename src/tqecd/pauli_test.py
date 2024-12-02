@@ -19,7 +19,7 @@ def test_pauli_string_construction() -> None:
     assert len({ps1, ps2}) == 1
     assert ps1.overlaps(ps2)
     assert not ps1.overlaps(PauliString({3: "X"}))
-    with pytest.raises(TQECException, match=r"^Invalid Pauli operator.*"):
+    with pytest.raises(TQECDException, match=r"^Invalid Pauli operator.*"):
         PauliString({0: "W"})  # type: ignore
 
 
@@ -40,7 +40,7 @@ def test_pauli_string_interop_with_stim() -> None:
     )
 
     with pytest.raises(
-        TQECException, match=r"^The length specified 2 <= the maximum qubit index.*"
+        TQECDException, match=r"^The length specified 2 <= the maximum qubit index.*"
     ):
         pauli_string.to_stim_pauli_string(2)
 
@@ -71,7 +71,7 @@ def test_pauli_string_collapse_by() -> None:
     X0 = PauliString({0: "X"})
     assert X0Z1.collapse_by([X0]) == Z1
     assert X0Z1.collapse_by([X0, Z1]) == PauliString({})
-    with pytest.raises(TQECException):
+    with pytest.raises(TQECDException):
         X0Z1.collapse_by([Z0])
 
 
@@ -89,9 +89,9 @@ def test_pauli_string_qubit() -> None:
     Z0 = PauliString({0: "Z"})
     I0to20 = PauliString({i: "I" for i in range(20)})
     assert Z0.qubit == 0
-    with pytest.raises(TQECException):
+    with pytest.raises(TQECDException):
         X0Z1.qubit
-    with pytest.raises(TQECException):
+    with pytest.raises(TQECDException):
         I0to20.qubit
 
 

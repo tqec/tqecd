@@ -10,12 +10,12 @@ def test_initialisation() -> None:
     RelativeMeasurementLocation(-1, 1)
 
     with pytest.raises(
-        TQECException,
+        TQECDException,
         match=r"^Relative measurement offsets should be strictly negative\.$",
     ):
         RelativeMeasurementLocation(0, 1)
     with pytest.raises(
-        TQECException,
+        TQECDException,
         match=r"^Relative measurement offsets should be strictly negative\.$",
     ):
         RelativeMeasurementLocation(1, 1)
@@ -25,7 +25,7 @@ def test_offset_by() -> None:
     rml = RelativeMeasurementLocation(-1, 1)
     assert rml.offset_by(-19) == RelativeMeasurementLocation(-20, 1)
     with pytest.raises(
-        TQECException,
+        TQECDException,
         match=r"^Relative measurement offsets should be strictly negative\.$",
     ):
         rml.offset_by(1)

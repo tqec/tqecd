@@ -18,7 +18,7 @@ from tqecd.utils import (
     is_virtual_moment,
     iter_stim_circuit_by_moments,
 )
-from tqecd.exceptions import TQECDException, TQECWarning
+from tqecd.exceptions import TQECDException, TQECDWarning
 
 
 class Fragment:
@@ -36,21 +36,21 @@ class Fragment:
             or noisy-gate instructions.
 
         Raises:
-            TQECException: if the provided `stim.Circuit` instance contains a
+            TQECDException: if the provided `stim.Circuit` instance contains a
                 stim.CircuitRepeatBlock instance.
-            TQECException: if any moment from the provided circuit contains
+            TQECDException: if any moment from the provided circuit contains
                 both a measurement (resp. reset) and a non-measurement (resp.
                 non-reset) operation. Note that annotations and noisy-gates
                 instructions (measurements excluded) are ignored, and so are
                 excluded from this condition.
-            TQECException: if the provided circuit does not end with at least
+            TQECDException: if the provided circuit does not end with at least
                 one measurement.
 
         Args:
             circuit: the circuit represented by the instance.
         """
         if has_circuit_repeat_block(circuit):
-            raise TQECException(
+            raise TQECDException(
                 "Breaking invariant: Cannot initialise a Fragment with a "
                 "stim.CircuitRepeatBlock instance but found one. Did you "
                 "meant to use FragmentLoop?"
@@ -73,7 +73,7 @@ class Fragment:
             if not has_reset(moment):
                 break
             if not has_only_reset_or_is_virtual(moment):
-                raise TQECException(
+                raise TQECDException(
                     "Breaking invariant: found a moment with at least one reset "
                     f"instruction and a non-reset instruction:\n{moment}"
                 )
@@ -85,7 +85,7 @@ class Fragment:
             if not has_measurement(moment):
                 break
             if not has_only_measurement_or_is_virtual(moment):
-                raise TQECException(
+                raise TQECDException(
                     "Breaking invariant: found a moment with at least one measurement "
                     f"instruction and a non-measurement instruction:\n{moment}"
                 )
@@ -95,7 +95,7 @@ class Fragment:
             )
 
         if not self._measurements:
-            raise TQECException(
+            raise TQECDException(
                 "A Fragment should end with at least one measurement. "
                 "The provided circuit does not seem to check that condition.\n"
                 f"Provided circuit:\n{circuit}"
@@ -154,11 +154,11 @@ class FragmentLoop:
 
     def __post_init__(self) -> None:
         if self.repetitions < 1:
-            raise TQECException(
+            raise TQECDException(
                 "Cannot have a FragmentLoop with 0 or less repetitions."
             )
         if not self.fragments:
-            raise TQECException(
+            raise TQECDException(
                 "Cannot initialise a FragmentLoop instance without any "
                 "fragment for the loop body."
             )
@@ -173,8 +173,8 @@ class FragmentLoop:
 def _get_fragment_loop(repeat_block: stim.CircuitRepeatBlock) -> FragmentLoop:
     try:
         body_fragments = split_stim_circuit_into_fragments(repeat_block.body_copy())
-    except TQECException as e:
-        raise TQECException(
+    except TQECDException as e:
+        raise TQECDException(
             f"Error when splitting the following REPEAT block:\n{repeat_block.body_copy()}"
         ) from e
     return FragmentLoop(fragments=body_fragments, repetitions=repeat_block.repeat_count)
@@ -210,12 +210,12 @@ def split_stim_circuit_into_fragments(
         circuit (stim.Circuit): the circuit to split into Fragment instances.
 
     Raises:
-        TQECException: If the circuit contains at least one moment (i.e., group of
+        TQECDException: If the circuit contains at least one moment (i.e., group of
             instructions between two TICK annotations) that are composed of at least
             one measurement (resp. one reset) and at least one non-annotation,
             non-measurement (resp. non-reset) instruction.
-        TQECException: If the circuit contains combined measurement/reset instructions.
-        TQECException: If the provided circuit could not be split into fragments due
+        TQECDException: If the circuit contains combined measurement/reset instructions.
+        TQECDException: If the provided circuit could not be split into fragments due
             to an invalid structure.
 
     Returns:
@@ -223,7 +223,7 @@ def split_stim_circuit_into_fragments(
     """
     potential_error_reason = is_valid_input_circuit(circuit)
     if potential_error_reason is not None:
-        raise TQECException(potential_error_reason)
+        raise TQECDException(potential_error_reason)
 
     fragments: list[Fragment | FragmentLoop] = []
     current_fragment = stim.Circuit()
@@ -241,7 +241,7 @@ def split_stim_circuit_into_fragments(
             # not terminated by measurements, which will raise an error when Fragment
             # is constructed.
             if current_fragment:
-                raise TQECException(
+                raise TQECDException(
                     "Trying to start a REPEAT block without a cleanly finished Fragment. "
                     "The following instructions were found preceding the REPEAT block:\n"
                     + "\n\t".join(f"{m}" for m in current_fragment)
@@ -255,7 +255,7 @@ def split_stim_circuit_into_fragments(
             # If there is something else than measurements, raise because this is
             # not a valid input.
             if not has_only_measurement_or_is_virtual(moment):
-                raise TQECException(
+                raise TQECDException(
                     "A moment with at least one measurement instruction can "
                     "only contain measurements."
                 )
@@ -279,10 +279,10 @@ def split_stim_circuit_into_fragments(
                 "sure that each reset (even resets from measurement/reset "
                 "combined instruction) is eventually followed by a measurement. "
                 f"Unprocessed fragment:\n{current_fragment}",
-                TQECWarning,
+                TQECDWarning,
             )
         else:
-            raise TQECException(
+            raise TQECDException(
                 "Circuit splitting did not finish on a measurement. "
                 f"Unprocessed fragment: \n{current_fragment}"
             )

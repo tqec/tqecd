@@ -22,7 +22,7 @@ class BoundaryStabilizer:
         boundary of a Fragment.
 
         Raises:
-            TQECException: if `source_qubits` is empty.
+            TQECDException: if `source_qubits` is empty.
 
         Args:
             stabilizer: The propagated stabilizer **before** any collapsing operation
@@ -67,14 +67,14 @@ class BoundaryStabilizer:
         operations.
 
         Raises:
-            TQECException: If any of the collapsing operation anti-commutes with the
+            TQECDException: If any of the collapsing operation anti-commutes with the
                 stored stabilizer.
 
         Returns:
             The collapsed Pauli string that goes out of the Fragment.
         """
         if self.has_anticommuting_operations:
-            raise TQECException(
+            raise TQECDException(
                 "Cannot collapse a BoundaryStabilizer if it has "
                 "anticommuting operations."
             )
@@ -116,7 +116,7 @@ class BoundaryStabilizer:
                 exactly the same set of collapsing operations.
 
         Raises:
-            TQECException: if `self` and `other` are not defined on exactly the same
+            TQECDException: if `self` and `other` are not defined on exactly the same
                 collapsing operations.
 
         Returns:
@@ -127,14 +127,14 @@ class BoundaryStabilizer:
         self_collapsing_operations = set(self.collapsing_operations)
         other_collapsing_operations = set(other.collapsing_operations)
         if self_collapsing_operations != other_collapsing_operations:
-            raise TQECException(
+            raise TQECDException(
                 "Breaking pre-condition: trying to merge two BoundaryStabilizer "
                 "instances that are not defined on the same boundary.\n"
                 f"Collapsing operations for left-hand side: {self_collapsing_operations}.\n"
                 f"Collapsing operations for right-hand side: {other_collapsing_operations}.\n"
             )
         if self._is_forward != other._is_forward:
-            raise TQECException(
+            raise TQECDException(
                 "Cannot merge a forward boundary stabilizer with a backward one."
             )
         is_forward_merge = self._is_forward
@@ -202,7 +202,7 @@ class BoundaryStabilizer:
             qubit_coordinates: mapping from qubit indices to coordinates
 
         Raises:
-            TQECException: If a qubit in self.source_qubits is not contained
+            TQECDException: If a qubit in self.source_qubits is not contained
             in the qubit_coordinates mapping.
 
         Returns:
@@ -213,7 +213,7 @@ class BoundaryStabilizer:
                 qubit_coordinates[source] for source in self.source_qubits
             ]
         except KeyError as exc:
-            raise TQECException(
+            raise TQECDException(
                 f"""Qubit index {exc.args[0]} required for detector assignment, but it does not have a valid QUBIT_COORDS statement."""
             )
         # Avoid returning numpy.float64 type returned by numpy.mean by

@@ -109,8 +109,8 @@ def find_cover(
             function. The radius is computed with the Manhattan distance.
 
     Raises:
-        TQECException: if `target` is the empty PauliString.
-        TQECException: if any of the provided instances in `target` or `sources`
+        TQECDException: if `target` is the empty PauliString.
+        TQECDException: if any of the provided instances in `target` or `sources`
             has anti-commuting stabilizers.
 
     Returns:

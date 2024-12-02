@@ -65,7 +65,7 @@ def test_after_and_before_collapse() -> None:
 
     stab = BoundaryStabilizer(X0Z1, [Z0, Z1], [], frozenset([0]), True)
     assert stab.before_collapse == X0Z1
-    with pytest.raises(TQECException):
+    with pytest.raises(TQECDException):
         stab.after_collapse
 
     stab = BoundaryStabilizer(X0Z1, [], [], frozenset([0]), True)
@@ -102,9 +102,9 @@ def test_merge() -> None:
     assert set(ab.measurements) == {RelativeMeasurementLocation(-2, 0)}
     assert set(ab.resets_qubits) == {0, 1}
 
-    with pytest.raises(TQECException):
+    with pytest.raises(TQECDException):
         a.merge(c)
-    with pytest.raises(TQECException):
+    with pytest.raises(TQECDException):
         a.merge(d)
 
 
@@ -130,7 +130,7 @@ def test_with_measurement_offset() -> None:
         RelativeMeasurementLocation(-11, 3),
     }
     with pytest.raises(
-        TQECException,
+        TQECDException,
         match=r"^Relative measurement offsets should be strictly negative\.$",
     ):
         a.with_measurement_offset(10)
@@ -168,7 +168,7 @@ def test_coordinates_raises_error_if_invalid_qubit_mapping() -> None:
     )
     qubit_coordinates: dict[int, tuple[float | int, ...]] = {3: (0, 1)}
     with pytest.raises(
-        TQECException,
+        TQECDException,
         match=r"^Qubit index 5 required for detector assignment, but it does not have a valid QUBIT_COORDS statement\.$",
     ):
         a.coordinates(qubit_coordinates=qubit_coordinates)

@@ -29,9 +29,9 @@ DETECTOR(3, 1) rec[-1] rec[-2] rec[-4]
 OBSERVABLE_INCLUDE(0) rec[-1]""")
     )
     Fragment(stim.Circuit("QUBIT_COORDS(0, 0) 0\nTICK\nM 1 2 3"))
-    with pytest.raises(TQECException):
+    with pytest.raises(TQECDException):
         Fragment(stim.Circuit("R 1 2 3"))
-    with pytest.raises(TQECException):
+    with pytest.raises(TQECDException):
         Fragment(
             stim.Circuit("""
 REPEAT 10 {
@@ -50,11 +50,11 @@ REPEAT 10 {
     OBSERVABLE_INCLUDE(0) rec[-1]
 }""")
         )
-    with pytest.raises(TQECException):
+    with pytest.raises(TQECDException):
         Fragment(stim.Circuit("R 1 2 3\nH 1 2 3\nTICK\nM 1 2 3"))
-    with pytest.raises(TQECException):
+    with pytest.raises(TQECDException):
         Fragment(stim.Circuit("M 1 2 3\nR 1 2 3"))
-    with pytest.raises(TQECException):
+    with pytest.raises(TQECDException):
         Fragment(stim.Circuit("H 2\nM 1 2 3"))
 
 
@@ -111,11 +111,11 @@ def test_fragment_loop_creation() -> None:
     # Even though a single repetition is not really something that makes sense (why using
     # a REPEAT in that case?), it is functionally valid, so we should accept it.
     FragmentLoop([fragment], 1)
-    with pytest.raises(TQECException):
+    with pytest.raises(TQECDException):
         FragmentLoop([], 10)
-    with pytest.raises(TQECException):
+    with pytest.raises(TQECDException):
         FragmentLoop([fragment], 0)
-    with pytest.raises(TQECException):
+    with pytest.raises(TQECDException):
         FragmentLoop([fragment], -10)
 
 
@@ -124,9 +124,9 @@ def test_fragment_loop_with_repetition() -> None:
     fragment_loop = FragmentLoop([fragment], 10)
     assert fragment_loop.with_repetitions(1) == FragmentLoop([fragment], 1)
     assert fragment_loop.with_repetitions(10) == fragment_loop
-    with pytest.raises(TQECException):
+    with pytest.raises(TQECDException):
         fragment_loop.with_repetitions(0)
-    with pytest.raises(TQECException):
+    with pytest.raises(TQECDException):
         fragment_loop.with_repetitions(-10)
 
 
@@ -241,7 +241,7 @@ REPEAT 9 {
     )
 
     erroneous_circuit = stim.Circuit("REPEAT 9 {\nR 1 3\nTICK\nH 1 3\n}")
-    with pytest.raises(TQECException, match=r"^Error when splitting .* REPEAT block.*"):
+    with pytest.raises(TQECDException, match=r"^Error when splitting .* REPEAT block.*"):
         split_stim_circuit_into_fragments(erroneous_circuit)
 
 
@@ -254,7 +254,7 @@ REPEAT 9 {
     M 1 3
 }""")
     with pytest.raises(
-        TQECException,
+        TQECDException,
         match=r"Trying to start a REPEAT block without a cleanly finished Fragment.*",
     ):
         split_stim_circuit_into_fragments(circuit)

@@ -83,5 +83,5 @@ def test_invalid_circuits(name: str, circuit: stim.Circuit, error_message: str) 
     circuit_without_detectors = remove_annotations(
         circuit, frozenset(["DETECTOR", "SHIFT_COORDS"])
     )
-    with pytest.raises(TQECException, match=rf"^{error_message}$"):
+    with pytest.raises(TQECDException, match=rf"^{error_message}$"):
         annotate_detectors_automatically(circuit_without_detectors)
