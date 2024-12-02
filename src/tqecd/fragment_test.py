@@ -241,7 +241,9 @@ REPEAT 9 {
     )
 
     erroneous_circuit = stim.Circuit("REPEAT 9 {\nR 1 3\nTICK\nH 1 3\n}")
-    with pytest.raises(TQECDException, match=r"^Error when splitting .* REPEAT block.*"):
+    with pytest.raises(
+        TQECDException, match=r"^Error when splitting .* REPEAT block.*"
+    ):
         split_stim_circuit_into_fragments(erroneous_circuit)
 
 
