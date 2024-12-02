@@ -6,9 +6,9 @@ from dataclasses import dataclass
 
 import stim
 
-from tqec.circuit.detectors.pauli import PauliString
-from tqec.circuit.detectors.predicates import is_valid_input_circuit
-from tqec.circuit.detectors.utils import (
+from tqecd.pauli import PauliString
+from tqecd.predicates import is_valid_input_circuit
+from tqecd.utils import (
     collapse_pauli_strings_at_moment,
     has_circuit_repeat_block,
     has_measurement,
@@ -18,7 +18,7 @@ from tqec.circuit.detectors.utils import (
     is_virtual_moment,
     iter_stim_circuit_by_moments,
 )
-from tqec.exceptions import TQECException, TQECWarning
+from tqecd.exceptions import TQECDException, TQECWarning
 
 
 class Fragment:

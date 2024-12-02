@@ -4,18 +4,18 @@ from typing import cast
 
 import stim
 
-from tqec.circuit.detectors.flow import build_flows_from_fragments
-from tqec.circuit.detectors.fragment import (
+from tqecd.flow import build_flows_from_fragments
+from tqecd.fragment import (
     Fragment,
     FragmentLoop,
     split_stim_circuit_into_fragments,
 )
-from tqec.circuit.detectors.match import (
+from tqecd.match import (
     MatchedDetector,
     match_detectors_from_flows_shallow,
 )
-from tqec.circuit.detectors.predicates import is_valid_input_circuit
-from tqec.exceptions import TQECException
+from tqecd.predicates import is_valid_input_circuit
+from tqecd.exceptions import TQECDException
 
 
 def _detectors_to_circuit(

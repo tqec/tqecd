@@ -14,7 +14,7 @@ import typing as ty
 
 import stim
 
-from tqec.exceptions import TQECException
+from tqecd.exceptions import TQECDException
 
 PAULI_STRING_TYPE = ty.Literal["I", "X", "Y", "Z"]
 _IXYZ: list[PAULI_STRING_TYPE] = ["I", "X", "Y", "Z"]

@@ -3,7 +3,7 @@ from __future__ import annotations
 import typing as ty
 
 import stim
-from tqec.circuit.detectors.utils import (
+from tqecd.utils import (
     has_computation_instruction,
     has_measurement,
     has_reset,

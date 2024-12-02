@@ -1,12 +1,12 @@
 import pytest
 import stim
-from tqec.circuit.detectors.fragment import (
+from tqecd.fragment import (
     Fragment,
     FragmentLoop,
     split_stim_circuit_into_fragments,
 )
-from tqec.circuit.detectors.pauli import PauliString
-from tqec.exceptions import TQECException
+from tqecd.pauli import PauliString
+from tqecd.exceptions import TQECDException
 
 
 def test_creation() -> None:

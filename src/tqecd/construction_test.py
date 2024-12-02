@@ -5,13 +5,13 @@ from pathlib import Path
 import pytest
 import stim
 
-from tqec.circuit.detectors.construction import annotate_detectors_automatically
-from tqec.circuit.detectors.utils import (
+from tqecd.construction import annotate_detectors_automatically
+from tqecd.utils import (
     detector_to_targets_tuple,
     push_all_detectors_to_the_end,
     remove_annotations,
 )
-from tqec.exceptions import TQECException
+from tqecd.exceptions import TQECDException
 
 _HERE = Path(__file__).parent
 _TEST_FOLDER = _HERE / "test_files"

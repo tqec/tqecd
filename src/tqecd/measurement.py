@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from tqec.exceptions import TQECException
+from tqecd.exceptions import TQECDException
 
 
 @dataclass(frozen=True)

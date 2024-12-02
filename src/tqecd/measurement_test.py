@@ -1,9 +1,9 @@
 import pytest
-from tqec.circuit.detectors.measurement import (
+from tqecd.measurement import (
     RelativeMeasurementLocation,
     get_relative_measurement_index,
 )
-from tqec.exceptions import TQECException
+from tqecd.exceptions import TQECDException
 
 
 def test_initialisation() -> None:

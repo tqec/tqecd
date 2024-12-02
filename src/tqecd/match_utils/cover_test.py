@@ -6,12 +6,12 @@ import typing as ty
 import pytest
 import stim
 
-from tqec.circuit.detectors.match_utils.cover import (
+from tqecd.match_utils.cover import (
     _all_pauli_string_combination_results,  # pyright: ignore[reportPrivateUsage]
     find_commuting_cover_on_target_qubits_sat,
     find_exact_cover_sat,
 )
-from tqec.circuit.detectors.pauli import PauliString, pauli_product
+from tqecd.pauli import PauliString, pauli_product
 
 
 def _pss(pauli_string: str) -> PauliString:

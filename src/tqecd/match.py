@@ -7,11 +7,11 @@ from typing import Final, Iterator, Mapping
 import numpy
 import stim
 
-from tqec.circuit.detectors.boundary import BoundaryStabilizer
-from tqec.circuit.detectors.flow import FragmentFlows, FragmentLoopFlows
-from tqec.circuit.detectors.match_utils.cover import find_exact_cover_sat
-from tqec.circuit.detectors.measurement import RelativeMeasurementLocation
-from tqec.exceptions import TQECException
+from tqecd.boundary import BoundaryStabilizer
+from tqecd.flow import FragmentFlows, FragmentLoopFlows
+from tqecd.match_utils.cover import find_exact_cover_sat
+from tqecd.measurement import RelativeMeasurementLocation
+from tqecd.exceptions import TQECDException
 
 
 @dataclass(frozen=True)

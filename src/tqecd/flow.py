@@ -3,14 +3,14 @@ from __future__ import annotations
 import typing as ty
 from dataclasses import dataclass
 
-from tqec.circuit.detectors.boundary import BoundaryStabilizer
-from tqec.circuit.detectors.fragment import Fragment, FragmentLoop
-from tqec.circuit.detectors.match_utils.cover import (
+from tqecd.boundary import BoundaryStabilizer
+from tqecd.fragment import Fragment, FragmentLoop
+from tqecd.match_utils.cover import (
     find_commuting_cover_on_target_qubits_sat,
 )
-from tqec.circuit.detectors.measurement import get_relative_measurement_index
-from tqec.circuit.detectors.pauli import PauliString, pauli_product
-from tqec.exceptions import TQECException
+from tqecd.measurement import get_relative_measurement_index
+from tqecd.pauli import PauliString, pauli_product
+from tqecd.exceptions import TQECDException
 
 
 def _anti_commuting_stabilizers_indices(flows: list[BoundaryStabilizer]) -> list[int]:

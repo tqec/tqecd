@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pysat.solvers import CryptoMinisat
 
-from tqec.circuit.detectors.pauli import PauliString, pauli_literal_to_bools
+from tqecd.pauli import PauliString, pauli_literal_to_bools
 
 
 def encode_pauli_string_exact_cover_sat_problem_in_solver(

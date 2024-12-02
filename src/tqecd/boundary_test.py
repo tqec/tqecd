@@ -1,10 +1,10 @@
 import numpy
 import pytest
 
-from tqec.circuit.detectors.boundary import BoundaryStabilizer, manhattan_distance
-from tqec.circuit.detectors.measurement import RelativeMeasurementLocation
-from tqec.circuit.detectors.pauli import PauliString
-from tqec.exceptions import TQECException
+from tqecd.boundary import BoundaryStabilizer, manhattan_distance
+from tqecd.measurement import RelativeMeasurementLocation
+from tqecd.pauli import PauliString
+from tqecd.exceptions import TQECDException
 
 
 def test_boundary_stabilizer_construction() -> None:

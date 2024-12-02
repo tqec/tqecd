@@ -1,8 +1,8 @@
 import typing
 
 import stim
-from tqec.circuit.detectors.pauli import PauliString
-from tqec.circuit.detectors.utils import (
+from tqecd.pauli import PauliString
+from tqecd.utils import (
     collapse_pauli_strings_at_moment,
     iter_stim_circuit_by_moments,
 )

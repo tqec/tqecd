@@ -1,11 +1,11 @@
 import pytest
 import stim
-from tqec.circuit.detectors.pauli import (
+from tqecd.pauli import (
     PauliString,
     pauli_literal_to_bools,
     pauli_product,
 )
-from tqec.exceptions import TQECException
+from tqecd.exceptions import TQECDException
 
 
 def test_pauli_string_construction() -> None:

@@ -4,12 +4,12 @@ import time
 import typing as ty
 
 import pysat.solvers
-from tqec.circuit.detectors.boundary import BoundaryStabilizer, manhattan_distance
-from tqec.circuit.detectors.match_utils.sat import (
+from tqecd.boundary import BoundaryStabilizer, manhattan_distance
+from tqecd.match_utils.sat import (
     encode_pauli_string_commuting_cover_sat_problem_in_solver,
     encode_pauli_string_exact_cover_sat_problem_in_solver,
 )
-from tqec.circuit.detectors.pauli import PauliString
+from tqecd.pauli import PauliString
 
 
 def _all_pauli_string_combination_results(

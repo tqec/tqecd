@@ -4,9 +4,9 @@ from typing import Iterable, Mapping
 
 import numpy
 
-from tqec.circuit.detectors.measurement import RelativeMeasurementLocation
-from tqec.circuit.detectors.pauli import PauliString
-from tqec.exceptions import TQECException
+from tqecd.measurement import RelativeMeasurementLocation
+from tqecd.pauli import PauliString
+from tqecd.exceptions import TQECDException
 
 
 class BoundaryStabilizer:
