@@ -1,0 +1,23 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/rust
+{
+    "name": "tqecd",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "DavidAnson.vscode-markdownlint",
+                "ms-python.python",
+                "charliermarsh.ruff",
+                "ms-azuretools.vscode-docker",
+                "tamasfe.even-better-toml",
+                "ms-toolsai.jupyter",
+                "github.vscode-github-actions"
+            ]
+        }
+    },
+    "remoteUser": "vscode",
+    "postCreateCommand": "python -m pip install -r ./requirements.txt && python -m pip install -e ./[all] && pre-commit install && pre-commit run -a"
+}
