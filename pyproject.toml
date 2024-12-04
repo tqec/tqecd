@@ -8,7 +8,7 @@ version = "0.0.1"
 authors = [
     { name = "TQEC community", email = "tqec-design-automation@googlegroups.com" },
 ]
-description = "Automatic computation of detectors in a topologically quantum error corrected computation"
+description = "Automatically find detectors in a topologically quantum error corrected computation"
 readme = "README.md"
 license = { file = "LICENSE" }
 keywords = ["topological quantum error correction", "qec", "detectors"]
