@@ -4,18 +4,11 @@ from typing import cast
 
 import stim
 
-from tqecd.flow import build_flows_from_fragments
-from tqecd.fragment import (
-    Fragment,
-    FragmentLoop,
-    split_stim_circuit_into_fragments,
-)
-from tqecd.match import (
-    MatchedDetector,
-    match_detectors_from_flows_shallow,
-)
-from tqecd.predicates import is_valid_input_circuit
 from tqecd.exceptions import TQECDException
+from tqecd.flow import build_flows_from_fragments
+from tqecd.fragment import Fragment, FragmentLoop, split_stim_circuit_into_fragments
+from tqecd.match import MatchedDetector, match_detectors_from_flows_shallow
+from tqecd.predicates import is_valid_input_circuit
 
 
 def _detectors_to_circuit(
@@ -27,7 +20,7 @@ def _detectors_to_circuit(
         detectors: detectors that will be included in the returned circuit.
 
     Returns:
-        A `stim.Circuit` instance containing all the provided detectors.
+        A ``stim.Circuit`` instance containing all the provided detectors.
     """
     if additional_coordinates is None:
         additional_coordinates = []
@@ -63,7 +56,7 @@ def annotate_detectors_automatically(circuit: stim.Circuit) -> stim.Circuit:
         circuit: circuit to insert detectors in.
 
     Returns:
-        A new `stim.Circuit` instance with automatically computed detectors.
+        A new ``stim.Circuit`` instance with automatically computed detectors.
     """
     potential_error_reason = is_valid_input_circuit(circuit)
     if potential_error_reason is not None:
