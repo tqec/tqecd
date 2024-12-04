@@ -6,14 +6,14 @@ Build your quantum circuit
 
 The first step to use ``tqecd`` is to build a compatible quantum circuit.
 
-In short, compatible quantum circuits should be sequences of blocks that all follow the 
+In short, compatible quantum circuits should be sequences of blocks that all follow the
 same scheme: starts by a possibly empty sequence of resets, continues by a possibly empty
-sequence of "computation gates" (i.e., any gate that is not a reset or a measurement) and 
+sequence of "computation gates" (i.e., any gate that is not a reset or a measurement) and
 ends with a non-empty sequence of measurements.
 
 .. code-block:: python
 
-    import stim 
+    import stim
 
     XXXX = stim.Circuit("""\
     QUBIT_COORDS(1, 1) 0
