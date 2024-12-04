@@ -1,31 +1,16 @@
-Automatic detector computation
-==============================
+Automatic detector finding
+==========================
 
-The ``tqec`` package implements a method to automatically compute detectors from a
+The ``tqecd`` package implements a method to automatically find detectors from a
 given quantum circuit representing a quantum error corrected computation.
 
 An accompanying notebook showcasing the different steps to find detectors is located
-`here <../media/detectors/detector_computation_illustration.ipynb>`_.
+`here <../media/detectors/detector_finding_illustration.ipynb>`_.
 
-Difference from the main ``tqec`` package
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Concepts used through the package
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The implementation to automatically find detectors in a given quantum circuit representing
-a quantum error corrected computation is currently kept as isolated from the ``tqec`` package
-as possible and will very likely be outsourced into its own independent package in the future.
-The implementation can be found in ``tqec.circuit.detectors`` and a few restrictions applies
-specifically to the code in this sub-module:
-
-- it should be self-contained, or in other words it should not call code from the main
-  ``tqec`` package, with the exception of code within ``tqec.circuit.detectors``,
-- it should avoid unneeded dependencies. For that reason, the code in ``tqec.circuit.detectors``
-  does not use ``cirq`` as its intermediary representation but directly operates on
-  ``stim`` data-structures.
-
-Concepts used through the sub-module
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-A few core concepts are re-used through the whole sub-module. This section aims at
+A few core concepts are re-used through the whole ``tqecd`` package. This section aims at
 presenting these core concepts in an accessible manner.
 
 Terms that are conventionally used in quantum computing, such as "circuit", will not
@@ -36,7 +21,7 @@ be defined here.
 Moments
 ^^^^^^^
 
-The concept of "moment" is central to the sub-module. A "moment" is a portion of a
+The concept of "moment" is central to ``tqecd``. A "moment" is a portion of a
 quantum circuit that is located between two ``TICK`` instructions. Conventionally,
 moments may end with a ``TICK`` instruction, but do not start with one.
 
@@ -72,11 +57,11 @@ Fragments
 
 Fragments are a collection of moments that check the following order:
 
-1. zero or more moments exclusively composed of `reset`, annotation or
+1. zero or more moments exclusively composed of ``reset``, annotation or
    noisy-gate instructions,
 2. zero or more moments composed of "computation" instructions (anything
    that is not a measurement, a reset, a noisy gate or an annotation),
-3. one or more moments exclusively composed of `measurement`, annotation
+3. one or more moments exclusively composed of ``measurement``, annotation
    or noisy-gate instructions.
 
 The circuit provided in :ref:`moments-section` contains 4 moments that form
@@ -198,4 +183,4 @@ See the accompanying notebook for an example of how to perform automatic detecto
 .. toctree::
    :maxdepth: 1
 
-   ../media/detectors/detector_computation_illustration.ipynb
+   ../media/detectors/detector_finding_illustration.ipynb

@@ -4,9 +4,9 @@ from typing import Iterable, Mapping
 
 import numpy
 
+from tqecd.exceptions import TQECDException
 from tqecd.measurement import RelativeMeasurementLocation
 from tqecd.pauli import PauliString
-from tqecd.exceptions import TQECDException
 
 
 class BoundaryStabilizer:
@@ -19,27 +19,28 @@ class BoundaryStabilizer:
         forward: bool,
     ):
         """Represents a stabilizer that has been propagated and is now at the
-        boundary of a Fragment.
+        boundary of a :class:`~tqecd.fragment.Fragment`.
 
         Raises:
-            TQECDException: if `source_qubits` is empty.
+            TQECDException: if ``source_qubits`` is empty.
 
         Args:
-            stabilizer: The propagated stabilizer **before** any collapsing operation
-                has been applied.
-            collapsing_operations: The collapsing operations the stabilizer will have to
-                go through to exit the Fragment.
+            stabilizer: The propagated stabilizer **before** any collapsing
+                operation has been applied.
+            collapsing_operations: The collapsing operations the stabilizer will
+                have to go through to exit the :class:`~tqecd.fragment.Fragment`.
             measurements: measurement offsets relative to the **end** of the
-                fragment (even if the created BoundaryStabilizer instance represents a
-                stabilizer on the beginning boundary) of measurements that are involved
-                in this stabilizer.
-            reset_qubits: index of the qubit on which reset operations touching the
-                flow are applied. Depending on the value of `forward`, these indices can
-                either be sources of the stabilizer (if `forward` is True) or sinks that
-                may or may not commute with the resulting stabilizer.
+                fragment (even if the created :class:`BoundaryStabilizer`
+                instance represents a stabilizer on the beginning boundary) of
+                measurements that are involved in this stabilizer.
+            reset_qubits: index of the qubit on which reset operations touching
+                the flow are applied. Depending on the value of ``forward``,
+                these indices can either be sources of the stabilizer (if
+                ``forward`` is ``True``) or sinks that may or may not commute
+                with the resulting stabilizer.
             forward:
-                True if the stabilizer propagated forward (i.e., ends on measurements),
-                else False.
+                ``True`` if the stabilizer propagated forward (i.e., ends on
+                measurements), else ``False``.
         """
         self._stabilizer = stabilizer
         self._measurements = measurements
@@ -56,8 +57,8 @@ class BoundaryStabilizer:
         with at least one of its collapsing operations.
 
         Returns:
-            `True` if at least one collapsing operation anti-commutes with the stabilizer,
-            else `False`.
+            ``True`` if at least one collapsing operation anti-commutes with the
+            stabilizer, else ``False``.
         """
         return self._has_anticommuting_collapsing_operations
 
@@ -67,11 +68,12 @@ class BoundaryStabilizer:
         operations.
 
         Raises:
-            TQECDException: If any of the collapsing operation anti-commutes with the
-                stored stabilizer.
+            TQECDException: If any of the collapsing operation anti-commutes
+                with the stored stabilizer.
 
         Returns:
-            The collapsed Pauli string that goes out of the Fragment.
+            The collapsed :class:`~tqecd.pauli.PauliString` that goes out of the
+            :class:`~tqecd.fragment.Fragment`.
         """
         if self.has_anticommuting_operations:
             raise TQECDException(
@@ -86,8 +88,9 @@ class BoundaryStabilizer:
         operations.
 
         Returns:
-            The Pauli string that goes out of the Fragment, before applying any
-            collapsing operation.
+            The :class:`~tqecd.pauli.PauliString` that goes out of the
+            :class:`~tqecd.fragment.Fragment`, before applying any collapsing
+            operation.
         """
         return self._stabilizer
 
@@ -108,16 +111,16 @@ class BoundaryStabilizer:
     def merge(self, other: BoundaryStabilizer) -> BoundaryStabilizer:
         """Merge two boundary stabilizers together.
 
-        The two merged stabilizers should be defined on the same boundaries. In particular,
-        they should have the same set of collapsing operations.
+        The two merged stabilizers should be defined on the same boundaries. In
+        particular, they should have the same set of collapsing operations.
 
         Args:
-            other: the other BoundaryStabilizer to merge with self. Should have
-                exactly the same set of collapsing operations.
+            other: the other :class:`BoundaryStabilizer` to merge with ``self``.
+                Should have exactly the same set of collapsing operations.
 
         Raises:
-            TQECDException: if `self` and `other` are not defined on exactly the same
-                collapsing operations.
+            TQECDException: if ``self`` and ``other`` are not defined on exactly
+                the same collapsing operations.
 
         Returns:
             the merged boundary stabilizer, defined on the same set of collapsing
@@ -195,15 +198,15 @@ class BoundaryStabilizer:
     ) -> tuple[float, ...]:
         """Compute and return the coordinates of the boundary stabilizer.
 
-        The coordinates of a given boundary stabilizer is defined as the average of
-        the coordinates of each collapsing operations it represents.
+        The coordinates of a given boundary stabilizer is defined as the average
+        of the coordinates of each collapsing operations it represents.
 
         Args:
             qubit_coordinates: mapping from qubit indices to coordinates
 
         Raises:
-            TQECDException: If a qubit in self.source_qubits is not contained
-            in the qubit_coordinates mapping.
+            TQECDException: If a qubit in ``self.source_qubits`` is not contained
+                in the ``qubit_coordinates`` mapping.
 
         Returns:
             the boundary stabilizer coordinates.
@@ -214,7 +217,8 @@ class BoundaryStabilizer:
             ]
         except KeyError as exc:
             raise TQECDException(
-                f"""Qubit index {exc.args[0]} required for detector assignment, but it does not have a valid QUBIT_COORDS statement."""
+                f"Qubit index {exc.args[0]} required for detector assignment, "
+                "but it does not have a valid QUBIT_COORDS statement."
             )
         # Avoid returning numpy.float64 type returned by numpy.mean by
         # explicitly calling float() on it.
