@@ -61,7 +61,7 @@ where = ["src"]
 exclude = ["*test.py"]
 
 [tool.setuptools.package-data]
-tqec = ["py.typed"]
+tqecd = ["py.typed"]
 
 [tool.setuptools.dynamic]
 dependencies = { file = "requirements.txt" }
