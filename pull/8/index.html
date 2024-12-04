@@ -401,25 +401,26 @@
 
 <span class="n">annotated_circuit</span> <span class="o">=</span> <span class="n">annotate_detectors_automatically</span><span class="p">(</span><span class="n">XXXX</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">annotated_circuit</span><span class="p">)</span>
-<span class="c1"># Outputs:</span>
-<span class="c1"># --------</span>
-<span class="c1"># QUBIT_COORDS(1, 1) 0</span>
-<span class="c1"># QUBIT_COORDS(0, 0) 1</span>
-<span class="c1"># QUBIT_COORDS(2, 0) 2</span>
-<span class="c1"># QUBIT_COORDS(0, 2) 3</span>
-<span class="c1"># QUBIT_COORDS(2, 2) 4</span>
-<span class="c1"># RX 0 1 2 3 4</span>
-<span class="c1"># TICK</span>
-<span class="c1"># CX 0 1</span>
-<span class="c1"># TICK</span>
-<span class="c1"># CX 0 2</span>
-<span class="c1"># TICK</span>
-<span class="c1"># CX 0 3</span>
-<span class="c1"># TICK</span>
-<span class="c1"># CX 0 4</span>
-<span class="c1"># TICK</span>
-<span class="c1"># MX 0</span>
-<span class="c1"># DETECTOR(1, 1, 0) rec[-1]</span>
+</pre></div>
+</div>
+<p>should output the following quantum circuit:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>QUBIT_COORDS(1, 1) 0
+QUBIT_COORDS(0, 0) 1
+QUBIT_COORDS(2, 0) 2
+QUBIT_COORDS(0, 2) 3
+QUBIT_COORDS(2, 2) 4
+RX 0 1 2 3 4
+TICK
+CX 0 1
+TICK
+CX 0 2
+TICK
+CX 0 3
+TICK
+CX 0 4
+TICK
+MX 0
+DETECTOR(1, 1, 0) rec[-1]
 </pre></div>
 </div>
 </section>
