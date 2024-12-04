@@ -48,25 +48,28 @@ assert XXXX.num_detectors == 0
 
 annotated_circuit = annotate_detectors_automatically(XXXX)
 print(annotated_circuit)
-# Outputs:
-# --------
-# QUBIT_COORDS(1, 1) 0
-# QUBIT_COORDS(0, 0) 1
-# QUBIT_COORDS(2, 0) 2
-# QUBIT_COORDS(0, 2) 3
-# QUBIT_COORDS(2, 2) 4
-# RX 0 1 2 3 4
-# TICK
-# CX 0 1
-# TICK
-# CX 0 2
-# TICK
-# CX 0 3
-# TICK
-# CX 0 4
-# TICK
-# MX 0
-# DETECTOR(1, 1, 0) rec[-1]
+```
+
+should output the following quantum circuit:
+
+```text
+QUBIT_COORDS(1, 1) 0
+QUBIT_COORDS(0, 0) 1
+QUBIT_COORDS(2, 0) 2
+QUBIT_COORDS(0, 2) 3
+QUBIT_COORDS(2, 2) 4
+RX 0 1 2 3 4
+TICK
+CX 0 1
+TICK
+CX 0 2
+TICK
+CX 0 3
+TICK
+CX 0 4
+TICK
+MX 0
+DETECTOR(1, 1, 0) rec[-1]
 ```
 
 ## Contributing
