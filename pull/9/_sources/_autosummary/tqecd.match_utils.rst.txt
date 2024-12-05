@@ -1,0 +1,35 @@
+tqecd.match\_utils
+==================
+
+.. automodule:: tqecd.match_utils
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+
+   cover
+
+
+   sat
+
