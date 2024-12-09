@@ -3,12 +3,14 @@
 
 name: Publish Python distribution to PyPI
 on:
-  push:
-    # branches:
-    #   - main
-    tags:
-      - "v*"
-
+  # push:
+  #   branches:
+  #     - main
+  #   tags:
+  #     - "v*"
+  pull_request:
+    branches:
+      - main
 jobs:
   build:
     name: Build source distribution
