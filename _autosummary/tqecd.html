@@ -372,6 +372,20 @@
 <li class="toctree-l3"><a class="reference internal" href="tqecd.match.MatchedDetector.html">tqecd.match.MatchedDetector</a></li>
 </ul>
 </details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="tqecd.match_utils.html">tqecd.match_utils</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="tqecd.match_utils.cover.html">tqecd.match_utils.cover</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="tqecd.match_utils.cover.find_commuting_cover_on_target_qubits_sat.html">tqecd.match_utils.cover.find_commuting_cover_on_target_qubits_sat</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tqecd.match_utils.cover.find_cover.html">tqecd.match_utils.cover.find_cover</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tqecd.match_utils.cover.find_exact_cover_sat.html">tqecd.match_utils.cover.find_exact_cover_sat</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="tqecd.match_utils.sat.html">tqecd.match_utils.sat</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="tqecd.match_utils.sat.encode_pauli_string_commuting_cover_sat_problem_in_solver.html">tqecd.match_utils.sat.encode_pauli_string_commuting_cover_sat_problem_in_solver</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tqecd.match_utils.sat.encode_pauli_string_exact_cover_sat_problem_in_solver.html">tqecd.match_utils.sat.encode_pauli_string_exact_cover_sat_problem_in_solver</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="tqecd.measurement.html">tqecd.measurement</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="tqecd.measurement.get_relative_measurement_index.html">tqecd.measurement.get_relative_measurement_index</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tqecd.measurement.RelativeMeasurementLocation.html">tqecd.measurement.RelativeMeasurementLocation</a></li>
@@ -471,6 +485,11 @@
                   
   <section id="module-tqecd">
 <span id="tqecd"></span><h1>tqecd<a class="headerlink" href="#module-tqecd" title="Link to this heading">#</a></h1>
+<p>Automatic computation of detectors in quantum circuits representing fault-tolerant
+quantum computations based on surface code and lattice surgery.</p>
+<p>This package provides a set of functions and data-structures to help anyone
+computing automatically the detectors (i.e., sets of deterministic measurements)
+contained in a quantum circuit.</p>
 <p class="rubric">Modules</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
@@ -492,16 +511,19 @@
 <tr class="row-even"><td><p><a class="reference internal" href="tqecd.match.html#module-tqecd.match" title="tqecd.match"><code class="xref py py-obj docutils literal notranslate"><span class="pre">match</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="tqecd.measurement.html#module-tqecd.measurement" title="tqecd.measurement"><code class="xref py py-obj docutils literal notranslate"><span class="pre">measurement</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="tqecd.match_utils.html#module-tqecd.match_utils" title="tqecd.match_utils"><code class="xref py py-obj docutils literal notranslate"><span class="pre">match_utils</span></code></a></p></td>
+<td><p>Provides a few utility functions to match flows.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="tqecd.measurement.html#module-tqecd.measurement" title="tqecd.measurement"><code class="xref py py-obj docutils literal notranslate"><span class="pre">measurement</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="tqecd.pauli.html#module-tqecd.pauli" title="tqecd.pauli"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pauli</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="tqecd.pauli.html#module-tqecd.pauli" title="tqecd.pauli"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pauli</span></code></a></p></td>
 <td><p>Introduces a convenience <cite>PauliString</cite> class.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="tqecd.predicates.html#module-tqecd.predicates" title="tqecd.predicates"><code class="xref py py-obj docutils literal notranslate"><span class="pre">predicates</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="tqecd.predicates.html#module-tqecd.predicates" title="tqecd.predicates"><code class="xref py py-obj docutils literal notranslate"><span class="pre">predicates</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="tqecd.utils.html#module-tqecd.utils" title="tqecd.utils"><code class="xref py py-obj docutils literal notranslate"><span class="pre">utils</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="tqecd.utils.html#module-tqecd.utils" title="tqecd.utils"><code class="xref py py-obj docutils literal notranslate"><span class="pre">utils</span></code></a></p></td>
 <td><p></p></td>
 </tr>
 </tbody>

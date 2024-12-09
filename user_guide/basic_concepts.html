@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Automatic detector computation &#8212; TQECD  documentation</title>
+    <title>Automatic detector finding &#8212; TQECD  documentation</title>
   
   
   
@@ -44,10 +44,10 @@
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'user_guide/detectors';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user_guide/basic_concepts';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="How to automatically find detectors?" href="../media/detectors/detector_computation_illustration.html" />
+    <link rel="next" title="How to automatically find detectors?" href="../media/detectors/detector_finding_illustration.html" />
     <link rel="prev" title="Quick start using tqecd" href="quick_start.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -338,16 +338,14 @@
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Get started</span></p>
-<ul class="nav bd-sidenav">
+<ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quick_start.html">Quick start</a></li>
-</ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
-<ul class="current nav bd-sidenav">
-<li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">Detectors Computation</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../media/detectors/detector_computation_illustration.html">How to automatically find detectors?</a></li>
+<li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">Basic concepts</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../media/detectors/detector_finding_illustration.html">How to automatically find detectors?</a></li>
 </ul>
 </details></li>
+<li class="toctree-l1"><a class="reference internal" href="../media/detectors/detector_finding_illustration.html">Example</a></li>
 </ul>
 </div>
 </nav></div>
@@ -386,7 +384,7 @@
     
     <li class="breadcrumb-item"><a href="index.html" class="nav-link">User Guide</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Automatic detector computation</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Automatic detector finding</span></li>
   </ul>
 </nav>
 </div>
@@ -403,36 +401,21 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="automatic-detector-computation">
-<h1>Automatic detector computation<a class="headerlink" href="#automatic-detector-computation" title="Link to this heading">#</a></h1>
-<p>The <code class="docutils literal notranslate"><span class="pre">tqec</span></code> package implements a method to automatically compute detectors from a
+  <section id="automatic-detector-finding">
+<h1>Automatic detector finding<a class="headerlink" href="#automatic-detector-finding" title="Link to this heading">#</a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">tqecd</span></code> package implements a method to automatically find detectors from a
 given quantum circuit representing a quantum error corrected computation.</p>
 <p>An accompanying notebook showcasing the different steps to find detectors is located
-<a class="reference internal" href="../media/detectors/detector_computation_illustration.html"><span class="doc">here</span></a>.</p>
-<section id="difference-from-the-main-tqec-package">
-<h2>Difference from the main <code class="docutils literal notranslate"><span class="pre">tqec</span></code> package<a class="headerlink" href="#difference-from-the-main-tqec-package" title="Link to this heading">#</a></h2>
-<p>The implementation to automatically find detectors in a given quantum circuit representing
-a quantum error corrected computation is currently kept as isolated from the <code class="docutils literal notranslate"><span class="pre">tqec</span></code> package
-as possible and will very likely be outsourced into its own independent package in the future.
-The implementation can be found in <code class="docutils literal notranslate"><span class="pre">tqec.circuit.detectors</span></code> and a few restrictions applies
-specifically to the code in this sub-module:</p>
-<ul class="simple">
-<li><p>it should be self-contained, or in other words it should not call code from the main
-<code class="docutils literal notranslate"><span class="pre">tqec</span></code> package, with the exception of code within <code class="docutils literal notranslate"><span class="pre">tqec.circuit.detectors</span></code>,</p></li>
-<li><p>it should avoid unneeded dependencies. For that reason, the code in <code class="docutils literal notranslate"><span class="pre">tqec.circuit.detectors</span></code>
-does not use <code class="docutils literal notranslate"><span class="pre">cirq</span></code> as its intermediary representation but directly operates on
-<code class="docutils literal notranslate"><span class="pre">stim</span></code> data-structures.</p></li>
-</ul>
-</section>
-<section id="concepts-used-through-the-sub-module">
-<h2>Concepts used through the sub-module<a class="headerlink" href="#concepts-used-through-the-sub-module" title="Link to this heading">#</a></h2>
-<p>A few core concepts are re-used through the whole sub-module. This section aims at
+<a class="reference internal" href="../media/detectors/detector_finding_illustration.html"><span class="doc">here</span></a>.</p>
+<section id="concepts-used-through-the-package">
+<h2>Concepts used through the package<a class="headerlink" href="#concepts-used-through-the-package" title="Link to this heading">#</a></h2>
+<p>A few core concepts are re-used through the whole <code class="docutils literal notranslate"><span class="pre">tqecd</span></code> package. This section aims at
 presenting these core concepts in an accessible manner.</p>
 <p>Terms that are conventionally used in quantum computing, such as “circuit”, will not
 be defined here.</p>
 <section id="moments">
 <span id="moments-section"></span><h3>Moments<a class="headerlink" href="#moments" title="Link to this heading">#</a></h3>
-<p>The concept of “moment” is central to the sub-module. A “moment” is a portion of a
+<p>The concept of “moment” is central to <code class="docutils literal notranslate"><span class="pre">tqecd</span></code>. A “moment” is a portion of a
 quantum circuit that is located between two <code class="docutils literal notranslate"><span class="pre">TICK</span></code> instructions. Conventionally,
 moments may end with a <code class="docutils literal notranslate"><span class="pre">TICK</span></code> instruction, but do not start with one.</p>
 <p>This definition is close, but not equivalent, to the definition used by <code class="docutils literal notranslate"><span class="pre">cirq</span></code>. One of
@@ -463,11 +446,11 @@ is equivalent to the definition used by <code class="docutils literal notranslat
 <h3>Fragments<a class="headerlink" href="#fragments" title="Link to this heading">#</a></h3>
 <p>Fragments are a collection of moments that check the following order:</p>
 <ol class="arabic simple">
-<li><p>zero or more moments exclusively composed of <cite>reset</cite>, annotation or
+<li><p>zero or more moments exclusively composed of <code class="docutils literal notranslate"><span class="pre">reset</span></code>, annotation or
 noisy-gate instructions,</p></li>
 <li><p>zero or more moments composed of “computation” instructions (anything
 that is not a measurement, a reset, a noisy gate or an annotation),</p></li>
-<li><p>one or more moments exclusively composed of <cite>measurement</cite>, annotation
+<li><p>one or more moments exclusively composed of <code class="docutils literal notranslate"><span class="pre">measurement</span></code>, annotation
 or noisy-gate instructions.</p></li>
 </ol>
 <p>The circuit provided in <a class="reference internal" href="#moments-section"><span class="std std-ref">Moments</span></a> contains 4 moments that form
@@ -561,7 +544,7 @@ will differentiate creation and destruction flows: <code class="docutils literal
 <p>See the accompanying notebook for an example of how to perform automatic detector computation:</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../media/detectors/detector_computation_illustration.html">How to automatically find detectors?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../media/detectors/detector_finding_illustration.html">How to automatically find detectors?</a></li>
 </ul>
 </div>
 </section>
@@ -587,7 +570,7 @@ will differentiate creation and destruction flows: <code class="docutils literal
       </div>
     </a>
     <a class="right-next"
-       href="../media/detectors/detector_computation_illustration.html"
+       href="../media/detectors/detector_finding_illustration.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
@@ -614,8 +597,7 @@ will differentiate creation and destruction flows: <code class="docutils literal
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#difference-from-the-main-tqec-package">Difference from the main <code class="docutils literal notranslate"><span class="pre">tqec</span></code> package</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#concepts-used-through-the-sub-module">Concepts used through the sub-module</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#concepts-used-through-the-package">Concepts used through the package</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#moments">Moments</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fragments">Fragments</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flows">Flows</a></li>
@@ -630,7 +612,7 @@ will differentiate creation and destruction flows: <code class="docutils literal
   <div class="sidebar-secondary-item">
 
   <div class="tocsection sourcelink">
-    <a href="../_sources/user_guide/detectors.rst.txt">
+    <a href="../_sources/user_guide/basic_concepts.rst.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>

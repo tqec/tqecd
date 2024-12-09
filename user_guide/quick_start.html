@@ -45,7 +45,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'user_guide/quick_start';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Automatic detector computation" href="detectors.html" />
+    <link rel="next" title="Automatic detector finding" href="basic_concepts.html" />
     <link rel="prev" title="How to install tqecd" href="installation.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -339,13 +339,11 @@
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Quick start</a></li>
-</ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1 has-children"><a class="reference internal" href="detectors.html">Detectors Computation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../media/detectors/detector_computation_illustration.html">How to automatically find detectors?</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="basic_concepts.html">Basic concepts</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../media/detectors/detector_finding_illustration.html">How to automatically find detectors?</a></li>
 </ul>
 </details></li>
+<li class="toctree-l1"><a class="reference internal" href="../media/detectors/detector_finding_illustration.html">Example</a></li>
 </ul>
 </div>
 </nav></div>
@@ -403,7 +401,45 @@
                   
   <section id="quick-start-using-tqecd">
 <h1>Quick start using <code class="docutils literal notranslate"><span class="pre">tqecd</span></code><a class="headerlink" href="#quick-start-using-tqecd" title="Link to this heading">#</a></h1>
-<p>TODO</p>
+<section id="build-your-quantum-circuit">
+<h2>Build your quantum circuit<a class="headerlink" href="#build-your-quantum-circuit" title="Link to this heading">#</a></h2>
+<p>The first step to use <code class="docutils literal notranslate"><span class="pre">tqecd</span></code> is to build a compatible quantum circuit.</p>
+<p>In short, compatible quantum circuits should be sequences of blocks that all follow the
+same scheme: starts by a possibly empty sequence of resets, continues by a possibly empty
+sequence of “computation gates” (i.e., any gate that is not a reset or a measurement) and
+ends with a non-empty sequence of measurements.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">stim</span>
+
+<span class="n">XXXX</span> <span class="o">=</span> <span class="n">stim</span><span class="o">.</span><span class="n">Circuit</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s2">QUBIT_COORDS(1, 1) 0</span>
+<span class="s2">QUBIT_COORDS(0, 0) 1</span>
+<span class="s2">QUBIT_COORDS(2, 0) 2</span>
+<span class="s2">QUBIT_COORDS(0, 2) 3</span>
+<span class="s2">QUBIT_COORDS(2, 2) 4</span>
+<span class="s2">RX 0 1 2 3 4</span>
+<span class="s2">TICK</span>
+<span class="s2">CX 0 1</span>
+<span class="s2">TICK</span>
+<span class="s2">CX 0 2</span>
+<span class="s2">TICK</span>
+<span class="s2">CX 0 3</span>
+<span class="s2">TICK</span>
+<span class="s2">CX 0 4</span>
+<span class="s2">TICK</span>
+<span class="s2">MX 0</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="call-annotate-detectors-automatically">
+<h2>Call <code class="docutils literal notranslate"><span class="pre">annotate_detectors_automatically</span></code><a class="headerlink" href="#call-annotate-detectors-automatically" title="Link to this heading">#</a></h2>
+<p>The next and last step is to call the <code class="docutils literal notranslate"><span class="pre">annotate_detectors_automatically</span></code> on your circuit.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">annotated_circuit</span> <span class="o">=</span> <span class="n">annotate_detectors_automatically</span><span class="p">(</span><span class="n">XXXX</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>And that’s it, <code class="docutils literal notranslate"><span class="pre">annotated_circuit</span></code> now represents the same computation, but also includes
+<code class="docutils literal notranslate"><span class="pre">DETECTOR</span></code> annotations for all the detectors that were found.</p>
+</section>
 </section>
 
 
@@ -426,11 +462,11 @@
       </div>
     </a>
     <a class="right-next"
-       href="detectors.html"
+       href="basic_concepts.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Automatic detector computation</p>
+        <p class="prev-next-title">Automatic detector finding</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -444,6 +480,19 @@
                 <dialog id="pst-secondary-sidebar-modal"></dialog>
                 <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#build-your-quantum-circuit">Build your quantum circuit</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#call-annotate-detectors-automatically">Call <code class="docutils literal notranslate"><span class="pre">annotate_detectors_automatically</span></code></a></li>
+</ul>
+  </nav></div>
 
   <div class="sidebar-secondary-item">
 

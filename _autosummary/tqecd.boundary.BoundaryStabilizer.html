@@ -372,6 +372,20 @@
 <li class="toctree-l3"><a class="reference internal" href="tqecd.match.MatchedDetector.html">tqecd.match.MatchedDetector</a></li>
 </ul>
 </details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="tqecd.match_utils.html">tqecd.match_utils</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="tqecd.match_utils.cover.html">tqecd.match_utils.cover</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="tqecd.match_utils.cover.find_commuting_cover_on_target_qubits_sat.html">tqecd.match_utils.cover.find_commuting_cover_on_target_qubits_sat</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tqecd.match_utils.cover.find_cover.html">tqecd.match_utils.cover.find_cover</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tqecd.match_utils.cover.find_exact_cover_sat.html">tqecd.match_utils.cover.find_exact_cover_sat</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="tqecd.match_utils.sat.html">tqecd.match_utils.sat</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="tqecd.match_utils.sat.encode_pauli_string_commuting_cover_sat_problem_in_solver.html">tqecd.match_utils.sat.encode_pauli_string_commuting_cover_sat_problem_in_solver</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tqecd.match_utils.sat.encode_pauli_string_exact_cover_sat_problem_in_solver.html">tqecd.match_utils.sat.encode_pauli_string_exact_cover_sat_problem_in_solver</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="tqecd.measurement.html">tqecd.measurement</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="tqecd.measurement.get_relative_measurement_index.html">tqecd.measurement.get_relative_measurement_index</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tqecd.measurement.RelativeMeasurementLocation.html">tqecd.measurement.RelativeMeasurementLocation</a></li>
@@ -484,27 +498,28 @@
 <dt class="sig sig-object py" id="tqecd.boundary.BoundaryStabilizer.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stabilizer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="tqecd.pauli.PauliString.html#tqecd.pauli.PauliString" title="tqecd.pauli.PauliString"><span class="pre">PauliString</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">collapsing_operations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="tqecd.pauli.PauliString.html#tqecd.pauli.PauliString" title="tqecd.pauli.PauliString"><span class="pre">PauliString</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measurements</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="tqecd.measurement.RelativeMeasurementLocation.html#tqecd.measurement.RelativeMeasurementLocation" title="tqecd.measurement.RelativeMeasurementLocation"><span class="pre">RelativeMeasurementLocation</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reset_qubits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">frozenset</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forward</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tqecd/boundary.html#BoundaryStabilizer.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tqecd.boundary.BoundaryStabilizer.__init__" title="Link to this definition">#</a></dt>
 <dd><p>Represents a stabilizer that has been propagated and is now at the
-boundary of a Fragment.</p>
+boundary of a <a class="reference internal" href="tqecd.fragment.Fragment.html#tqecd.fragment.Fragment" title="tqecd.fragment.Fragment"><code class="xref py py-class docutils literal notranslate"><span class="pre">Fragment</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="tqecd.exceptions.TQECDException.html#tqecd.exceptions.TQECDException" title="tqecd.exceptions.TQECDException"><strong>TQECDException</strong></a> – if <cite>source_qubits</cite> is empty.</p>
+<dd class="field-odd"><p><a class="reference internal" href="tqecd.exceptions.TQECDException.html#tqecd.exceptions.TQECDException" title="tqecd.exceptions.TQECDException"><strong>TQECDException</strong></a> – if <code class="docutils literal notranslate"><span class="pre">source_qubits</span></code> is empty.</p>
 </dd>
 <dt class="field-even">Parameters<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
-<li><p><strong>stabilizer</strong> – The propagated stabilizer <strong>before</strong> any collapsing operation
-has been applied.</p></li>
-<li><p><strong>collapsing_operations</strong> – The collapsing operations the stabilizer will have to
-go through to exit the Fragment.</p></li>
+<li><p><strong>stabilizer</strong> – The propagated stabilizer <strong>before</strong> any collapsing
+operation has been applied.</p></li>
+<li><p><strong>collapsing_operations</strong> – The collapsing operations the stabilizer will
+have to go through to exit the <a class="reference internal" href="tqecd.fragment.Fragment.html#tqecd.fragment.Fragment" title="tqecd.fragment.Fragment"><code class="xref py py-class docutils literal notranslate"><span class="pre">Fragment</span></code></a>.</p></li>
 <li><p><strong>measurements</strong> – measurement offsets relative to the <strong>end</strong> of the
-fragment (even if the created BoundaryStabilizer instance represents a
-stabilizer on the beginning boundary) of measurements that are involved
-in this stabilizer.</p></li>
-<li><p><strong>reset_qubits</strong> – index of the qubit on which reset operations touching the
-flow are applied. Depending on the value of <cite>forward</cite>, these indices can
-either be sources of the stabilizer (if <cite>forward</cite> is True) or sinks that
-may or may not commute with the resulting stabilizer.</p></li>
-<li><p><strong>forward</strong> – True if the stabilizer propagated forward (i.e., ends on measurements),
-else False.</p></li>
+fragment (even if the created <a class="reference internal" href="#tqecd.boundary.BoundaryStabilizer" title="tqecd.boundary.BoundaryStabilizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">BoundaryStabilizer</span></code></a>
+instance represents a stabilizer on the beginning boundary) of
+measurements that are involved in this stabilizer.</p></li>
+<li><p><strong>reset_qubits</strong> – index of the qubit on which reset operations touching
+the flow are applied. Depending on the value of <code class="docutils literal notranslate"><span class="pre">forward</span></code>,
+these indices can either be sources of the stabilizer (if
+<code class="docutils literal notranslate"><span class="pre">forward</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>) or sinks that may or may not commute
+with the resulting stabilizer.</p></li>
+<li><p><strong>forward</strong> – <code class="docutils literal notranslate"><span class="pre">True</span></code> if the stabilizer propagated forward (i.e., ends on
+measurements), else <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
 </ul>
 </dd>
 </dl>
@@ -514,7 +529,7 @@ else False.</p></li>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#tqecd.boundary.BoundaryStabilizer.__init__" title="tqecd.boundary.BoundaryStabilizer.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(stabilizer, collapsing_operations, ...)</p></td>
-<td><p>Represents a stabilizer that has been propagated and is now at the boundary of a Fragment.</p></td>
+<td><p>Represents a stabilizer that has been propagated and is now at the boundary of a <a class="reference internal" href="tqecd.fragment.Fragment.html#tqecd.fragment.Fragment" title="tqecd.fragment.Fragment"><code class="xref py py-class docutils literal notranslate"><span class="pre">Fragment</span></code></a>.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">coordinates</span></code>(qubit_coordinates)</p></td>
 <td><p>Compute and return the coordinates of the boundary stabilizer.</p></td>

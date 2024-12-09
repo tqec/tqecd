@@ -358,7 +358,77 @@
                   
   <section id="tqecd">
 <h1>tqecd<a class="headerlink" href="#tqecd" title="Link to this heading">#</a></h1>
-<p>Automatic computation of detectors in a topologically quantum error corrected computation</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">tqecd</span></code> package is a spin-off from the <a class="reference external" href="https://github.com/tqec/tqec"><code class="docutils literal notranslate"><span class="pre">tqec</span></code></a> package that allows the automatic search of detectors in structured quantum error correction circuits.</p>
+<p>This package was initially part of <code class="docutils literal notranslate"><span class="pre">tqec</span></code>, and has been outsourced to make it accessible to anyone wanting to use it outside of the <code class="docutils literal notranslate"><span class="pre">tqec</span></code> library.</p>
+<section id="documentation">
+<h2>Documentation<a class="headerlink" href="#documentation" title="Link to this heading">#</a></h2>
+<p>Documentation is available at <a class="reference external" href="https://tqec.github.io/tqecd/index.html">https://tqec.github.io/tqecd/index.html</a>.</p>
+</section>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Link to this heading">#</a></h2>
+<p>Currently, <code class="docutils literal notranslate"><span class="pre">tqecd</span></code> needs to be installed from source using</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>git+https://github.com/tqec/tqecd.git
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">tqecd</span></code> package have some dependencies that might be harder than a simple <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span></code> to install. If you end up having any issue with the simple installation method above, please have a look at the <a class="reference external" href="https://tqec.github.io/tqecd/user_guide/installation.html">full installation page</a>.</p>
+</section>
+<section id="basic-usage">
+<h2>Basic usage<a class="headerlink" href="#basic-usage" title="Link to this heading">#</a></h2>
+<div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">stim</span>
+
+<span class="kn">from</span> <span class="nn">tqecd</span> <span class="kn">import</span> <span class="n">annotate_detectors_automatically</span>
+
+<span class="c1"># Example circuit that contains a detector</span>
+<span class="n">XXXX</span> <span class="o">=</span> <span class="n">stim</span><span class="o">.</span><span class="n">Circuit</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s2">QUBIT_COORDS(1, 1) 0</span>
+<span class="s2">QUBIT_COORDS(0, 0) 1</span>
+<span class="s2">QUBIT_COORDS(2, 0) 2</span>
+<span class="s2">QUBIT_COORDS(0, 2) 3</span>
+<span class="s2">QUBIT_COORDS(2, 2) 4</span>
+<span class="s2">RX 0 1 2 3 4</span>
+<span class="s2">TICK</span>
+<span class="s2">CX 0 1</span>
+<span class="s2">TICK</span>
+<span class="s2">CX 0 2</span>
+<span class="s2">TICK</span>
+<span class="s2">CX 0 3</span>
+<span class="s2">TICK</span>
+<span class="s2">CX 0 4</span>
+<span class="s2">TICK</span>
+<span class="s2">MX 0</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">XXXX</span><span class="o">.</span><span class="n">num_detectors</span> <span class="o">==</span> <span class="mi">0</span>
+
+<span class="n">annotated_circuit</span> <span class="o">=</span> <span class="n">annotate_detectors_automatically</span><span class="p">(</span><span class="n">XXXX</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">annotated_circuit</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>should output the following quantum circuit:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>QUBIT_COORDS(1, 1) 0
+QUBIT_COORDS(0, 0) 1
+QUBIT_COORDS(2, 0) 2
+QUBIT_COORDS(0, 2) 3
+QUBIT_COORDS(2, 2) 4
+RX 0 1 2 3 4
+TICK
+CX 0 1
+TICK
+CX 0 2
+TICK
+CX 0 3
+TICK
+CX 0 4
+TICK
+MX 0
+DETECTOR(1, 1, 0) rec[-1]
+</pre></div>
+</div>
+</section>
+<section id="contributing">
+<h2>Contributing<a class="headerlink" href="#contributing" title="Link to this heading">#</a></h2>
+<p>Pull requests and issues are more than welcomed!</p>
+<p>See the <a class="reference external" href="https://tqec.github.io/tqecd/contributor_guide.html">contributing page</a> for for specific instructions to start contributing.</p>
+</section>
 </section>
 <div class="toctree-wrapper compound">
 </div>
@@ -392,6 +462,21 @@
                 <dialog id="pst-secondary-sidebar-modal"></dialog>
                 <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#documentation">Documentation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#installation">Installation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-usage">Basic usage</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#contributing">Contributing</a></li>
+</ul>
+  </nav></div>
 
   <div class="sidebar-secondary-item">
 

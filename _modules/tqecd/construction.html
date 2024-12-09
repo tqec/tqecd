@@ -382,18 +382,11 @@
 
 <span class="kn">import</span> <span class="nn">stim</span>
 
-<span class="kn">from</span> <span class="nn">tqecd.flow</span> <span class="kn">import</span> <span class="n">build_flows_from_fragments</span>
-<span class="kn">from</span> <span class="nn">tqecd.fragment</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">Fragment</span><span class="p">,</span>
-    <span class="n">FragmentLoop</span><span class="p">,</span>
-    <span class="n">split_stim_circuit_into_fragments</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="kn">from</span> <span class="nn">tqecd.match</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">MatchedDetector</span><span class="p">,</span>
-    <span class="n">match_detectors_from_flows_shallow</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="kn">from</span> <span class="nn">tqecd.predicates</span> <span class="kn">import</span> <span class="n">is_valid_input_circuit</span>
 <span class="kn">from</span> <span class="nn">tqecd.exceptions</span> <span class="kn">import</span> <span class="n">TQECDException</span>
+<span class="kn">from</span> <span class="nn">tqecd.flow</span> <span class="kn">import</span> <span class="n">build_flows_from_fragments</span>
+<span class="kn">from</span> <span class="nn">tqecd.fragment</span> <span class="kn">import</span> <span class="n">Fragment</span><span class="p">,</span> <span class="n">FragmentLoop</span><span class="p">,</span> <span class="n">split_stim_circuit_into_fragments</span>
+<span class="kn">from</span> <span class="nn">tqecd.match</span> <span class="kn">import</span> <span class="n">MatchedDetector</span><span class="p">,</span> <span class="n">match_detectors_from_flows_shallow</span>
+<span class="kn">from</span> <span class="nn">tqecd.predicates</span> <span class="kn">import</span> <span class="n">is_valid_input_circuit</span>
 
 
 <span class="k">def</span> <span class="nf">_detectors_to_circuit</span><span class="p">(</span>
@@ -405,7 +398,7 @@
 <span class="sd">        detectors: detectors that will be included in the returned circuit.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        A `stim.Circuit` instance containing all the provided detectors.</span>
+<span class="sd">        A ``stim.Circuit`` instance containing all the provided detectors.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">additional_coordinates</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">additional_coordinates</span> <span class="o">=</span> <span class="p">[]</span>
@@ -443,7 +436,7 @@
 <span class="sd">        circuit: circuit to insert detectors in.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        A new `stim.Circuit` instance with automatically computed detectors.</span>
+<span class="sd">        A new ``stim.Circuit`` instance with automatically computed detectors.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">potential_error_reason</span> <span class="o">=</span> <span class="n">is_valid_input_circuit</span><span class="p">(</span><span class="n">circuit</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">potential_error_reason</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
