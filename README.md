@@ -1,6 +1,6 @@
 # tqecd
 
-The `tqecd` package is a spin-off from the [`tqec`](https://github.com/tqec/tqec) package that allows the automatic research of detectors in quantum circuits representing fault-tolerant quantum computations based on surface code and lattice surgery.
+The `tqecd` package is a spin-off from the [`tqec`](https://github.com/tqec/tqec) package that allows the automatic search of detectors in structured quantum error correction circuits.
 
 This package was initially part of `tqec`, and has been outsourced to make it accessible to anyone wanting to use it outside of the `tqec` library.
 
