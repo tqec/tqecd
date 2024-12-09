@@ -1,6 +1,0 @@
-tqecd.predicates.has\_well\_defined\_moments
-============================================
-
-.. currentmodule:: tqecd.predicates
-
-.. autofunction:: has_well_defined_moments
