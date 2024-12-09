@@ -49,7 +49,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="How to contribute" href="../../contributor_guide.html" />
-    <link rel="prev" title="Automatic detector finding" href="../../user_guide/detectors.html" />
+    <link rel="prev" title="Automatic detector finding" href="../../user_guide/basic_concepts.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -339,16 +339,14 @@
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Get started</span></p>
-<ul class="nav bd-sidenav">
+<ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../../user_guide/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../user_guide/quick_start.html">Quick start</a></li>
-</ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
-<ul class="current nav bd-sidenav">
-<li class="toctree-l1 current active has-children"><a class="reference internal" href="../../user_guide/detectors.html">Detectors Computation</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../../user_guide/basic_concepts.html">Basic concepts</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">How to automatically find detectors?</a></li>
 </ul>
 </details></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Example</a></li>
 </ul>
 </div>
 </nav></div>
@@ -388,7 +386,7 @@
     <li class="breadcrumb-item"><a href="../../user_guide/index.html" class="nav-link">User Guide</a></li>
     
     
-    <li class="breadcrumb-item"><a href="../../user_guide/detectors.html" class="nav-link">Automatic detector finding</a></li>
+    <li class="breadcrumb-item"><a href="../../user_guide/basic_concepts.html" class="nav-link">Automatic detector finding</a></li>
     
     <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">How to automatically find detectors?</span></li>
   </ul>
@@ -571,27 +569,27 @@ Fragment(circuit=stim.Circuit(&#39;&#39;&#39;
 ================================================================================
 Flow(
   creation = [
-    BoundaryStabilizers(stabilizer=Z0, collapsing_operations=[Z1, Z3], measurements=[], resets={0}, is_forward=True)
-    BoundaryStabilizers(stabilizer=Z0*Z1*Z2, collapsing_operations=[Z1, Z3], measurements=[RelativeMeasurementLocation(offset=-2, qubit_index=1)], resets={1}, is_forward=True)
-    BoundaryStabilizers(stabilizer=Z2, collapsing_operations=[Z1, Z3], measurements=[], resets={2}, is_forward=True)
-    BoundaryStabilizers(stabilizer=Z2*Z3*Z4, collapsing_operations=[Z1, Z3], measurements=[RelativeMeasurementLocation(offset=-1, qubit_index=3)], resets={3}, is_forward=True)
-    BoundaryStabilizers(stabilizer=Z4, collapsing_operations=[Z1, Z3], measurements=[], resets={4}, is_forward=True)
+    BoundaryStabilizers(stabilizer=Z0, collapsing_operations=[Z3, Z1], measurements=[], resets={0}, is_forward=True)
+    BoundaryStabilizers(stabilizer=Z0*Z1*Z2, collapsing_operations=[Z3, Z1], measurements=[RelativeMeasurementLocation(offset=-2, qubit_index=1)], resets={1}, is_forward=True)
+    BoundaryStabilizers(stabilizer=Z2, collapsing_operations=[Z3, Z1], measurements=[], resets={2}, is_forward=True)
+    BoundaryStabilizers(stabilizer=Z2*Z3*Z4, collapsing_operations=[Z3, Z1], measurements=[RelativeMeasurementLocation(offset=-1, qubit_index=3)], resets={3}, is_forward=True)
+    BoundaryStabilizers(stabilizer=Z4, collapsing_operations=[Z3, Z1], measurements=[], resets={4}, is_forward=True)
   ],
   destruction = [
-    BoundaryStabilizers(stabilizer=Z0*Z1*Z2, collapsing_operations=[Z4, Z0, Z1, Z3, Z2], measurements=[RelativeMeasurementLocation(offset=-2, qubit_index=1)], resets={0, 1, 2}, is_forward=False)
-    BoundaryStabilizers(stabilizer=Z2*Z3*Z4, collapsing_operations=[Z4, Z0, Z1, Z3, Z2], measurements=[RelativeMeasurementLocation(offset=-1, qubit_index=3)], resets={2, 3, 4}, is_forward=False)
+    BoundaryStabilizers(stabilizer=Z0*Z1*Z2, collapsing_operations=[Z2, Z4, Z0, Z1, Z3], measurements=[RelativeMeasurementLocation(offset=-2, qubit_index=1)], resets={0, 1, 2}, is_forward=False)
+    BoundaryStabilizers(stabilizer=Z2*Z3*Z4, collapsing_operations=[Z2, Z4, Z0, Z1, Z3], measurements=[RelativeMeasurementLocation(offset=-1, qubit_index=3)], resets={2, 3, 4}, is_forward=False)
   ],
 total_number_of_measurements = 2
 )
 ================================================================================
 Flow(
   creation = [
-    BoundaryStabilizers(stabilizer=Z0*Z1*Z2, collapsing_operations=[Z1, Z3], measurements=[RelativeMeasurementLocation(offset=-2, qubit_index=1)], resets={1}, is_forward=True)
-    BoundaryStabilizers(stabilizer=Z2*Z3*Z4, collapsing_operations=[Z1, Z3], measurements=[RelativeMeasurementLocation(offset=-1, qubit_index=3)], resets={3}, is_forward=True)
+    BoundaryStabilizers(stabilizer=Z0*Z1*Z2, collapsing_operations=[Z3, Z1], measurements=[RelativeMeasurementLocation(offset=-2, qubit_index=1)], resets={1}, is_forward=True)
+    BoundaryStabilizers(stabilizer=Z2*Z3*Z4, collapsing_operations=[Z3, Z1], measurements=[RelativeMeasurementLocation(offset=-1, qubit_index=3)], resets={3}, is_forward=True)
   ],
   destruction = [
-    BoundaryStabilizers(stabilizer=Z0*Z1*Z2, collapsing_operations=[Z1, Z3], measurements=[RelativeMeasurementLocation(offset=-2, qubit_index=1)], resets={1}, is_forward=False)
-    BoundaryStabilizers(stabilizer=Z2*Z3*Z4, collapsing_operations=[Z1, Z3], measurements=[RelativeMeasurementLocation(offset=-1, qubit_index=3)], resets={3}, is_forward=False)
+    BoundaryStabilizers(stabilizer=Z0*Z1*Z2, collapsing_operations=[Z3, Z1], measurements=[RelativeMeasurementLocation(offset=-2, qubit_index=1)], resets={1}, is_forward=False)
+    BoundaryStabilizers(stabilizer=Z2*Z3*Z4, collapsing_operations=[Z3, Z1], measurements=[RelativeMeasurementLocation(offset=-1, qubit_index=3)], resets={3}, is_forward=False)
   ],
 total_number_of_measurements = 2
 )
@@ -922,7 +920,7 @@ DETECTOR(3, 1) rec[-1] rec[-2] rec[-4]
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="../../user_guide/detectors.html"
+       href="../../user_guide/basic_concepts.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
