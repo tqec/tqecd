@@ -9,10 +9,5 @@ User Guide
 
    Installation <installation>
    Quick start <quick_start>
-
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Tutorials
-
-   Detectors Computation <detectors>
+   Basic concepts <basic_concepts>
+   Example <../media/detectors/detector_finding_illustration.ipynb>

@@ -1,3 +1,18 @@
+"""Semi-private module providing functions to construct SAT problems.
+
+This module is semi-private in the sense that even though the two functions it
+implements are not private, they are quite low-level and are not expected to be
+used by external users of the library.
+
+The module defines 2 functions that each take a SAT solver able to encode XOR
+clauses, a target Pauli string, a list of potential Pauli strings and a set of
+qubits to consider and encode in the provided SAT solver a cover problem, either
+exact (i.e., find Pauli strings in the list of potential Pauli strings such that
+their product is exactly the target Pauli string on the considered qubits) or
+commuting (i.e., the product only needs to commute with the target Pauli string
+on the considered qubits).
+"""
+
 from __future__ import annotations
 
 from pysat.solvers import CryptoMinisat
@@ -13,68 +28,72 @@ def encode_pauli_string_exact_cover_sat_problem_in_solver(
 ) -> None:
     """Build the SAT problem that should be solved to find an exact cover.
 
-    This function encodes the SAT problem of interest into the provided `solver`.
-    As such, the provided `solver` is expected to be a newly created instance,
+    This function encodes the SAT problem of interest into the provided ``solver``.
+    As such, the provided ``solver`` is expected to be a newly created instance,
     and will be mutated by this function.
 
     The encoded problem is the following:
 
-    Find the indices of Pauli strings in `available_pauli_strings` such that
+    Find the indices of Pauli strings in ``available_pauli_strings`` such that
     the product of all the corresponding Pauli strings is exactly equal to
-    `expected_pauli_string` on all the qubits in `qubits_to_consider`.
+    ``expected_pauli_string`` on all the qubits in ``qubits_to_consider``.
 
     The following post-condition should be checked after solving:
 
-    ```py
-    expected_pauli_string = PauliString({})      # Fill in!
-    available_pauli_strings = [PauliString({})]  # Fill in!
-    qubits_to_consider = frozenset()             # Fill in!
-    solver = None                                # Fill in!
+    .. code-block:: python
 
-    encode_pauli_string_exact_cover_sat_problem_in_solver(
-        solver, expected_pauli_string, available_pauli_strings, qubits_to_consider
-    )
-    indices = None # Solve the problem encoded in solver and recover the indices.
+        expected_pauli_string = PauliString({})      # Fill in!
+        available_pauli_strings = [PauliString({})]  # Fill in!
+        qubits_to_consider = frozenset()             # Fill in!
+        solver = None                                # Fill in!
 
-    final_pauli_string = pauli_product([available_pauli_strings[i] for i in indices])
-    for q in qubits_to_consider:
-        assert final_pauli_string[q] == expected_pauli_string[q]
-    ```
+        encode_pauli_string_exact_cover_sat_problem_in_solver(
+            solver, expected_pauli_string, available_pauli_strings, qubits_to_consider
+        )
+        indices = None # Solve the problem encoded in solver and recover the indices.
+
+        final_pauli_string = pauli_product([available_pauli_strings[i] for i in indices])
+        for q in qubits_to_consider:
+            assert final_pauli_string[q] == expected_pauli_string[q]
+
 
     The SAT problem contains one boolean variable per Pauli string in
-    `available_pauli_strings`, deciding if the associated Pauli string should
+    ``available_pauli_strings``, deciding if the associated Pauli string should
     be part of the cover.
-    The formula is quite simple: for each qubit in `qubits_to_consider`, the following
-    two boolean formulas should be `True`:
 
-    1. The X part of the resulting Pauli string, obtained from XORing the X part of each
-       Pauli string weighted by the boolean variable that decides if the Pauli string should
-       be included or not, should be equal to the X part of the expected final Pauli string.
+    The formula is quite simple: for each qubit in ``qubits_to_consider``, the
+    following two boolean formulas should be ``True``:
+
+    1. The X part of the resulting Pauli string, obtained from XORing the X part
+       of each Pauli string weighted by the boolean variable that decides if the
+       Pauli string should be included or not, should be equal to the X part of
+       the expected final Pauli string.
     2. Same reasoning, but for the Z part.
 
-    Note that the "should be equal to the [P] part of the expected final Pauli string" is
-    natively implemented in the SAT solver used, so we do not need to adapt the formula
-    with some binary logic tricks. The solver really solves a conjunction of
-    `a XOR b XOR ... XOR z == [True/False]`.
+    Note that the "should be equal to the [P] part of the expected final Pauli
+    string" is natively implemented in the SAT solver used, so we do not need to
+    adapt the formula with some binary logic tricks. The solver really solves a
+    conjunction of ``a XOR b XOR ... XOR z == [True/False]``.
 
-    This leads to a formula with `2*len(qubits_to_consider)` XOR clauses that should all
-    be verified for a cover to exist.
-    Each of the `2*len(qubits_to_consider)` XOR clauses can contain up to
-    `len(available_pauli_strings)` XORed items, but a simplification is made that should
-    reduce that number: if the Pauli string acts trivially w.r.t the considered Pauli effect
-    (X or Z), the boolean variable is removed from the formula as we know for sure that
-    this particular Pauli string cannot impact the result on that specific qubit and Pauli
-    effect.
+    This leads to a formula with ``2*len(qubits_to_consider)`` XOR clauses that
+    should all be verified for a cover to exist.
+    Each of the ``2*len(qubits_to_consider)`` XOR clauses can contain up to
+    ``len(available_pauli_strings)`` XORed items, but a simplification is made
+    that should reduce that number: if the Pauli string acts trivially w.r.t the
+    considered Pauli effect (X or Z), the boolean variable is removed from the
+    formula as we know for sure that this particular Pauli string cannot impact
+    the result on that specific qubit and Pauli effect.
 
     Args:
         solver: solver that will be modified in-place to encode the SAT problem.
-        expected_pauli_string: target Pauli string that should be covered by strings from
-            `available_pauli_strings`.
+        expected_pauli_string: target Pauli string that should be covered by
+            strings from ``available_pauli_strings``.
         available_pauli_strings: Pauli strings that can be used to try to cover
-            `expected_pauli_string`.
+            ``expected_pauli_string``.
         qubits_to_consider: qubits on which the cover should be exactly equal to
-            `expected_pauli_string`. Qubits not listed in this input will simply be ignored
-            and no restriction on the value of the resulting cover on those qubits is added.
+            ``expected_pauli_string``. Qubits not listed in this input will
+            simply be ignored and no restriction on the value of the resulting
+            cover on those qubits is added.
     """
 
     for qubit in qubits_to_consider:
@@ -106,64 +125,68 @@ def encode_pauli_string_commuting_cover_sat_problem_in_solver(
 ) -> None:
     """Build the SAT problem that should be solved to find a commuting cover.
 
-    This function encodes the SAT problem of interest into the provided `solver`.
-    As such, the provided `solver` is expected to be a newly created instance,
+    This function encodes the SAT problem of interest into the provided ``solver``.
+    As such, the provided ``solver`` is expected to be a newly created instance,
     and will be mutated by this function.
 
     The encoded problem is the following:
 
-    Find the indices of Pauli strings in `available_pauli_strings` such that
+    Find the indices of Pauli strings in ``available_pauli_strings`` such that
     the product of all the corresponding Pauli strings commutes with
-    `expected_pauli_string` on all the qubits in `qubits_to_consider`.
+    ``expected_pauli_string`` on all the qubits in ``qubits_to_consider``.
 
     The SAT problem contains one boolean variable per Pauli string in
-    `available_pauli_strings`, deciding if the associated Pauli string should
+    ``available_pauli_strings``, deciding if the associated Pauli string should
     be part of the cover.
-    The formula is quite simple: for each qubit in `qubits_to_consider`, the following
-    two boolean formulas should be `True`:
 
-    1. The X part of the resulting Pauli string, obtained from XORing the X part of each
-       Pauli string weighted by the boolean variable that decides if the Pauli string should
-       be included or not, should be equal to the X part of the expected final Pauli string
-       or be equal to I.
+    The formula is quite simple: for each qubit in ``qubits_to_consider``, the
+    following two boolean formulas should be ``True``:
+
+    1. The X part of the resulting Pauli string, obtained from XORing the X part
+       of each Pauli string weighted by the boolean variable that decides if the
+       Pauli string should be included or not, should be equal to the X part of
+       the expected final Pauli string or be equal to I.
     2. Same reasoning, but for the Z part.
 
-    Note that the "should be equal to the [P] part of the expected final Pauli string" is
-    natively implemented in the SAT solver used, so we do not need to adapt the formula
-    with some binary logic tricks. The solver really solves a conjunction of
-    `a XOR b XOR ... XOR z == [True/False]`.
-    Also note that the "or be equal to I" part is a little bit more tricky and requires
-    some care. The logic retained for each of the possible Pauli terms is explained
-    inline within the code.
+    Note that the "should be equal to the [P] part of the expected final Pauli
+    string" is natively implemented in the SAT solver used, so we do not need to
+    adapt the formula with some binary logic tricks. The solver really solves a
+    conjunction of ``a XOR b XOR ... XOR z == [True/False]``.
 
-    The number of XOR clauses in the formula depends on the number of each Pauli terms in
-    the input `expected_pauli_string` that is considered (i.e. on qubits in
-    `qubits_to_consider`). Let [P] be the number of Pauli term equal to P in
-    `expected_pauli_string`, the number of XOR clauses in the resulting formula is
-    `(2 * [I] + [X] + [Y] + [Z]) * len(qubits_to_consider)`. That means that there
-    are less clauses in the SAT problem defined in this function than in the one defined in
+    Also note that the "or be equal to I" part is a little bit more tricky and
+    requires some care. The logic retained for each of the possible Pauli terms
+    is explained inline within the code.
+
+    The number of XOR clauses in the formula depends on the number of each Pauli
+    terms in the input ``expected_pauli_string`` that is considered (i.e. on
+    qubits in ``qubits_to_consider``). Let [P] be the number of Pauli term equal
+    to P in ``expected_pauli_string``, the number of XOR clauses in the
+    resulting formula is ``(2 * [I] + [X] + [Y] + [Z]) * len(qubits_to_consider)``.
+    That means that there are less clauses in the SAT problem defined in this
+    function than in the one defined in
     :func:`encode_pauli_string_exact_cover_sat_problem_in_solver`, except if
-    `expected_pauli_string` only contains identity gates, in which case the two functions
-    return the same number of XOR clauses.
+    ``expected_pauli_string`` only contains identity gates, in which case the
+    two functions return the same number of XOR clauses.
 
-    Just like :func:`encode_pauli_string_exact_cover_sat_problem_in_solver`, the number
-    of terms in each XOR clause can vary depending on the provided Pauli strings in
-    `available_pauli_strings`.
+    Just like :func:`encode_pauli_string_exact_cover_sat_problem_in_solver`, the
+    number of terms in each XOR clause can vary depending on the provided Pauli
+    strings in ``available_pauli_strings``.
 
-    Also note that the problem defined above includes a trivial solution: do not include
-    any Pauli string. This lead to an identity Pauli string, that will necessarily commute
-    with the provided target. A specific clause is added to the SAT problem to avoid that
-    particular trivial solution.
+    Also note that the problem defined above includes a trivial solution: do not
+    include any Pauli string. This lead to an identity Pauli string, that will
+    necessarily commute with the provided target. A specific clause is added to
+    the SAT problem to avoid that particular trivial solution.
 
     Args:
         solver: solver that will be modified in-place to encode the SAT problem.
-        expected_pauli_string: target Pauli string that should be covered by strings from
-            `available_pauli_strings`.
+        expected_pauli_string: target Pauli string that should be covered by
+            strings from ``available_pauli_strings``.
         available_pauli_strings: Pauli strings that can be used to try to cover
-            `expected_pauli_string`.
+            ``expected_pauli_string``.
         qubits_to_consider: qubits on which the cover should be exactly equal to
-            `expected_pauli_string`. Qubits not listed in this input will simply be ignored
-            and no restriction on the value of the resulting cover on those qubits is added.
+            ``expected_pauli_string``. Qubits not listed in this input will
+            simply be ignored and no restriction on the value of the resulting
+            cover on those qubits is added.
     """
     # Clause to exclude the trivial solution "include no Pauli string at all"
     solver.add_clause([lit + 1 for lit in range(len(available_pauli_strings))])
