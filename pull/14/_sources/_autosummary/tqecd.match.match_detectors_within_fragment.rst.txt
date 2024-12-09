@@ -1,0 +1,6 @@
+tqecd.match.match\_detectors\_within\_fragment
+==============================================
+
+.. currentmodule:: tqecd.match
+
+.. autofunction:: match_detectors_within_fragment

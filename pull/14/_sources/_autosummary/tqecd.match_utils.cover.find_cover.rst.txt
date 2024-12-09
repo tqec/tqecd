@@ -1,0 +1,6 @@
+tqecd.match\_utils.cover.find\_cover
+====================================
+
+.. currentmodule:: tqecd.match_utils.cover
+
+.. autofunction:: find_cover
