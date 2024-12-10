@@ -2,9 +2,9 @@ import numpy
 import pytest
 
 from tqecd.boundary import BoundaryStabilizer, manhattan_distance
+from tqecd.exceptions import TQECDException
 from tqecd.measurement import RelativeMeasurementLocation
 from tqecd.pauli import PauliString
-from tqecd.exceptions import TQECDException
 
 
 def test_boundary_stabilizer_construction() -> None:

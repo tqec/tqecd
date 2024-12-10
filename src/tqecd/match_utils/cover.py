@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import time
-import typing as ty
+from typing import Iterator
 
 import pysat.solvers
 
@@ -17,7 +17,7 @@ from tqecd.pauli import PauliString
 
 def _all_pauli_string_combination_results(
     pauli_strings: list[PauliString],
-) -> ty.Iterator[tuple[list[bool], PauliString]]:
+) -> Iterator[tuple[list[bool], PauliString]]:
     """Iterate over all the possible Pauli string products.
 
     This function iterates over all the ``2**len(pauli_strings)`` products
@@ -41,7 +41,7 @@ def _all_pauli_string_combination_results(
 
 def _all_pauli_string_combination_results_impl(
     pauli_strings: list[PauliString], current_pauli_string: PauliString
-) -> ty.Iterator[tuple[list[bool], PauliString]]:
+) -> Iterator[tuple[list[bool], PauliString]]:
     """Iterate over all the possible Pauli string products.
 
     This function iterates over all the ``2**len(pauli_strings)`` products
@@ -144,7 +144,7 @@ def find_cover(
 
 
 def _smallest_solution_shortcircuit(
-    solutions: ty.Iterator[list[int]], lower_length_bound: int = 0, timeout: float = 0.1
+    solutions: Iterator[list[int]], lower_length_bound: int = 0, timeout: float = 0.1
 ) -> list[int] | None:
     """Iterate over the provided ``solutions`` iterator to find the smallest
     possible solution within the provided ``timeout``.

@@ -1,11 +1,8 @@
 import pytest
 import stim
-from tqecd.pauli import (
-    PauliString,
-    pauli_literal_to_bools,
-    pauli_product,
-)
+
 from tqecd.exceptions import TQECDException
+from tqecd.pauli import PauliString, pauli_literal_to_bools, pauli_product
 
 
 def test_pauli_string_construction() -> None:
