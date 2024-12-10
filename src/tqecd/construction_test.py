@@ -6,12 +6,12 @@ import pytest
 import stim
 
 from tqecd.construction import annotate_detectors_automatically
+from tqecd.exceptions import TQECDException
 from tqecd.utils import (
     detector_to_targets_tuple,
     push_all_detectors_to_the_end,
     remove_annotations,
 )
-from tqecd.exceptions import TQECDException
 
 _HERE = Path(__file__).parent
 _TEST_FOLDER = _HERE / "test_files"

@@ -10,13 +10,13 @@ from __future__ import annotations
 
 import functools
 import operator
-import typing as ty
+from typing import Iterable, Literal
 
 import stim
 
 from tqecd.exceptions import TQECDException
 
-PAULI_STRING_TYPE = ty.Literal["I", "X", "Y", "Z"]
+PAULI_STRING_TYPE = Literal["I", "X", "Y", "Z"]
 _IXYZ: list[PAULI_STRING_TYPE] = ["I", "X", "Y", "Z"]
 _IXZY: list[PAULI_STRING_TYPE] = ["I", "X", "Z", "Y"]
 
@@ -46,7 +46,7 @@ class PauliString:
         return len(self._pauli_by_qubit)
 
     @property
-    def qubits(self) -> ty.Iterable[int]:
+    def qubits(self) -> Iterable[int]:
         return self._pauli_by_qubit.keys()
 
     @property
@@ -132,7 +132,7 @@ class PauliString:
             t += self._pauli_by_qubit[q] != other._pauli_by_qubit[q]
         return t % 2 == 1
 
-    def collapse_by(self, collapse_operators: ty.Iterable[PauliString]) -> PauliString:
+    def collapse_by(self, collapse_operators: Iterable[PauliString]) -> PauliString:
         """Collapse the provided Pauli string by the provided operators.
 
         Here, collapsing means that we are removing from the Pauli string represented
@@ -164,7 +164,7 @@ class PauliString:
                     del ret._pauli_by_qubit[qubit]
         return ret
 
-    def after(self, tableau: stim.Tableau, targets: ty.Iterable[int]) -> PauliString:
+    def after(self, tableau: stim.Tableau, targets: Iterable[int]) -> PauliString:
         stim_pauli_string = self.to_stim_pauli_string(
             length=max(list(targets) + list(self._pauli_by_qubit.keys())) + 1
         )
@@ -211,5 +211,5 @@ def pauli_literal_to_bools(
         return (False, True)
 
 
-def pauli_product(paulis: ty.Iterable[PauliString]) -> PauliString:
+def pauli_product(paulis: Iterable[PauliString]) -> PauliString:
     return functools.reduce(operator.mul, paulis, PauliString({}))

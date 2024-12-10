@@ -1,10 +1,12 @@
+from typing import Union
+
 import numpy
 import pytest
 
 from tqecd.boundary import BoundaryStabilizer, manhattan_distance
+from tqecd.exceptions import TQECDException
 from tqecd.measurement import RelativeMeasurementLocation
 from tqecd.pauli import PauliString
-from tqecd.exceptions import TQECDException
 
 
 def test_boundary_stabilizer_construction() -> None:
@@ -166,7 +168,7 @@ def test_coordinates_raises_error_if_invalid_qubit_mapping() -> None:
         frozenset([3, 5]),
         True,
     )
-    qubit_coordinates: dict[int, tuple[float | int, ...]] = {3: (0, 1)}
+    qubit_coordinates: dict[int, tuple[Union[float, int], ...]] = {3: (0, 1)}
     with pytest.raises(
         TQECDException,
         match=r"^Qubit index 5 required for detector assignment, but it does not have a valid QUBIT_COORDS statement\.$",

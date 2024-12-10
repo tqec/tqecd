@@ -1,9 +1,10 @@
 import pytest
+
+from tqecd.exceptions import TQECDException
 from tqecd.measurement import (
     RelativeMeasurementLocation,
     get_relative_measurement_index,
 )
-from tqecd.exceptions import TQECDException
 
 
 def test_initialisation() -> None:

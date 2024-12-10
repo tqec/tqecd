@@ -1,11 +1,10 @@
-import typing
+from typing import Iterable, Literal
+
 import pytest
 import stim
+
 from tqecd.pauli import PauliString
-from tqecd.utils import (
-    collapse_pauli_strings_at_moment,
-    iter_stim_circuit_by_moments,
-)
+from tqecd.utils import collapse_pauli_strings_at_moment, iter_stim_circuit_by_moments
 
 
 def test_iter_by_moment_empty() -> None:
@@ -114,7 +113,7 @@ def test_iter_by_moment_repeat_block() -> None:
 @pytest.mark.parametrize("basis", ["", "X", "Y", "Z"])
 @pytest.mark.parametrize("qubits", [range(5), [1, 2, 0], [0, 1, 2], [2, 1, 0]])
 def test_collapse_pauli_strings_at_moment_all_basis(
-    basis: typing.Literal["", "X", "Y", "Z"], qubits: typing.Iterable[int]
+    basis: Literal["", "X", "Y", "Z"], qubits: Iterable[int]
 ) -> None:
     qubits_str = " ".join(map(str, qubits))
     circuit = stim.Circuit(f"R{basis} {qubits_str}")
