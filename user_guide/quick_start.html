@@ -405,9 +405,9 @@
 <h2>Build your quantum circuit<a class="headerlink" href="#build-your-quantum-circuit" title="Link to this heading">#</a></h2>
 <p>The first step to use <code class="docutils literal notranslate"><span class="pre">tqecd</span></code> is to build a compatible quantum circuit.</p>
 <p>In short, compatible quantum circuits should be sequences of blocks that all follow the
-same scheme: starts by a possibly empty sequence of resets, continues by a possibly empty
+same scheme: they start with a possibly empty sequence of resets, continue by a possibly empty
 sequence of “computation gates” (i.e., any gate that is not a reset or a measurement) and
-ends with a non-empty sequence of measurements.</p>
+end with a non-empty sequence of measurements.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">stim</span>
 
 <span class="n">XXXX</span> <span class="o">=</span> <span class="n">stim</span><span class="o">.</span><span class="n">Circuit</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span><span class="se">\</span>
