@@ -2,7 +2,7 @@
 
 The `tqecd` package is a spin-off from the [`tqec`](https://github.com/tqec/tqec) package that allows the automatic search of detectors in structured quantum error correction circuits.
 
-This package was initially part of `tqec`, and has been outsourced to make it accessible to anyone wanting to use it outside of the `tqec` library.
+This package was initially part of `tqec` and has been outsourced to make it accessible to anyone wanting to use it outside of the `tqec` library.
 
 ## Documentation
 
@@ -16,7 +16,7 @@ Currently, `tqecd` needs to be installed from source using
 python -m pip install git+https://github.com/tqec/tqecd.git
 ```
 
-The `tqecd` package have some dependencies that might be harder than a simple `pip install` to install. If you end up having any issue with the simple installation method above, please have a look at the [full installation page](https://tqec.github.io/tqecd/user_guide/installation.html).
+The `tqecd` package has some dependencies that might be harder to install than a simple `pip install`. If you have any issues with the simple installation method above, please look at the [full installation page](https://tqec.github.io/tqecd/user_guide/installation.html).
 
 ## Basic usage
 
@@ -76,4 +76,4 @@ DETECTOR(1, 1, 0) rec[-1]
 
 Pull requests and issues are more than welcomed!
 
-See the [contributing page](https://tqec.github.io/tqecd/contributor_guide.html) for for specific instructions to start contributing.
+See the [contributing page](https://tqec.github.io/tqecd/contributor_guide.html) for specific contributing instructions.
