@@ -1,5 +1,4 @@
 numpy
 stim
-typing-extensions
 pycryptosat!=5.11.23
 python-sat[cryptosat]
