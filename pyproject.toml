@@ -41,8 +41,15 @@ Repository = "https://github.com/tqec/tqecd"
 Issues = "https://github.com/tqec/tqecd/issues"
 
 [project.optional-dependencies]
+doc = [
+    "sphinx",
+    "myst-parser",
+    "pydata-sphinx-theme",
+    "nbsphinx",
+    "pandoc",
+    "jupyter",
+]
 test = ["pytest", "mypy", "pytest-cov"]
-doc = ["sphinx", "myst-parser", "pydata-sphinx-theme", "nbsphinx", "pandoc"]
 bench = ["pyinstrument"]
 dev = ["pre-commit", "tqecd[test, doc, bench]"]
 all = ["tqecd[test, dev, doc, bench]"]
