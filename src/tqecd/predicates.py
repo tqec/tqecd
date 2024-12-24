@@ -3,6 +3,7 @@ from __future__ import annotations
 import typing as ty
 
 import stim
+
 from tqecd.utils import (
     has_computation_instruction,
     has_measurement,

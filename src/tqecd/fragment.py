@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-import typing
 import warnings
 from dataclasses import dataclass
+from typing import cast
 
 import stim
 
+from tqecd.exceptions import TQECDException, TQECDWarning
 from tqecd.pauli import PauliString
 from tqecd.predicates import is_valid_input_circuit
 from tqecd.utils import (
@@ -18,7 +19,6 @@ from tqecd.utils import (
     is_virtual_moment,
     iter_stim_circuit_by_moments,
 )
-from tqecd.exceptions import TQECDException, TQECDWarning
 
 
 class Fragment:
@@ -59,7 +59,7 @@ class Fragment:
         # any stim.CircuitRepeatBlock instance, and so iter_stim_circuit_by_moments
         # can only return stim.Circuit instances.
         moments = [
-            typing.cast(stim.Circuit, moment).copy()
+            cast(stim.Circuit, moment).copy()
             for moment in iter_stim_circuit_by_moments(circuit)
         ]
 
