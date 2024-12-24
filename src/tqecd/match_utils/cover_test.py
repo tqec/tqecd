@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import itertools
-import typing as ty
+from typing import Iterator
 
 import pytest
 import stim
@@ -20,7 +20,7 @@ def _pss(pauli_string: str) -> PauliString:
 
 def _all_pauli_string_combination_results_alternative_implementation(
     pauli_string_list: list[PauliString],
-) -> ty.Iterator[PauliString]:
+) -> Iterator[PauliString]:
     yield from (
         pauli_product([p for p, c in zip(pauli_string_list, choices) if c])
         for choices in itertools.product([True, False], repeat=len(pauli_string_list))

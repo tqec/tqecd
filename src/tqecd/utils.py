@@ -5,8 +5,8 @@ import typing as ty
 import numpy
 import stim
 
-from tqecd.pauli import PauliString
 from tqecd.exceptions import TQECDException
+from tqecd.pauli import PauliString
 
 ANNOTATIONS = {
     "DETECTOR",

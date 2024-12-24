@@ -12,7 +12,7 @@ description = "Automatically find detectors in a topologically quantum error cor
 readme = "README.md"
 license = { file = "LICENSE" }
 keywords = ["topological quantum error correction", "qec", "detectors"]
-requires-python = ">= 3.10"
+requires-python = ">= 3.9"
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -36,21 +36,22 @@ classifiers = [
 dynamic = ["dependencies"]
 
 [project.urls]
-# Documentation = "https://tqec.github.io/tqecd/"
+Documentation = "https://tqec.github.io/tqecd/"
 Repository = "https://github.com/tqec/tqecd"
 Issues = "https://github.com/tqec/tqecd/issues"
 
 [project.optional-dependencies]
-test = ["pytest", "mypy", "pytest-cov"]
-dev = [
-    "sinter>=1.14",
-    "pymatching",
-    "jupyterlab",
-    "tqecd[test, doc, bench]",
-    "pre-commit",
+doc = [
+    "sphinx",
+    "myst-parser",
+    "pydata-sphinx-theme",
+    "nbsphinx",
+    "pandoc",
+    "jupyter",
 ]
-doc = ["sphinx", "myst-parser", "pydata-sphinx-theme", "nbsphinx", "pandoc"]
 bench = ["pyinstrument", "build", "asv"]
+test = ["pytest", "mypy", "pytest-cov"]
+dev = ["pre-commit", "tqecd[test, doc, bench]"]
 all = ["tqecd[test, dev, doc, bench]"]
 
 [tool.setuptools]
@@ -105,7 +106,7 @@ warn_return_any = true
 
 # See https://mypy.readthedocs.io/en/stable/config_file.html#using-a-pyproject-toml
 [[tool.mypy.overrides]]
-module = ["stim", "sinter", "pysat", "pysat.solvers"]
+module = ["stim", "pysat", "pysat.solvers"]
 ignore_missing_imports = true
 
 [tool.coverage.run]
