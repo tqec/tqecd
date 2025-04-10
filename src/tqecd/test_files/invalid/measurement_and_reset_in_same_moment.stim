@@ -1,4 +1,4 @@
-# The provided quantum circuit contains at least one moment that has two different operation types from \{reset, measurement, computation\}\.
+# The provided quantum circuit contains at least one moment that has both reset and measurement operations\.
 QUBIT_COORDS(0) 0
 QUBIT_COORDS(1) 1
 QUBIT_COORDS(2) 2
