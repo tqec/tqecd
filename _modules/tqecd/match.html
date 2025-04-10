@@ -29,7 +29,7 @@
   <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
   
   <!-- So that users can add custom icons -->
   <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -381,43 +381,43 @@
                 <article class="bd-article">
                   
   <h1>Source code for tqecd.match</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
-<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Final</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Mapping</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Final</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Mapping</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span>
-<span class="kn">import</span> <span class="nn">stim</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">stim</span>
 
-<span class="kn">from</span> <span class="nn">tqecd.boundary</span> <span class="kn">import</span> <span class="n">BoundaryStabilizer</span>
-<span class="kn">from</span> <span class="nn">tqecd.exceptions</span> <span class="kn">import</span> <span class="n">TQECDException</span>
-<span class="kn">from</span> <span class="nn">tqecd.flow</span> <span class="kn">import</span> <span class="n">FragmentFlows</span><span class="p">,</span> <span class="n">FragmentLoopFlows</span>
-<span class="kn">from</span> <span class="nn">tqecd.match_utils.cover</span> <span class="kn">import</span> <span class="n">find_exact_cover_sat</span>
-<span class="kn">from</span> <span class="nn">tqecd.measurement</span> <span class="kn">import</span> <span class="n">RelativeMeasurementLocation</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.boundary</span><span class="w"> </span><span class="kn">import</span> <span class="n">BoundaryStabilizer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">TQECDException</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.flow</span><span class="w"> </span><span class="kn">import</span> <span class="n">FragmentFlows</span><span class="p">,</span> <span class="n">FragmentLoopFlows</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.match_utils.cover</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_exact_cover_sat</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.measurement</span><span class="w"> </span><span class="kn">import</span> <span class="n">RelativeMeasurementLocation</span>
 
 
 <div class="viewcode-block" id="MatchedDetector">
 <a class="viewcode-back" href="../../_autosummary/tqecd.match.MatchedDetector.html#tqecd.match.MatchedDetector">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="k">class</span> <span class="nc">MatchedDetector</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MatchedDetector</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Represents an automatically computed detector.&quot;&quot;&quot;</span>
 
     <span class="n">coords</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
     <span class="n">measurements</span><span class="p">:</span> <span class="nb">frozenset</span><span class="p">[</span><span class="n">RelativeMeasurementLocation</span><span class="p">]</span>
     <span class="n">resets</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">frozenset</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="o">...</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">measurements</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">MatchedDetector</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">measurements</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">measurements</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">to_instruction</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">stim</span><span class="o">.</span><span class="n">CircuitInstruction</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_instruction</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">stim</span><span class="o">.</span><span class="n">CircuitInstruction</span><span class="p">:</span>
         <span class="n">targets</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">stim</span><span class="o">.</span><span class="n">target_rec</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">offset</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span>
@@ -426,14 +426,14 @@
         <span class="p">]</span>
         <span class="k">return</span> <span class="n">stim</span><span class="o">.</span><span class="n">CircuitInstruction</span><span class="p">(</span><span class="s2">&quot;DETECTOR&quot;</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="p">))</span>
 
-    <span class="k">def</span> <span class="nf">with_time_coordinate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time_coordinate</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MatchedDetector</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">with_time_coordinate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time_coordinate</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MatchedDetector</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">MatchedDetector</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">coords</span> <span class="o">+</span> <span class="p">(</span><span class="n">time_coordinate</span><span class="p">,),</span> <span class="bp">self</span><span class="o">.</span><span class="n">measurements</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">resets</span>
         <span class="p">)</span></div>
 
 
 
-<span class="k">def</span> <span class="nf">_get_detectors_with_time_coordinate</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_detectors_with_time_coordinate</span><span class="p">(</span>
     <span class="n">flows</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">FragmentFlows</span> <span class="o">|</span> <span class="n">FragmentLoopFlows</span><span class="p">],</span>
     <span class="n">matched_detectors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">MatchedDetector</span><span class="p">]],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">MatchedDetector</span><span class="p">]]:</span>
@@ -457,7 +457,7 @@
 
 <div class="viewcode-block" id="match_detectors_from_flows_shallow">
 <a class="viewcode-back" href="../../_autosummary/tqecd.match.match_detectors_from_flows_shallow.html#tqecd.match.match_detectors_from_flows_shallow">[docs]</a>
-<span class="k">def</span> <span class="nf">match_detectors_from_flows_shallow</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">match_detectors_from_flows_shallow</span><span class="p">(</span>
     <span class="n">flows</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">FragmentFlows</span> <span class="o">|</span> <span class="n">FragmentLoopFlows</span><span class="p">],</span>
     <span class="n">qubit_coordinates</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">MatchedDetector</span><span class="p">]]:</span>
@@ -507,7 +507,7 @@
 
 <div class="viewcode-block" id="match_detectors_within_fragment">
 <a class="viewcode-back" href="../../_autosummary/tqecd.match.match_detectors_within_fragment.html#tqecd.match.match_detectors_within_fragment">[docs]</a>
-<span class="k">def</span> <span class="nf">match_detectors_within_fragment</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">match_detectors_within_fragment</span><span class="p">(</span>
     <span class="n">flows</span><span class="p">:</span> <span class="n">FragmentFlows</span> <span class="o">|</span> <span class="n">FragmentLoopFlows</span><span class="p">,</span>
     <span class="n">qubit_coordinates</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">MatchedDetector</span><span class="p">]:</span>
@@ -547,7 +547,7 @@
 
 
 
-<span class="k">def</span> <span class="nf">_match_non_propagating_non_trivial_flows_inline</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_match_non_propagating_non_trivial_flows_inline</span><span class="p">(</span>
     <span class="n">boundary_stabilizers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">BoundaryStabilizer</span><span class="p">],</span>
     <span class="n">qubit_coordinates</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">MatchedDetector</span><span class="p">]:</span>
@@ -614,7 +614,7 @@
     <span class="k">return</span> <span class="n">matched_detectors</span>
 
 
-<span class="k">def</span> <span class="nf">_find_non_propagating_non_trivial_flows</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_find_non_propagating_non_trivial_flows</span><span class="p">(</span>
     <span class="n">boundary_stabilizers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">BoundaryStabilizer</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Find all the boundary stabilizers that do not have any anti-commuting</span>
@@ -640,7 +640,7 @@
 
 <div class="viewcode-block" id="match_boundary_stabilizers">
 <a class="viewcode-back" href="../../_autosummary/tqecd.match.match_boundary_stabilizers.html#tqecd.match.match_boundary_stabilizers">[docs]</a>
-<span class="k">def</span> <span class="nf">match_boundary_stabilizers</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">match_boundary_stabilizers</span><span class="p">(</span>
     <span class="n">left_flows</span><span class="p">:</span> <span class="n">FragmentFlows</span> <span class="o">|</span> <span class="n">FragmentLoopFlows</span><span class="p">,</span>
     <span class="n">right_flows</span><span class="p">:</span> <span class="n">FragmentFlows</span> <span class="o">|</span> <span class="n">FragmentLoopFlows</span><span class="p">,</span>
     <span class="n">qubit_coordinates</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span>
@@ -744,7 +744,7 @@
 
 
 
-<span class="k">def</span> <span class="nf">_match_commute_stabilizers</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_match_commute_stabilizers</span><span class="p">(</span>
     <span class="n">left_flows</span><span class="p">:</span> <span class="n">FragmentFlows</span> <span class="o">|</span> <span class="n">FragmentLoopFlows</span><span class="p">,</span>
     <span class="n">right_flows</span><span class="p">:</span> <span class="n">FragmentFlows</span> <span class="o">|</span> <span class="n">FragmentLoopFlows</span><span class="p">,</span>
     <span class="n">qubit_coordinates</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span>
@@ -817,7 +817,7 @@
     <span class="k">return</span> <span class="n">detectors</span>
 
 
-<span class="k">def</span> <span class="nf">_match_boundary_stabilizers_by_disjoint_cover</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_match_boundary_stabilizers_by_disjoint_cover</span><span class="p">(</span>
     <span class="n">target_stabilizers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">BoundaryStabilizer</span><span class="p">],</span>
     <span class="n">covering_stabilizers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">BoundaryStabilizer</span><span class="p">],</span>
     <span class="n">qubit_coordinates</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span>
@@ -888,7 +888,7 @@
     <span class="k">return</span> <span class="n">detectors</span><span class="p">,</span> <span class="n">targets_to_remove</span>
 
 
-<span class="k">def</span> <span class="nf">_match_by_disjoint_cover</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_match_by_disjoint_cover</span><span class="p">(</span>
     <span class="n">left_flows</span><span class="p">:</span> <span class="n">FragmentFlows</span> <span class="o">|</span> <span class="n">FragmentLoopFlows</span><span class="p">,</span>
     <span class="n">right_flows</span><span class="p">:</span> <span class="n">FragmentFlows</span> <span class="o">|</span> <span class="n">FragmentLoopFlows</span><span class="p">,</span>
     <span class="n">qubit_coordinates</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span>

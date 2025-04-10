@@ -24,6 +24,7 @@ tqecd.utils
       has_only_reset_or_is_virtual
       has_reset
       is_annotation
+      is_collapsing_instruction
       is_combined_measurement_reset
       is_measurement
       is_noisy_gate

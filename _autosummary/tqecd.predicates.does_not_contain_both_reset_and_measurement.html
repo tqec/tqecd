@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>tqecd.fragment.Fragment &#8212; TQECD  documentation</title>
+    <title>tqecd.predicates.does_not_contain_both_reset_and_measurement &#8212; TQECD  documentation</title>
   
   
   
@@ -30,7 +30,7 @@
   <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
   
   <!-- So that users can add custom icons -->
   <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -42,11 +42,11 @@
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = '_autosummary/tqecd.fragment.Fragment';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_autosummary/tqecd.predicates.does_not_contain_both_reset_and_measurement';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="tqecd.fragment.FragmentLoop" href="tqecd.fragment.FragmentLoop.html" />
-    <link rel="prev" title="tqecd.fragment.split_stim_circuit_into_fragments" href="tqecd.fragment.split_stim_circuit_into_fragments.html" />
+    <link rel="next" title="tqecd.predicates.does_not_contain_combined_gates" href="tqecd.predicates.does_not_contain_combined_gates.html" />
+    <link rel="prev" title="tqecd.predicates" href="tqecd.predicates.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -359,9 +359,9 @@
 <li class="toctree-l3"><a class="reference internal" href="tqecd.flow.FragmentLoopFlows.html">tqecd.flow.FragmentLoopFlows</a></li>
 </ul>
 </details></li>
-<li class="toctree-l2 current active has-children"><a class="reference internal" href="tqecd.fragment.html">tqecd.fragment</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 has-children"><a class="reference internal" href="tqecd.fragment.html">tqecd.fragment</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="tqecd.fragment.split_stim_circuit_into_fragments.html">tqecd.fragment.split_stim_circuit_into_fragments</a></li>
-<li class="toctree-l3 current active"><a class="current reference internal" href="#">tqecd.fragment.Fragment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tqecd.fragment.Fragment.html">tqecd.fragment.Fragment</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tqecd.fragment.FragmentLoop.html">tqecd.fragment.FragmentLoop</a></li>
 </ul>
 </details></li>
@@ -397,9 +397,9 @@
 <li class="toctree-l3"><a class="reference internal" href="tqecd.pauli.PauliString.html">tqecd.pauli.PauliString</a></li>
 </ul>
 </details></li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="tqecd.predicates.html">tqecd.predicates</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="tqecd.predicates.html">tqecd.predicates</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l3 current active"><a class="current reference internal" href="#">tqecd.predicates.does_not_contain_both_reset_and_measurement</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tqecd.predicates.does_not_contain_combined_gates.html">tqecd.predicates.does_not_contain_combined_gates</a></li>
-<li class="toctree-l3"><a class="reference internal" href="tqecd.predicates.has_well_defined_moments.html">tqecd.predicates.has_well_defined_moments</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tqecd.predicates.is_valid_input_circuit.html">tqecd.predicates.is_valid_input_circuit</a></li>
 </ul>
 </details></li>
@@ -414,6 +414,7 @@
 <li class="toctree-l3"><a class="reference internal" href="tqecd.utils.has_only_reset_or_is_virtual.html">tqecd.utils.has_only_reset_or_is_virtual</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tqecd.utils.has_reset.html">tqecd.utils.has_reset</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tqecd.utils.is_annotation.html">tqecd.utils.is_annotation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tqecd.utils.is_collapsing_instruction.html">tqecd.utils.is_collapsing_instruction</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tqecd.utils.is_combined_measurement_reset.html">tqecd.utils.is_combined_measurement_reset</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tqecd.utils.is_measurement.html">tqecd.utils.is_measurement</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tqecd.utils.is_noisy_gate.html">tqecd.utils.is_noisy_gate</a></li>
@@ -475,9 +476,9 @@
     <li class="breadcrumb-item"><a href="tqecd.html" class="nav-link">tqecd</a></li>
     
     
-    <li class="breadcrumb-item"><a href="tqecd.fragment.html" class="nav-link">tqecd.fragment</a></li>
+    <li class="breadcrumb-item"><a href="tqecd.predicates.html" class="nav-link">tqecd.predicates</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">tqecd.fragment.Fragment</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">tqecd.predicates.does_not_contain_both_reset_and_measurement</span></li>
   </ul>
 </nav>
 </div>
@@ -494,88 +495,12 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="tqecd-fragment-fragment">
-<h1>tqecd.fragment.Fragment<a class="headerlink" href="#tqecd-fragment-fragment" title="Link to this heading">#</a></h1>
-<dl class="py class">
-<dt class="sig sig-object py" id="tqecd.fragment.Fragment">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Fragment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circuit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Circuit</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tqecd/fragment.html#Fragment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tqecd.fragment.Fragment" title="Link to this definition">#</a></dt>
-<dd><dl class="py method">
-<dt class="sig sig-object py" id="tqecd.fragment.Fragment.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circuit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Circuit</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tqecd/fragment.html#Fragment.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tqecd.fragment.Fragment.__init__" title="Link to this definition">#</a></dt>
-<dd><p>A sub-circuit guaranteed to end with a moment filled by measurement
-instructions.</p>
-<p>Fragment instances represent sub-circuits that contain:</p>
-<ol class="arabic simple">
-<li><dl class="simple">
-<dt>zero or more moments exclusively composed of <cite>reset</cite>, annotation or</dt><dd><p>noisy-gate instructions,</p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>zero or more moments composed of “computation” instructions (anything</dt><dd><p>that is not a measurement or a reset),</p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>one moment exclusively composed of <cite>measurement</cite>, annotation</dt><dd><p>or noisy-gate instructions.</p>
-</dd>
-</dl>
-</li>
-</ol>
-<dl class="field-list simple">
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><a class="reference internal" href="tqecd.exceptions.TQECDException.html#tqecd.exceptions.TQECDException" title="tqecd.exceptions.TQECDException"><strong>TQECDException</strong></a> – if the provided <cite>stim.Circuit</cite> instance contains a
-    stim.CircuitRepeatBlock instance.</p></li>
-<li><p><a class="reference internal" href="tqecd.exceptions.TQECDException.html#tqecd.exceptions.TQECDException" title="tqecd.exceptions.TQECDException"><strong>TQECDException</strong></a> – if any moment from the provided circuit contains
-    both a measurement (resp. reset) and a non-measurement (resp.
-    non-reset) operation. Note that annotations and noisy-gates
-    instructions (measurements excluded) are ignored, and so are
-    excluded from this condition.</p></li>
-<li><p><a class="reference internal" href="tqecd.exceptions.TQECDException.html#tqecd.exceptions.TQECDException" title="tqecd.exceptions.TQECDException"><strong>TQECDException</strong></a> – if the provided circuit does not end with at least
-    one measurement.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>circuit</strong> – the circuit represented by the instance.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<p class="rubric">Methods</p>
-<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#tqecd.fragment.Fragment.__init__" title="tqecd.fragment.Fragment.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(circuit)</p></td>
-<td><p>A sub-circuit guaranteed to end with a moment filled by measurement instructions.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_tableau</span></code>()</p></td>
-<td><p></p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<p class="rubric">Attributes</p>
-<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
-<tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">circuit</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">measurements</span></code></p></td>
-<td><p>Get the measurement instructions at the back on the Fragment.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">measurements_qubits</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">num_measurements</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">resets</span></code></p></td>
-<td><p>Get the reset instructions at the front on the Fragment.</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-</dd></dl>
+  <section id="tqecd-predicates-does-not-contain-both-reset-and-measurement">
+<h1>tqecd.predicates.does_not_contain_both_reset_and_measurement<a class="headerlink" href="#tqecd-predicates-does-not-contain-both-reset-and-measurement" title="Link to this heading">#</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="tqecd.predicates.does_not_contain_both_reset_and_measurement">
+<span class="sig-name descname"><span class="pre">does_not_contain_both_reset_and_measurement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circuit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Circuit</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/tqecd/predicates.html#does_not_contain_both_reset_and_measurement"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tqecd.predicates.does_not_contain_both_reset_and_measurement" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
 
 </section>
 
@@ -590,20 +515,20 @@ instructions.</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="tqecd.fragment.split_stim_circuit_into_fragments.html"
+       href="tqecd.predicates.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">tqecd.fragment.split_stim_circuit_into_fragments</p>
+        <p class="prev-next-title">tqecd.predicates</p>
       </div>
     </a>
     <a class="right-next"
-       href="tqecd.fragment.FragmentLoop.html"
+       href="tqecd.predicates.does_not_contain_combined_gates.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">tqecd.fragment.FragmentLoop</p>
+        <p class="prev-next-title">tqecd.predicates.does_not_contain_combined_gates</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -626,10 +551,7 @@ instructions.</p>
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#tqecd.fragment.Fragment"><code class="docutils literal notranslate"><span class="pre">Fragment</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#tqecd.fragment.Fragment.__init__"><code class="docutils literal notranslate"><span class="pre">Fragment.__init__()</span></code></a></li>
-</ul>
-</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#tqecd.predicates.does_not_contain_both_reset_and_measurement"><code class="docutils literal notranslate"><span class="pre">does_not_contain_both_reset_and_measurement()</span></code></a></li>
 </ul>
   </nav></div>
 
@@ -637,7 +559,7 @@ instructions.</p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="../_sources/_autosummary/tqecd.fragment.Fragment.rst.txt"
+      <li><a href="../_sources/_autosummary/tqecd.predicates.does_not_contain_both_reset_and_measurement.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div></div>

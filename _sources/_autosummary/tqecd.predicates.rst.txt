@@ -14,8 +14,8 @@ tqecd.predicates
    .. autosummary::
       :toctree:
    
+      does_not_contain_both_reset_and_measurement
       does_not_contain_combined_gates
-      has_well_defined_moments
       is_valid_input_circuit
    
    

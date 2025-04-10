@@ -29,7 +29,7 @@
   <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
   
   <!-- So that users can add custom icons -->
   <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -381,17 +381,17 @@
                 <article class="bd-article">
                   
   <h1>Source code for tqecd.measurement</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 
-<span class="kn">from</span> <span class="nn">tqecd.exceptions</span> <span class="kn">import</span> <span class="n">TQECDException</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">TQECDException</span>
 
 
 <div class="viewcode-block" id="RelativeMeasurementLocation">
 <a class="viewcode-back" href="../../_autosummary/tqecd.measurement.RelativeMeasurementLocation.html#tqecd.measurement.RelativeMeasurementLocation">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="k">class</span> <span class="nc">RelativeMeasurementLocation</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RelativeMeasurementLocation</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Represents a unique measurement with an offset.</span>
 
 <span class="sd">    Measurements are represented with the same method as stim: by a negative</span>
@@ -407,13 +407,13 @@
     <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span>
     <span class="n">qubit_index</span><span class="p">:</span> <span class="nb">int</span>
 
-    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">TQECDException</span><span class="p">(</span>
                 <span class="s2">&quot;Relative measurement offsets should be strictly negative.&quot;</span>
             <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">offset_by</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RelativeMeasurementLocation</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">offset_by</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RelativeMeasurementLocation</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">RelativeMeasurementLocation</span><span class="p">(</span>
             <span class="n">offset</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span> <span class="n">qubit_index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">qubit_index</span>
         <span class="p">)</span></div>
@@ -422,7 +422,7 @@
 
 <div class="viewcode-block" id="get_relative_measurement_index">
 <a class="viewcode-back" href="../../_autosummary/tqecd.measurement.get_relative_measurement_index.html#tqecd.measurement.get_relative_measurement_index">[docs]</a>
-<span class="k">def</span> <span class="nf">get_relative_measurement_index</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_relative_measurement_index</span><span class="p">(</span>
     <span class="n">all_measured_qubits</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">measured_qubit</span><span class="p">:</span> <span class="nb">int</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RelativeMeasurementLocation</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">RelativeMeasurementLocation</span><span class="p">(</span>

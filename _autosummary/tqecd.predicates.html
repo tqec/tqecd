@@ -30,7 +30,7 @@
   <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
   
   <!-- So that users can add custom icons -->
   <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -45,7 +45,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = '_autosummary/tqecd.predicates';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="tqecd.predicates.does_not_contain_combined_gates" href="tqecd.predicates.does_not_contain_combined_gates.html" />
+    <link rel="next" title="tqecd.predicates.does_not_contain_both_reset_and_measurement" href="tqecd.predicates.does_not_contain_both_reset_and_measurement.html" />
     <link rel="prev" title="tqecd.pauli.PauliString" href="tqecd.pauli.PauliString.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -398,8 +398,8 @@
 </ul>
 </details></li>
 <li class="toctree-l2 current active has-children"><a class="current reference internal" href="#">tqecd.predicates</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="tqecd.predicates.does_not_contain_both_reset_and_measurement.html">tqecd.predicates.does_not_contain_both_reset_and_measurement</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tqecd.predicates.does_not_contain_combined_gates.html">tqecd.predicates.does_not_contain_combined_gates</a></li>
-<li class="toctree-l3"><a class="reference internal" href="tqecd.predicates.has_well_defined_moments.html">tqecd.predicates.has_well_defined_moments</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tqecd.predicates.is_valid_input_circuit.html">tqecd.predicates.is_valid_input_circuit</a></li>
 </ul>
 </details></li>
@@ -414,6 +414,7 @@
 <li class="toctree-l3"><a class="reference internal" href="tqecd.utils.has_only_reset_or_is_virtual.html">tqecd.utils.has_only_reset_or_is_virtual</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tqecd.utils.has_reset.html">tqecd.utils.has_reset</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tqecd.utils.is_annotation.html">tqecd.utils.is_annotation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tqecd.utils.is_collapsing_instruction.html">tqecd.utils.is_collapsing_instruction</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tqecd.utils.is_combined_measurement_reset.html">tqecd.utils.is_combined_measurement_reset</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tqecd.utils.is_measurement.html">tqecd.utils.is_measurement</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tqecd.utils.is_noisy_gate.html">tqecd.utils.is_noisy_gate</a></li>
@@ -496,10 +497,10 @@
 <p class="rubric">Functions</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="tqecd.predicates.does_not_contain_combined_gates.html#tqecd.predicates.does_not_contain_combined_gates" title="tqecd.predicates.does_not_contain_combined_gates"><code class="xref py py-obj docutils literal notranslate"><span class="pre">does_not_contain_combined_gates</span></code></a>(circuit)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="tqecd.predicates.does_not_contain_both_reset_and_measurement.html#tqecd.predicates.does_not_contain_both_reset_and_measurement" title="tqecd.predicates.does_not_contain_both_reset_and_measurement"><code class="xref py py-obj docutils literal notranslate"><span class="pre">does_not_contain_both_reset_and_measurement</span></code></a>(circuit)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="tqecd.predicates.has_well_defined_moments.html#tqecd.predicates.has_well_defined_moments" title="tqecd.predicates.has_well_defined_moments"><code class="xref py py-obj docutils literal notranslate"><span class="pre">has_well_defined_moments</span></code></a>(circuit)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="tqecd.predicates.does_not_contain_combined_gates.html#tqecd.predicates.does_not_contain_combined_gates" title="tqecd.predicates.does_not_contain_combined_gates"><code class="xref py py-obj docutils literal notranslate"><span class="pre">does_not_contain_combined_gates</span></code></a>(circuit)</p></td>
 <td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="tqecd.predicates.is_valid_input_circuit.html#tqecd.predicates.is_valid_input_circuit" title="tqecd.predicates.is_valid_input_circuit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_valid_input_circuit</span></code></a>(circuit)</p></td>
@@ -530,11 +531,11 @@
       </div>
     </a>
     <a class="right-next"
-       href="tqecd.predicates.does_not_contain_combined_gates.html"
+       href="tqecd.predicates.does_not_contain_both_reset_and_measurement.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">tqecd.predicates.does_not_contain_combined_gates</p>
+        <p class="prev-next-title">tqecd.predicates.does_not_contain_both_reset_and_measurement</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

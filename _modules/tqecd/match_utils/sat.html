@@ -29,7 +29,7 @@
   <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
   
   <!-- So that users can add custom icons -->
   <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -396,16 +396,16 @@
 <span class="sd">on the considered qubits).</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">from</span> <span class="nn">pysat.solvers</span> <span class="kn">import</span> <span class="n">CryptoMinisat</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pysat.solvers</span><span class="w"> </span><span class="kn">import</span> <span class="n">CryptoMinisat</span>
 
-<span class="kn">from</span> <span class="nn">tqecd.pauli</span> <span class="kn">import</span> <span class="n">PauliString</span><span class="p">,</span> <span class="n">pauli_literal_to_bools</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.pauli</span><span class="w"> </span><span class="kn">import</span> <span class="n">PauliString</span><span class="p">,</span> <span class="n">pauli_literal_to_bools</span>
 
 
 <div class="viewcode-block" id="encode_pauli_string_exact_cover_sat_problem_in_solver">
 <a class="viewcode-back" href="../../../_autosummary/tqecd.match_utils.sat.encode_pauli_string_exact_cover_sat_problem_in_solver.html#tqecd.match_utils.sat.encode_pauli_string_exact_cover_sat_problem_in_solver">[docs]</a>
-<span class="k">def</span> <span class="nf">encode_pauli_string_exact_cover_sat_problem_in_solver</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">encode_pauli_string_exact_cover_sat_problem_in_solver</span><span class="p">(</span>
     <span class="n">solver</span><span class="p">:</span> <span class="n">CryptoMinisat</span><span class="p">,</span>
     <span class="n">expected_pauli_string</span><span class="p">:</span> <span class="n">PauliString</span><span class="p">,</span>
     <span class="n">available_pauli_strings</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">PauliString</span><span class="p">],</span>
@@ -505,7 +505,7 @@
 
 <div class="viewcode-block" id="encode_pauli_string_commuting_cover_sat_problem_in_solver">
 <a class="viewcode-back" href="../../../_autosummary/tqecd.match_utils.sat.encode_pauli_string_commuting_cover_sat_problem_in_solver.html#tqecd.match_utils.sat.encode_pauli_string_commuting_cover_sat_problem_in_solver">[docs]</a>
-<span class="k">def</span> <span class="nf">encode_pauli_string_commuting_cover_sat_problem_in_solver</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">encode_pauli_string_commuting_cover_sat_problem_in_solver</span><span class="p">(</span>
     <span class="n">solver</span><span class="p">:</span> <span class="n">CryptoMinisat</span><span class="p">,</span>
     <span class="n">expected_pauli_string</span><span class="p">:</span> <span class="n">PauliString</span><span class="p">,</span>
     <span class="n">available_pauli_strings</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">PauliString</span><span class="p">],</span>

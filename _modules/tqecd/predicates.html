@@ -29,7 +29,7 @@
   <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
   
   <!-- So that users can add custom icons -->
   <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -381,14 +381,13 @@
                 <article class="bd-article">
                   
   <h1>Source code for tqecd.predicates</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">import</span> <span class="nn">typing</span> <span class="k">as</span> <span class="nn">ty</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ty</span>
 
-<span class="kn">import</span> <span class="nn">stim</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">stim</span>
 
-<span class="kn">from</span> <span class="nn">tqecd.utils</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">has_computation_instruction</span><span class="p">,</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">has_measurement</span><span class="p">,</span>
     <span class="n">has_reset</span><span class="p">,</span>
     <span class="n">is_combined_measurement_reset</span><span class="p">,</span>
@@ -396,7 +395,7 @@
 <span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_has_any_combined_gates</span><span class="p">(</span><span class="n">circuit</span><span class="p">:</span> <span class="n">stim</span><span class="o">.</span><span class="n">Circuit</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_has_any_combined_gates</span><span class="p">(</span><span class="n">circuit</span><span class="p">:</span> <span class="n">stim</span><span class="o">.</span><span class="n">Circuit</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
     <span class="k">for</span> <span class="n">instruction</span> <span class="ow">in</span> <span class="n">circuit</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">instruction</span><span class="p">,</span> <span class="n">stim</span><span class="o">.</span><span class="n">CircuitRepeatBlock</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">_has_any_combined_gates</span><span class="p">(</span><span class="n">instruction</span><span class="o">.</span><span class="n">body_copy</span><span class="p">()):</span>
@@ -408,23 +407,20 @@
 
 <div class="viewcode-block" id="does_not_contain_combined_gates">
 <a class="viewcode-back" href="../../_autosummary/tqecd.predicates.does_not_contain_combined_gates.html#tqecd.predicates.does_not_contain_combined_gates">[docs]</a>
-<span class="k">def</span> <span class="nf">does_not_contain_combined_gates</span><span class="p">(</span><span class="n">circuit</span><span class="p">:</span> <span class="n">stim</span><span class="o">.</span><span class="n">Circuit</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">does_not_contain_combined_gates</span><span class="p">(</span><span class="n">circuit</span><span class="p">:</span> <span class="n">stim</span><span class="o">.</span><span class="n">Circuit</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
     <span class="k">return</span> <span class="ow">not</span> <span class="n">_has_any_combined_gates</span><span class="p">(</span><span class="n">circuit</span><span class="p">)</span></div>
 
 
 
-<div class="viewcode-block" id="has_well_defined_moments">
-<a class="viewcode-back" href="../../_autosummary/tqecd.predicates.has_well_defined_moments.html#tqecd.predicates.has_well_defined_moments">[docs]</a>
-<span class="k">def</span> <span class="nf">has_well_defined_moments</span><span class="p">(</span><span class="n">circuit</span><span class="p">:</span> <span class="n">stim</span><span class="o">.</span><span class="n">Circuit</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<div class="viewcode-block" id="does_not_contain_both_reset_and_measurement">
+<a class="viewcode-back" href="../../_autosummary/tqecd.predicates.does_not_contain_both_reset_and_measurement.html#tqecd.predicates.does_not_contain_both_reset_and_measurement">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">does_not_contain_both_reset_and_measurement</span><span class="p">(</span><span class="n">circuit</span><span class="p">:</span> <span class="n">stim</span><span class="o">.</span><span class="n">Circuit</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
     <span class="k">for</span> <span class="n">moment</span> <span class="ow">in</span> <span class="n">iter_stim_circuit_by_moments</span><span class="p">(</span><span class="n">circuit</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">moment</span><span class="p">,</span> <span class="n">stim</span><span class="o">.</span><span class="n">CircuitRepeatBlock</span><span class="p">):</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">has_well_defined_moments</span><span class="p">(</span><span class="n">moment</span><span class="o">.</span><span class="n">body_copy</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">does_not_contain_both_reset_and_measurement</span><span class="p">(</span><span class="n">moment</span><span class="o">.</span><span class="n">body_copy</span><span class="p">()):</span>
                 <span class="k">return</span> <span class="kc">False</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">measurement</span> <span class="o">=</span> <span class="n">has_measurement</span><span class="p">(</span><span class="n">moment</span><span class="p">)</span>
-            <span class="n">reset</span> <span class="o">=</span> <span class="n">has_reset</span><span class="p">(</span><span class="n">moment</span><span class="p">)</span>
-            <span class="n">computation</span> <span class="o">=</span> <span class="n">has_computation_instruction</span><span class="p">(</span><span class="n">moment</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">measurement</span> <span class="o">+</span> <span class="n">reset</span> <span class="o">+</span> <span class="n">computation</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">has_measurement</span><span class="p">(</span><span class="n">moment</span><span class="p">)</span> <span class="ow">and</span> <span class="n">has_reset</span><span class="p">(</span><span class="n">moment</span><span class="p">):</span>
                 <span class="k">return</span> <span class="kc">False</span>
     <span class="k">return</span> <span class="kc">True</span></div>
 
@@ -432,16 +428,16 @@
 
 <div class="viewcode-block" id="is_valid_input_circuit">
 <a class="viewcode-back" href="../../_autosummary/tqecd.predicates.is_valid_input_circuit.html#tqecd.predicates.is_valid_input_circuit">[docs]</a>
-<span class="k">def</span> <span class="nf">is_valid_input_circuit</span><span class="p">(</span><span class="n">circuit</span><span class="p">:</span> <span class="n">stim</span><span class="o">.</span><span class="n">Circuit</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">is_valid_input_circuit</span><span class="p">(</span><span class="n">circuit</span><span class="p">:</span> <span class="n">stim</span><span class="o">.</span><span class="n">Circuit</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
     <span class="n">predicates</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">ty</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="n">stim</span><span class="o">.</span><span class="n">Circuit</span><span class="p">],</span> <span class="nb">bool</span><span class="p">],</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span>
         <span class="p">(</span>
             <span class="n">does_not_contain_combined_gates</span><span class="p">,</span>
             <span class="s2">&quot;The provided quantum circuit should not contain any combined instruction (e.g., MR).&quot;</span><span class="p">,</span>
         <span class="p">),</span>
         <span class="p">(</span>
-            <span class="n">has_well_defined_moments</span><span class="p">,</span>
-            <span class="s2">&quot;The provided quantum circuit contains at least one moment that has two different &quot;</span>
-            <span class="s2">&quot;operation types from {reset, measurement, computation}.&quot;</span><span class="p">,</span>
+            <span class="n">does_not_contain_both_reset_and_measurement</span><span class="p">,</span>
+            <span class="s2">&quot;The provided quantum circuit contains at least one moment that has both reset &quot;</span>
+            <span class="s2">&quot;and measurement operations.&quot;</span><span class="p">,</span>
         <span class="p">),</span>
     <span class="p">]</span>
 

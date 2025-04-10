@@ -30,7 +30,7 @@
   <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
   
   <!-- So that users can add custom icons -->
   <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -398,8 +398,8 @@
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="tqecd.predicates.html">tqecd.predicates</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="tqecd.predicates.does_not_contain_both_reset_and_measurement.html">tqecd.predicates.does_not_contain_both_reset_and_measurement</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tqecd.predicates.does_not_contain_combined_gates.html">tqecd.predicates.does_not_contain_combined_gates</a></li>
-<li class="toctree-l3"><a class="reference internal" href="tqecd.predicates.has_well_defined_moments.html">tqecd.predicates.has_well_defined_moments</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tqecd.predicates.is_valid_input_circuit.html">tqecd.predicates.is_valid_input_circuit</a></li>
 </ul>
 </details></li>
@@ -414,6 +414,7 @@
 <li class="toctree-l3"><a class="reference internal" href="tqecd.utils.has_only_reset_or_is_virtual.html">tqecd.utils.has_only_reset_or_is_virtual</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tqecd.utils.has_reset.html">tqecd.utils.has_reset</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tqecd.utils.is_annotation.html">tqecd.utils.is_annotation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tqecd.utils.is_collapsing_instruction.html">tqecd.utils.is_collapsing_instruction</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tqecd.utils.is_combined_measurement_reset.html">tqecd.utils.is_combined_measurement_reset</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tqecd.utils.is_measurement.html">tqecd.utils.is_measurement</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tqecd.utils.is_noisy_gate.html">tqecd.utils.is_noisy_gate</a></li>
@@ -526,34 +527,37 @@
 <tr class="row-even"><td><p><a class="reference internal" href="tqecd.utils.is_annotation.html#tqecd.utils.is_annotation" title="tqecd.utils.is_annotation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_annotation</span></code></a>(instruction)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="tqecd.utils.is_combined_measurement_reset.html#tqecd.utils.is_combined_measurement_reset" title="tqecd.utils.is_combined_measurement_reset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_combined_measurement_reset</span></code></a>(instruction)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="tqecd.utils.is_collapsing_instruction.html#tqecd.utils.is_collapsing_instruction" title="tqecd.utils.is_collapsing_instruction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_collapsing_instruction</span></code></a>(instruction)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="tqecd.utils.is_measurement.html#tqecd.utils.is_measurement" title="tqecd.utils.is_measurement"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_measurement</span></code></a>(instruction)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="tqecd.utils.is_combined_measurement_reset.html#tqecd.utils.is_combined_measurement_reset" title="tqecd.utils.is_combined_measurement_reset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_combined_measurement_reset</span></code></a>(instruction)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="tqecd.utils.is_noisy_gate.html#tqecd.utils.is_noisy_gate" title="tqecd.utils.is_noisy_gate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_noisy_gate</span></code></a>(instruction)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="tqecd.utils.is_measurement.html#tqecd.utils.is_measurement" title="tqecd.utils.is_measurement"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_measurement</span></code></a>(instruction)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="tqecd.utils.is_reset.html#tqecd.utils.is_reset" title="tqecd.utils.is_reset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_reset</span></code></a>(instruction)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="tqecd.utils.is_noisy_gate.html#tqecd.utils.is_noisy_gate" title="tqecd.utils.is_noisy_gate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_noisy_gate</span></code></a>(instruction)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="tqecd.utils.is_virtual_instruction.html#tqecd.utils.is_virtual_instruction" title="tqecd.utils.is_virtual_instruction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_virtual_instruction</span></code></a>(inst)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="tqecd.utils.is_reset.html#tqecd.utils.is_reset" title="tqecd.utils.is_reset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_reset</span></code></a>(instruction)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="tqecd.utils.is_virtual_moment.html#tqecd.utils.is_virtual_moment" title="tqecd.utils.is_virtual_moment"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_virtual_moment</span></code></a>(moment)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="tqecd.utils.is_virtual_instruction.html#tqecd.utils.is_virtual_instruction" title="tqecd.utils.is_virtual_instruction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_virtual_instruction</span></code></a>(inst)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="tqecd.utils.is_virtual_moment.html#tqecd.utils.is_virtual_moment" title="tqecd.utils.is_virtual_moment"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_virtual_moment</span></code></a>(moment)</p></td>
 <td><p>Check if the provided moment only contains virtual instructions.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="tqecd.utils.iter_stim_circuit_by_moments.html#tqecd.utils.iter_stim_circuit_by_moments" title="tqecd.utils.iter_stim_circuit_by_moments"><code class="xref py py-obj docutils literal notranslate"><span class="pre">iter_stim_circuit_by_moments</span></code></a>(circuit)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="tqecd.utils.iter_stim_circuit_by_moments.html#tqecd.utils.iter_stim_circuit_by_moments" title="tqecd.utils.iter_stim_circuit_by_moments"><code class="xref py py-obj docutils literal notranslate"><span class="pre">iter_stim_circuit_by_moments</span></code></a>(circuit)</p></td>
 <td><p>Iterate over the <cite>stim.Circuit</cite> by moments.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="tqecd.utils.pauli_string_mean_coords.html#tqecd.utils.pauli_string_mean_coords" title="tqecd.utils.pauli_string_mean_coords"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pauli_string_mean_coords</span></code></a>(pauli_string, ...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="tqecd.utils.pauli_string_mean_coords.html#tqecd.utils.pauli_string_mean_coords" title="tqecd.utils.pauli_string_mean_coords"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pauli_string_mean_coords</span></code></a>(pauli_string, ...)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="tqecd.utils.push_all_detectors_to_the_end.html#tqecd.utils.push_all_detectors_to_the_end" title="tqecd.utils.push_all_detectors_to_the_end"><code class="xref py py-obj docutils literal notranslate"><span class="pre">push_all_detectors_to_the_end</span></code></a>(circuit)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="tqecd.utils.push_all_detectors_to_the_end.html#tqecd.utils.push_all_detectors_to_the_end" title="tqecd.utils.push_all_detectors_to_the_end"><code class="xref py py-obj docutils literal notranslate"><span class="pre">push_all_detectors_to_the_end</span></code></a>(circuit)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="tqecd.utils.remove_annotations.html#tqecd.utils.remove_annotations" title="tqecd.utils.remove_annotations"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_annotations</span></code></a>(circuit[, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="tqecd.utils.remove_annotations.html#tqecd.utils.remove_annotations" title="tqecd.utils.remove_annotations"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_annotations</span></code></a>(circuit[, ...])</p></td>
 <td><p>Remove all the annotations from a given circuit, except TICK instructions.</p></td>
 </tr>
 </tbody>

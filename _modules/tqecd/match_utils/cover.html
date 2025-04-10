@@ -29,7 +29,7 @@
   <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
   
   <!-- So that users can add custom icons -->
   <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -383,22 +383,22 @@
   <h1>Source code for tqecd.match_utils.cover</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Provides utility functions to find &quot;covers&quot; of Pauli strings.&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">import</span> <span class="nn">time</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterator</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterator</span>
 
-<span class="kn">import</span> <span class="nn">pysat.solvers</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pysat.solvers</span>
 
-<span class="kn">from</span> <span class="nn">tqecd.boundary</span> <span class="kn">import</span> <span class="n">BoundaryStabilizer</span><span class="p">,</span> <span class="n">manhattan_distance</span>
-<span class="kn">from</span> <span class="nn">tqecd.match_utils.sat</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.boundary</span><span class="w"> </span><span class="kn">import</span> <span class="n">BoundaryStabilizer</span><span class="p">,</span> <span class="n">manhattan_distance</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.match_utils.sat</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">encode_pauli_string_commuting_cover_sat_problem_in_solver</span><span class="p">,</span>
     <span class="n">encode_pauli_string_exact_cover_sat_problem_in_solver</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">tqecd.pauli</span> <span class="kn">import</span> <span class="n">PauliString</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.pauli</span><span class="w"> </span><span class="kn">import</span> <span class="n">PauliString</span>
 
 
-<span class="k">def</span> <span class="nf">_all_pauli_string_combination_results</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_all_pauli_string_combination_results</span><span class="p">(</span>
     <span class="n">pauli_strings</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">PauliString</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">],</span> <span class="n">PauliString</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Iterate over all the possible Pauli string products.</span>
@@ -422,7 +422,7 @@
     <span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_all_pauli_string_combination_results_impl</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_all_pauli_string_combination_results_impl</span><span class="p">(</span>
     <span class="n">pauli_strings</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">PauliString</span><span class="p">],</span> <span class="n">current_pauli_string</span><span class="p">:</span> <span class="n">PauliString</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">],</span> <span class="n">PauliString</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Iterate over all the possible Pauli string products.</span>
@@ -464,7 +464,7 @@
 
 <div class="viewcode-block" id="find_cover">
 <a class="viewcode-back" href="../../../_autosummary/tqecd.match_utils.cover.find_cover.html#tqecd.match_utils.cover.find_cover">[docs]</a>
-<span class="k">def</span> <span class="nf">find_cover</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">find_cover</span><span class="p">(</span>
     <span class="n">target</span><span class="p">:</span> <span class="n">BoundaryStabilizer</span><span class="p">,</span>
     <span class="n">sources</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">BoundaryStabilizer</span><span class="p">],</span>
     <span class="n">qubit_coordinates</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span>
@@ -529,7 +529,7 @@
 
 
 
-<span class="k">def</span> <span class="nf">_smallest_solution_shortcircuit</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_smallest_solution_shortcircuit</span><span class="p">(</span>
     <span class="n">solutions</span><span class="p">:</span> <span class="n">Iterator</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]],</span> <span class="n">lower_length_bound</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Iterate over the provided ``solutions`` iterator to find the smallest</span>
@@ -567,7 +567,7 @@
     <span class="k">return</span> <span class="n">smallest_solution</span>
 
 
-<span class="k">def</span> <span class="nf">_find_cover_sat</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_find_cover_sat</span><span class="p">(</span>
     <span class="n">target</span><span class="p">:</span> <span class="n">PauliString</span><span class="p">,</span> <span class="n">sources</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">PauliString</span><span class="p">],</span> <span class="n">on_qubits</span><span class="p">:</span> <span class="nb">frozenset</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Try to find a set of boundary stabilizers from ``sources`` that generate</span>
@@ -603,7 +603,7 @@
 
 <div class="viewcode-block" id="find_exact_cover_sat">
 <a class="viewcode-back" href="../../../_autosummary/tqecd.match_utils.cover.find_exact_cover_sat.html#tqecd.match_utils.cover.find_exact_cover_sat">[docs]</a>
-<span class="k">def</span> <span class="nf">find_exact_cover_sat</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">find_exact_cover_sat</span><span class="p">(</span>
     <span class="n">target</span><span class="p">:</span> <span class="n">PauliString</span><span class="p">,</span> <span class="n">sources</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">PauliString</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Try to find a set of pauli strings from ``sources`` that generate exactly</span>
@@ -660,7 +660,7 @@
 
 <div class="viewcode-block" id="find_commuting_cover_on_target_qubits_sat">
 <a class="viewcode-back" href="../../../_autosummary/tqecd.match_utils.cover.find_commuting_cover_on_target_qubits_sat.html#tqecd.match_utils.cover.find_commuting_cover_on_target_qubits_sat">[docs]</a>
-<span class="k">def</span> <span class="nf">find_commuting_cover_on_target_qubits_sat</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">find_commuting_cover_on_target_qubits_sat</span><span class="p">(</span>
     <span class="n">target</span><span class="p">:</span> <span class="n">PauliString</span><span class="p">,</span> <span class="n">sources</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">PauliString</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Try to find a set of boundary stabilizers from ``sources`` that generate a</span>

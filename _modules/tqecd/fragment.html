@@ -29,7 +29,7 @@
   <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
   
   <!-- So that users can add custom icons -->
   <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -381,22 +381,24 @@
                 <article class="bd-article">
                   
   <h1>Source code for tqecd.fragment</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">cast</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">cast</span>
 
-<span class="kn">import</span> <span class="nn">stim</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">stim</span>
 
-<span class="kn">from</span> <span class="nn">tqecd.exceptions</span> <span class="kn">import</span> <span class="n">TQECDException</span><span class="p">,</span> <span class="n">TQECDWarning</span>
-<span class="kn">from</span> <span class="nn">tqecd.pauli</span> <span class="kn">import</span> <span class="n">PauliString</span>
-<span class="kn">from</span> <span class="nn">tqecd.predicates</span> <span class="kn">import</span> <span class="n">is_valid_input_circuit</span>
-<span class="kn">from</span> <span class="nn">tqecd.utils</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">TQECDException</span><span class="p">,</span> <span class="n">TQECDWarning</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.pauli</span><span class="w"> </span><span class="kn">import</span> <span class="n">PauliString</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.predicates</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">does_not_contain_both_reset_and_measurement</span><span class="p">,</span>
+    <span class="n">is_valid_input_circuit</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">collapse_pauli_strings_at_moment</span><span class="p">,</span>
     <span class="n">has_circuit_repeat_block</span><span class="p">,</span>
     <span class="n">has_measurement</span><span class="p">,</span>
-    <span class="n">has_only_measurement_or_is_virtual</span><span class="p">,</span>
     <span class="n">has_only_reset_or_is_virtual</span><span class="p">,</span>
     <span class="n">has_reset</span><span class="p">,</span>
     <span class="n">is_virtual_moment</span><span class="p">,</span>
@@ -406,30 +408,27 @@
 
 <div class="viewcode-block" id="Fragment">
 <a class="viewcode-back" href="../../_autosummary/tqecd.fragment.Fragment.html#tqecd.fragment.Fragment">[docs]</a>
-<span class="k">class</span> <span class="nc">Fragment</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Fragment</span><span class="p">:</span>
 <div class="viewcode-block" id="Fragment.__init__">
 <a class="viewcode-back" href="../../_autosummary/tqecd.fragment.Fragment.html#tqecd.fragment.Fragment.__init__">[docs]</a>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">circuit</span><span class="p">:</span> <span class="n">stim</span><span class="o">.</span><span class="n">Circuit</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">circuit</span><span class="p">:</span> <span class="n">stim</span><span class="o">.</span><span class="n">Circuit</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;A sub-circuit guaranteed to end with a moment filled by measurement</span>
 <span class="sd">        instructions.</span>
 
 <span class="sd">        Fragment instances represent sub-circuits that contain:</span>
 
-<span class="sd">        1. zero or more moments exclusively composed of `reset`, annotation or</span>
-<span class="sd">            noisy-gate instructions,</span>
+<span class="sd">        1. zero or more moments composed of `reset` and any other instructions</span>
+<span class="sd">            except measurement instructions,</span>
 <span class="sd">        2. zero or more moments composed of &quot;computation&quot; instructions (anything</span>
 <span class="sd">            that is not a measurement or a reset),</span>
-<span class="sd">        3. one moment exclusively composed of `measurement`, annotation</span>
-<span class="sd">            or noisy-gate instructions.</span>
+<span class="sd">        3. one moment composed of `measurement` and any other instructions</span>
+<span class="sd">            except reset instructions.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            TQECDException: if the provided `stim.Circuit` instance contains a</span>
 <span class="sd">                stim.CircuitRepeatBlock instance.</span>
 <span class="sd">            TQECDException: if any moment from the provided circuit contains</span>
-<span class="sd">                both a measurement (resp. reset) and a non-measurement (resp.</span>
-<span class="sd">                non-reset) operation. Note that annotations and noisy-gates</span>
-<span class="sd">                instructions (measurements excluded) are ignored, and so are</span>
-<span class="sd">                excluded from this condition.</span>
+<span class="sd">                both a reset and a measurement operation.</span>
 <span class="sd">            TQECDException: if the provided circuit does not end with at least</span>
 <span class="sd">                one measurement.</span>
 
@@ -459,10 +458,10 @@
                 <span class="k">continue</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">has_reset</span><span class="p">(</span><span class="n">moment</span><span class="p">):</span>
                 <span class="k">break</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">has_only_reset_or_is_virtual</span><span class="p">(</span><span class="n">moment</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">does_not_contain_both_reset_and_measurement</span><span class="p">(</span><span class="n">moment</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="n">TQECDException</span><span class="p">(</span>
-                    <span class="s2">&quot;Breaking invariant: found a moment with at least one reset &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;instruction and a non-reset instruction:</span><span class="se">\n</span><span class="si">{</span><span class="n">moment</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot;Breaking invariant: found a moment with both reset &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;and measurement operations:</span><span class="se">\n</span><span class="si">{</span><span class="n">moment</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_resets</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">collapse_pauli_strings_at_moment</span><span class="p">(</span><span class="n">moment</span><span class="p">))</span>
 
@@ -471,11 +470,6 @@
                 <span class="k">continue</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">has_measurement</span><span class="p">(</span><span class="n">moment</span><span class="p">):</span>
                 <span class="k">break</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">has_only_measurement_or_is_virtual</span><span class="p">(</span><span class="n">moment</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="n">TQECDException</span><span class="p">(</span>
-                    <span class="s2">&quot;Breaking invariant: found a moment with at least one measurement &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;instruction and a non-measurement instruction:</span><span class="se">\n</span><span class="si">{</span><span class="n">moment</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="p">)</span>
             <span class="c1"># Insert new measurement at the front to keep them correctly ordered.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_measurements</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">collapse_pauli_strings_at_moment</span><span class="p">(</span><span class="n">moment</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_measurements</span>
@@ -490,7 +484,7 @@
 
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">resets</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">PauliString</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">resets</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">PauliString</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the reset instructions at the front on the Fragment.</span>
 
 <span class="sd">        Returns:</span>
@@ -501,7 +495,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resets</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">measurements</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">PauliString</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">measurements</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">PauliString</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the measurement instructions at the back on the Fragment.</span>
 
 <span class="sd">        Returns:</span>
@@ -512,26 +506,26 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_measurements</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">measurements_qubits</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">measurements_qubits</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">measurement</span><span class="o">.</span><span class="n">qubit</span> <span class="k">for</span> <span class="n">measurement</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">measurements</span><span class="p">]</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">num_measurements</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">num_measurements</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_measurements</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">circuit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">stim</span><span class="o">.</span><span class="n">Circuit</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">circuit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">stim</span><span class="o">.</span><span class="n">Circuit</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_circuit</span>
 
-    <span class="k">def</span> <span class="nf">get_tableau</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">stim</span><span class="o">.</span><span class="n">Tableau</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_tableau</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">stim</span><span class="o">.</span><span class="n">Tableau</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_circuit</span><span class="o">.</span><span class="n">to_tableau</span><span class="p">(</span>
             <span class="n">ignore_measurement</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ignore_noise</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ignore_reset</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Fragment(circuit=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_circuit</span><span class="si">!r}</span><span class="s2">)&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Fragment</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_circuit</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">_circuit</span></div>
 
 
@@ -539,11 +533,11 @@
 <div class="viewcode-block" id="FragmentLoop">
 <a class="viewcode-back" href="../../_autosummary/tqecd.fragment.FragmentLoop.html#tqecd.fragment.FragmentLoop">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="k">class</span> <span class="nc">FragmentLoop</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">FragmentLoop</span><span class="p">:</span>
     <span class="n">fragments</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Fragment</span> <span class="o">|</span> <span class="n">FragmentLoop</span><span class="p">]</span>
     <span class="n">repetitions</span><span class="p">:</span> <span class="nb">int</span>
 
-    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">repetitions</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">TQECDException</span><span class="p">(</span>
                 <span class="s2">&quot;Cannot have a FragmentLoop with 0 or less repetitions.&quot;</span>
@@ -554,27 +548,27 @@
                 <span class="s2">&quot;fragment for the loop body.&quot;</span>
             <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">with_repetitions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">repetitions</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FragmentLoop</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">with_repetitions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">repetitions</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FragmentLoop</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">FragmentLoop</span><span class="p">(</span><span class="n">fragments</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fragments</span><span class="p">,</span> <span class="n">repetitions</span><span class="o">=</span><span class="n">repetitions</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;FragmentLoop(repetitions=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">repetitions</span><span class="si">}</span><span class="s2">, fragments=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">fragments</span><span class="si">!r}</span><span class="s2">)&quot;</span></div>
 
 
 
-<span class="k">def</span> <span class="nf">_get_fragment_loop</span><span class="p">(</span><span class="n">repeat_block</span><span class="p">:</span> <span class="n">stim</span><span class="o">.</span><span class="n">CircuitRepeatBlock</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FragmentLoop</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_fragment_loop</span><span class="p">(</span><span class="n">repeat_block</span><span class="p">:</span> <span class="n">stim</span><span class="o">.</span><span class="n">CircuitRepeatBlock</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FragmentLoop</span><span class="p">:</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">body_fragments</span> <span class="o">=</span> <span class="n">split_stim_circuit_into_fragments</span><span class="p">(</span><span class="n">repeat_block</span><span class="o">.</span><span class="n">body_copy</span><span class="p">())</span>
     <span class="k">except</span> <span class="n">TQECDException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">TQECDException</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;Error when splitting the following REPEAT block:</span><span class="se">\n</span><span class="si">{</span><span class="n">repeat_block</span><span class="o">.</span><span class="n">body_copy</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span>
+        <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
     <span class="k">return</span> <span class="n">FragmentLoop</span><span class="p">(</span><span class="n">fragments</span><span class="o">=</span><span class="n">body_fragments</span><span class="p">,</span> <span class="n">repetitions</span><span class="o">=</span><span class="n">repeat_block</span><span class="o">.</span><span class="n">repeat_count</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="split_stim_circuit_into_fragments">
 <a class="viewcode-back" href="../../_autosummary/tqecd.fragment.split_stim_circuit_into_fragments.html#tqecd.fragment.split_stim_circuit_into_fragments">[docs]</a>
-<span class="k">def</span> <span class="nf">split_stim_circuit_into_fragments</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">split_stim_circuit_into_fragments</span><span class="p">(</span>
     <span class="n">circuit</span><span class="p">:</span> <span class="n">stim</span><span class="o">.</span><span class="n">Circuit</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Fragment</span> <span class="o">|</span> <span class="n">FragmentLoop</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Split the circuit into fragments.</span>
@@ -582,17 +576,16 @@
 <span class="sd">    The provided circuit should check a few pre-conditions:</span>
 
 <span class="sd">    - If there is one measurement (resp. reset) instruction between two TICK</span>
-<span class="sd">      annotation, then only measurement (resp. reset) instructions, annotations</span>
-<span class="sd">      and noisy gates can appear between these two TICK. Any other instruction</span>
-<span class="sd">      will result in an exception being raised.</span>
+<span class="sd">      annotation, then no reset (resp. measurement) instruction should appear</span>
+<span class="sd">      between these two TICK.</span>
 <span class="sd">    - The circuit should be (recursively if it contains one or more instance of</span>
 <span class="sd">      `stim.CircuitRepeatBlock`) composed of a succession of layers that should</span>
 <span class="sd">      have the same shape:</span>
 
-<span class="sd">      - starts with zero or more moments containing exclusively reset operations,</span>
+<span class="sd">      - starts with zero or more moments containing reset and non-measurement operations,</span>
 <span class="sd">      - continuing with zero or more moments containing any non-collapsing operation</span>
 <span class="sd">        (i.e., anything except reset and measurement operations).</span>
-<span class="sd">      - ends with one moment containing exclusively measurement operations.</span>
+<span class="sd">      - ends with one moment containing measurement and non-reset operations.</span>
 
 <span class="sd">      For the above reasons, be careful with reset/measurement combined operations</span>
 <span class="sd">      (e.g., the `stim` instruction `MR` that performs in one instruction a</span>
@@ -605,9 +598,8 @@
 
 <span class="sd">    Raises:</span>
 <span class="sd">        TQECDException: If the circuit contains at least one moment (i.e., group of</span>
-<span class="sd">            instructions between two TICK annotations) that are composed of at least</span>
-<span class="sd">            one measurement (resp. one reset) and at least one non-annotation,</span>
-<span class="sd">            non-measurement (resp. non-reset) instruction.</span>
+<span class="sd">            instructions between two TICK annotations) that are composed of both</span>
+<span class="sd">            measurement and reset instructions.</span>
 <span class="sd">        TQECDException: If the circuit contains combined measurement/reset instructions.</span>
 <span class="sd">        TQECDException: If the provided circuit could not be split into fragments due</span>
 <span class="sd">            to an invalid structure.</span>
@@ -645,16 +637,8 @@
             <span class="n">fragments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_get_fragment_loop</span><span class="p">(</span><span class="n">moment</span><span class="p">))</span>
 
         <span class="c1"># If this is a measurement moment</span>
+        <span class="c1"># we add the full moment to the current fragment and start a new one.</span>
         <span class="k">elif</span> <span class="n">has_measurement</span><span class="p">(</span><span class="n">moment</span><span class="p">):</span>
-            <span class="c1"># If there is something else than measurements, raise because this is</span>
-            <span class="c1"># not a valid input.</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">has_only_measurement_or_is_virtual</span><span class="p">(</span><span class="n">moment</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="n">TQECDException</span><span class="p">(</span>
-                    <span class="s2">&quot;A moment with at least one measurement instruction can &quot;</span>
-                    <span class="s2">&quot;only contain measurements.&quot;</span>
-                <span class="p">)</span>
-            <span class="c1"># Else, we only have measurements in this moment, so we can</span>
-            <span class="c1"># add the full moment to the current fragment and start a new one.</span>
             <span class="n">current_fragment</span> <span class="o">+=</span> <span class="n">moment</span>
             <span class="n">fragments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Fragment</span><span class="p">(</span><span class="n">current_fragment</span><span class="o">.</span><span class="n">copy</span><span class="p">()))</span>
             <span class="n">current_fragment</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>

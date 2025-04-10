@@ -30,7 +30,7 @@
   <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
   
   <!-- So that users can add custom icons -->
   <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -451,12 +451,21 @@ is equivalent to the definition used by <code class="docutils literal notranslat
 <h3>Fragments<a class="headerlink" href="#fragments" title="Link to this heading">#</a></h3>
 <p>Fragments are a collection of moments that check the following order:</p>
 <ol class="arabic simple">
-<li><p>zero or more moments exclusively composed of <code class="docutils literal notranslate"><span class="pre">reset</span></code>, annotation or
-noisy-gate instructions,</p></li>
-<li><p>zero or more moments composed of “computation” instructions (anything
-that is not a measurement, a reset, a noisy gate or an annotation),</p></li>
-<li><p>one or more moments exclusively composed of <code class="docutils literal notranslate"><span class="pre">measurement</span></code>, annotation
-or noisy-gate instructions.</p></li>
+<li><dl class="simple">
+<dt>zero or more moments composed of <cite>reset</cite> and any other instructions</dt><dd><p>except measurement instructions,</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>zero or more moments composed of “computation” instructions (anything</dt><dd><p>that is not a measurement or a reset),</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>one moment composed of <cite>measurement</cite> and any other instructions</dt><dd><p>except reset instructions.</p>
+</dd>
+</dl>
+</li>
 </ol>
 <p>The circuit provided in <a class="reference internal" href="#moments-section"><span class="std std-ref">Moments</span></a> contains 4 moments that form
 a fragment.</p>

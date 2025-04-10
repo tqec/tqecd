@@ -29,7 +29,7 @@
   <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
   
   <!-- So that users can add custom icons -->
   <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -381,24 +381,24 @@
                 <article class="bd-article">
                   
   <h1>Source code for tqecd.flow</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">import</span> <span class="nn">typing</span> <span class="k">as</span> <span class="nn">ty</span>
-<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ty</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 
-<span class="kn">from</span> <span class="nn">tqecd.boundary</span> <span class="kn">import</span> <span class="n">BoundaryStabilizer</span>
-<span class="kn">from</span> <span class="nn">tqecd.exceptions</span> <span class="kn">import</span> <span class="n">TQECDException</span>
-<span class="kn">from</span> <span class="nn">tqecd.fragment</span> <span class="kn">import</span> <span class="n">Fragment</span><span class="p">,</span> <span class="n">FragmentLoop</span>
-<span class="kn">from</span> <span class="nn">tqecd.match_utils.cover</span> <span class="kn">import</span> <span class="n">find_commuting_cover_on_target_qubits_sat</span>
-<span class="kn">from</span> <span class="nn">tqecd.measurement</span> <span class="kn">import</span> <span class="n">get_relative_measurement_index</span>
-<span class="kn">from</span> <span class="nn">tqecd.pauli</span> <span class="kn">import</span> <span class="n">PauliString</span><span class="p">,</span> <span class="n">pauli_product</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.boundary</span><span class="w"> </span><span class="kn">import</span> <span class="n">BoundaryStabilizer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">TQECDException</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.fragment</span><span class="w"> </span><span class="kn">import</span> <span class="n">Fragment</span><span class="p">,</span> <span class="n">FragmentLoop</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.match_utils.cover</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_commuting_cover_on_target_qubits_sat</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.measurement</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_relative_measurement_index</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.pauli</span><span class="w"> </span><span class="kn">import</span> <span class="n">PauliString</span><span class="p">,</span> <span class="n">pauli_product</span>
 
 
-<span class="k">def</span> <span class="nf">_anti_commuting_stabilizers_indices</span><span class="p">(</span><span class="n">flows</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">BoundaryStabilizer</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_anti_commuting_stabilizers_indices</span><span class="p">(</span><span class="n">flows</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">BoundaryStabilizer</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
     <span class="k">return</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">flows</span><span class="p">))</span> <span class="k">if</span> <span class="n">flows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">has_anticommuting_operations</span><span class="p">]</span>
 
 
-<span class="k">def</span> <span class="nf">_try_merge_anticommuting_flows_inplace</span><span class="p">(</span><span class="n">flows</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">BoundaryStabilizer</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_try_merge_anticommuting_flows_inplace</span><span class="p">(</span><span class="n">flows</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">BoundaryStabilizer</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Merge as much anti-commuting flows as possible from the provided flows.</span>
 
 <span class="sd">    This function try to merge together several :class:`BoundaryStabilizer`</span>
@@ -497,7 +497,7 @@
 <div class="viewcode-block" id="FragmentFlows">
 <a class="viewcode-back" href="../../_autosummary/tqecd.flow.FragmentFlows.html#tqecd.flow.FragmentFlows">[docs]</a>
 <span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">FragmentFlows</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">FragmentFlows</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Stores stabilizer flows for a :class:`Fragment` instance.</span>
 
 <span class="sd">    Attributes:</span>
@@ -518,32 +518,32 @@
     <span class="n">total_number_of_measurements</span><span class="p">:</span> <span class="nb">int</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">all_flows</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ty</span><span class="o">.</span><span class="n">Iterator</span><span class="p">[</span><span class="n">BoundaryStabilizer</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">all_flows</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ty</span><span class="o">.</span><span class="n">Iterator</span><span class="p">[</span><span class="n">BoundaryStabilizer</span><span class="p">]:</span>
         <span class="k">yield from</span> <span class="bp">self</span><span class="o">.</span><span class="n">creation</span>
         <span class="k">yield from</span> <span class="bp">self</span><span class="o">.</span><span class="n">destruction</span>
 
-    <span class="k">def</span> <span class="nf">remove_creation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">remove_creation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">creation</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">remove_destruction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">remove_destruction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">destruction</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">remove_creations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span> <span class="n">ty</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">remove_creations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span> <span class="n">ty</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">remove_creation</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">remove_destructions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span> <span class="n">ty</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">remove_destructions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span> <span class="n">ty</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">remove_destruction</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">without_trivial_flows</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FragmentFlows</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">without_trivial_flows</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FragmentFlows</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">FragmentFlows</span><span class="p">(</span>
             <span class="n">creation</span><span class="o">=</span><span class="p">[</span><span class="n">bs</span> <span class="k">for</span> <span class="n">bs</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">creation</span> <span class="k">if</span> <span class="n">bs</span><span class="o">.</span><span class="n">is_trivial</span><span class="p">()],</span>
             <span class="n">destruction</span><span class="o">=</span><span class="p">[</span><span class="n">bs</span> <span class="k">for</span> <span class="n">bs</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">destruction</span> <span class="k">if</span> <span class="n">bs</span><span class="o">.</span><span class="n">is_trivial</span><span class="p">()],</span>
             <span class="n">total_number_of_measurements</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">total_number_of_measurements</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">try_merge_anticommuting_flows</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">try_merge_anticommuting_flows</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">_try_merge_anticommuting_flows_inplace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">creation</span><span class="p">)</span>
         <span class="n">_try_merge_anticommuting_flows_inplace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destruction</span><span class="p">)</span></div>
 
@@ -552,7 +552,7 @@
 <div class="viewcode-block" id="FragmentLoopFlows">
 <a class="viewcode-back" href="../../_autosummary/tqecd.flow.FragmentLoopFlows.html#tqecd.flow.FragmentLoopFlows">[docs]</a>
 <span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">FragmentLoopFlows</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">FragmentLoopFlows</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Store stabilizer flows for a FragmentLoop instance.</span>
 
 <span class="sd">    This class is currently quite dumb and does not provide a sufficient</span>
@@ -565,37 +565,37 @@
     <span class="n">repeat</span><span class="p">:</span> <span class="nb">int</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">creation</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">BoundaryStabilizer</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">creation</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">BoundaryStabilizer</span><span class="p">]:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fragment_flows</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">creation</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">destruction</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">BoundaryStabilizer</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">destruction</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">BoundaryStabilizer</span><span class="p">]:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fragment_flows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">destruction</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">all_flows</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ty</span><span class="o">.</span><span class="n">Iterator</span><span class="p">[</span><span class="n">BoundaryStabilizer</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">all_flows</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ty</span><span class="o">.</span><span class="n">Iterator</span><span class="p">[</span><span class="n">BoundaryStabilizer</span><span class="p">]:</span>
         <span class="k">yield from</span> <span class="bp">self</span><span class="o">.</span><span class="n">creation</span>
         <span class="k">yield from</span> <span class="bp">self</span><span class="o">.</span><span class="n">destruction</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">total_number_of_measurements</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">total_number_of_measurements</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">flow</span><span class="o">.</span><span class="n">total_number_of_measurements</span> <span class="k">for</span> <span class="n">flow</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fragment_flows</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">remove_creation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">remove_creation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">creation</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">remove_destruction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">remove_destruction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">destruction</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">remove_creations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span> <span class="n">ty</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">remove_creations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span> <span class="n">ty</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">remove_creation</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">remove_destructions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span> <span class="n">ty</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">remove_destructions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span> <span class="n">ty</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">remove_destruction</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">without_trivial_flows</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FragmentLoopFlows</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">without_trivial_flows</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FragmentLoopFlows</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">FragmentLoopFlows</span><span class="p">(</span>
             <span class="n">fragment_flows</span><span class="o">=</span><span class="p">[</span>
                 <span class="n">flow</span><span class="o">.</span><span class="n">without_trivial_flows</span><span class="p">()</span> <span class="k">for</span> <span class="n">flow</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fragment_flows</span>
@@ -603,7 +603,7 @@
             <span class="n">repeat</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">repeat</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">try_merge_anticommuting_flows</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">try_merge_anticommuting_flows</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">_try_merge_anticommuting_flows_inplace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">creation</span><span class="p">)</span>
         <span class="n">_try_merge_anticommuting_flows_inplace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destruction</span><span class="p">)</span></div>
 
@@ -611,7 +611,7 @@
 
 <div class="viewcode-block" id="build_flows_from_fragments">
 <a class="viewcode-back" href="../../_autosummary/tqecd.flow.build_flows_from_fragments.html#tqecd.flow.build_flows_from_fragments">[docs]</a>
-<span class="k">def</span> <span class="nf">build_flows_from_fragments</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">build_flows_from_fragments</span><span class="p">(</span>
     <span class="n">fragments</span><span class="p">:</span> <span class="n">ty</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">Fragment</span> <span class="o">|</span> <span class="n">FragmentLoop</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">FragmentFlows</span> <span class="o">|</span> <span class="n">FragmentLoopFlows</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute and return the stabilizer flows of the provided fragments.</span>
@@ -646,7 +646,7 @@
 
 
 
-<span class="k">def</span> <span class="nf">_build_flows_from_fragment</span><span class="p">(</span><span class="n">fragment</span><span class="p">:</span> <span class="n">Fragment</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FragmentFlows</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_build_flows_from_fragment</span><span class="p">(</span><span class="n">fragment</span><span class="p">:</span> <span class="n">Fragment</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FragmentFlows</span><span class="p">:</span>
     <span class="n">tableau</span> <span class="o">=</span> <span class="n">fragment</span><span class="o">.</span><span class="n">get_tableau</span><span class="p">()</span>
     <span class="n">targets</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tableau</span><span class="p">)))</span>
     <span class="n">sorted_qubit_involved_in_measurements</span> <span class="o">=</span> <span class="n">fragment</span><span class="o">.</span><span class="n">measurements_qubits</span>
@@ -711,7 +711,7 @@
     <span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_build_flows_from_fragment_loop</span><span class="p">(</span><span class="n">fragment_loop</span><span class="p">:</span> <span class="n">FragmentLoop</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FragmentLoopFlows</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_build_flows_from_fragment_loop</span><span class="p">(</span><span class="n">fragment_loop</span><span class="p">:</span> <span class="n">FragmentLoop</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FragmentLoopFlows</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">FragmentLoopFlows</span><span class="p">(</span>
         <span class="n">build_flows_from_fragments</span><span class="p">(</span><span class="n">fragment_loop</span><span class="o">.</span><span class="n">fragments</span><span class="p">),</span> <span class="n">fragment_loop</span><span class="o">.</span><span class="n">repetitions</span>
     <span class="p">)</span>

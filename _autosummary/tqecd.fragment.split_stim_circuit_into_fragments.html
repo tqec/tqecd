@@ -30,7 +30,7 @@
   <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
   
   <!-- So that users can add custom icons -->
   <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -398,8 +398,8 @@
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="tqecd.predicates.html">tqecd.predicates</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="tqecd.predicates.does_not_contain_both_reset_and_measurement.html">tqecd.predicates.does_not_contain_both_reset_and_measurement</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tqecd.predicates.does_not_contain_combined_gates.html">tqecd.predicates.does_not_contain_combined_gates</a></li>
-<li class="toctree-l3"><a class="reference internal" href="tqecd.predicates.has_well_defined_moments.html">tqecd.predicates.has_well_defined_moments</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tqecd.predicates.is_valid_input_circuit.html">tqecd.predicates.is_valid_input_circuit</a></li>
 </ul>
 </details></li>
@@ -414,6 +414,7 @@
 <li class="toctree-l3"><a class="reference internal" href="tqecd.utils.has_only_reset_or_is_virtual.html">tqecd.utils.has_only_reset_or_is_virtual</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tqecd.utils.has_reset.html">tqecd.utils.has_reset</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tqecd.utils.is_annotation.html">tqecd.utils.is_annotation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tqecd.utils.is_collapsing_instruction.html">tqecd.utils.is_collapsing_instruction</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tqecd.utils.is_combined_measurement_reset.html">tqecd.utils.is_combined_measurement_reset</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tqecd.utils.is_measurement.html">tqecd.utils.is_measurement</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tqecd.utils.is_noisy_gate.html">tqecd.utils.is_noisy_gate</a></li>
@@ -503,17 +504,16 @@
 <p>The provided circuit should check a few pre-conditions:</p>
 <ul>
 <li><p>If there is one measurement (resp. reset) instruction between two TICK
-annotation, then only measurement (resp. reset) instructions, annotations
-and noisy gates can appear between these two TICK. Any other instruction
-will result in an exception being raised.</p></li>
+annotation, then no reset (resp. measurement) instruction should appear
+between these two TICK.</p></li>
 <li><p>The circuit should be (recursively if it contains one or more instance of
 <cite>stim.CircuitRepeatBlock</cite>) composed of a succession of layers that should
 have the same shape:</p>
 <ul class="simple">
-<li><p>starts with zero or more moments containing exclusively reset operations,</p></li>
+<li><p>starts with zero or more moments containing reset and non-measurement operations,</p></li>
 <li><p>continuing with zero or more moments containing any non-collapsing operation
 (i.e., anything except reset and measurement operations).</p></li>
-<li><p>ends with one moment containing exclusively measurement operations.</p></li>
+<li><p>ends with one moment containing measurement and non-reset operations.</p></li>
 </ul>
 <p>For the above reasons, be careful with reset/measurement combined operations
 (e.g., the <cite>stim</cite> instruction <cite>MR</cite> that performs in one instruction a
@@ -529,9 +529,8 @@ does not contain combined measurements/resets instructions.</p>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
 <li><p><a class="reference internal" href="tqecd.exceptions.TQECDException.html#tqecd.exceptions.TQECDException" title="tqecd.exceptions.TQECDException"><strong>TQECDException</strong></a> – If the circuit contains at least one moment (i.e., group of
-    instructions between two TICK annotations) that are composed of at least
-    one measurement (resp. one reset) and at least one non-annotation,
-    non-measurement (resp. non-reset) instruction.</p></li>
+    instructions between two TICK annotations) that are composed of both
+    measurement and reset instructions.</p></li>
 <li><p><a class="reference internal" href="tqecd.exceptions.TQECDException.html#tqecd.exceptions.TQECDException" title="tqecd.exceptions.TQECDException"><strong>TQECDException</strong></a> – If the circuit contains combined measurement/reset instructions.</p></li>
 <li><p><a class="reference internal" href="tqecd.exceptions.TQECDException.html#tqecd.exceptions.TQECDException" title="tqecd.exceptions.TQECDException"><strong>TQECDException</strong></a> – If the provided circuit could not be split into fragments due
     to an invalid structure.</p></li>
