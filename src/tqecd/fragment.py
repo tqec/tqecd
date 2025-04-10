@@ -8,12 +8,14 @@ import stim
 
 from tqecd.exceptions import TQECDException, TQECDWarning
 from tqecd.pauli import PauliString
-from tqecd.predicates import is_valid_input_circuit
+from tqecd.predicates import (
+    does_not_contain_both_reset_and_measurement,
+    is_valid_input_circuit,
+)
 from tqecd.utils import (
     collapse_pauli_strings_at_moment,
     has_circuit_repeat_block,
     has_measurement,
-    has_only_measurement_or_is_virtual,
     has_only_reset_or_is_virtual,
     has_reset,
     is_virtual_moment,
@@ -28,21 +30,18 @@ class Fragment:
 
         Fragment instances represent sub-circuits that contain:
 
-        1. zero or more moments exclusively composed of `reset`, annotation or
-            noisy-gate instructions,
+        1. zero or more moments composed of `reset` and any other instructions
+            except measurement instructions,
         2. zero or more moments composed of "computation" instructions (anything
             that is not a measurement or a reset),
-        3. one moment exclusively composed of `measurement`, annotation
-            or noisy-gate instructions.
+        3. one moment composed of `measurement` and any other instructions
+            except reset instructions.
 
         Raises:
             TQECDException: if the provided `stim.Circuit` instance contains a
                 stim.CircuitRepeatBlock instance.
             TQECDException: if any moment from the provided circuit contains
-                both a measurement (resp. reset) and a non-measurement (resp.
-                non-reset) operation. Note that annotations and noisy-gates
-                instructions (measurements excluded) are ignored, and so are
-                excluded from this condition.
+                both a reset and a measurement operation.
             TQECDException: if the provided circuit does not end with at least
                 one measurement.
 
@@ -72,10 +71,10 @@ class Fragment:
                 continue
             if not has_reset(moment):
                 break
-            if not has_only_reset_or_is_virtual(moment):
+            if not does_not_contain_both_reset_and_measurement(moment):
                 raise TQECDException(
-                    "Breaking invariant: found a moment with at least one reset "
-                    f"instruction and a non-reset instruction:\n{moment}"
+                    "Breaking invariant: found a moment with both reset "
+                    f"and measurement operations:\n{moment}"
                 )
             self._resets.extend(collapse_pauli_strings_at_moment(moment))
 
@@ -84,11 +83,6 @@ class Fragment:
                 continue
             if not has_measurement(moment):
                 break
-            if not has_only_measurement_or_is_virtual(moment):
-                raise TQECDException(
-                    "Breaking invariant: found a moment with at least one measurement "
-                    f"instruction and a non-measurement instruction:\n{moment}"
-                )
             # Insert new measurement at the front to keep them correctly ordered.
             self._measurements = (
                 collapse_pauli_strings_at_moment(moment) + self._measurements
@@ -188,17 +182,16 @@ def split_stim_circuit_into_fragments(
     The provided circuit should check a few pre-conditions:
 
     - If there is one measurement (resp. reset) instruction between two TICK
-      annotation, then only measurement (resp. reset) instructions, annotations
-      and noisy gates can appear between these two TICK. Any other instruction
-      will result in an exception being raised.
+      annotation, then no reset (resp. measurement) instruction should appear
+      between these two TICK.
     - The circuit should be (recursively if it contains one or more instance of
       `stim.CircuitRepeatBlock`) composed of a succession of layers that should
       have the same shape:
 
-      - starts with zero or more moments containing exclusively reset operations,
+      - starts with zero or more moments containing reset and non-measurement operations,
       - continuing with zero or more moments containing any non-collapsing operation
         (i.e., anything except reset and measurement operations).
-      - ends with one moment containing exclusively measurement operations.
+      - ends with one moment containing measurement and non-reset operations.
 
       For the above reasons, be careful with reset/measurement combined operations
       (e.g., the `stim` instruction `MR` that performs in one instruction a
@@ -211,9 +204,8 @@ def split_stim_circuit_into_fragments(
 
     Raises:
         TQECDException: If the circuit contains at least one moment (i.e., group of
-            instructions between two TICK annotations) that are composed of at least
-            one measurement (resp. one reset) and at least one non-annotation,
-            non-measurement (resp. non-reset) instruction.
+            instructions between two TICK annotations) that are composed of both
+            measurement and reset instructions.
         TQECDException: If the circuit contains combined measurement/reset instructions.
         TQECDException: If the provided circuit could not be split into fragments due
             to an invalid structure.
@@ -251,16 +243,8 @@ def split_stim_circuit_into_fragments(
             fragments.append(_get_fragment_loop(moment))
 
         # If this is a measurement moment
+        # we add the full moment to the current fragment and start a new one.
         elif has_measurement(moment):
-            # If there is something else than measurements, raise because this is
-            # not a valid input.
-            if not has_only_measurement_or_is_virtual(moment):
-                raise TQECDException(
-                    "A moment with at least one measurement instruction can "
-                    "only contain measurements."
-                )
-            # Else, we only have measurements in this moment, so we can
-            # add the full moment to the current fragment and start a new one.
             current_fragment += moment
             fragments.append(Fragment(current_fragment.copy()))
             current_fragment.clear()

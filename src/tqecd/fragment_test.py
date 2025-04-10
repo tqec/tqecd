@@ -48,11 +48,7 @@ REPEAT 10 {
 }""")
         )
     with pytest.raises(TQECDException):
-        Fragment(stim.Circuit("R 1 2 3\nH 1 2 3\nTICK\nM 1 2 3"))
-    with pytest.raises(TQECDException):
         Fragment(stim.Circuit("M 1 2 3\nR 1 2 3"))
-    with pytest.raises(TQECDException):
-        Fragment(stim.Circuit("H 2\nM 1 2 3"))
 
 
 def test_measurement_qubits() -> None:

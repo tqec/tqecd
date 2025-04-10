@@ -5,7 +5,6 @@ import typing as ty
 import stim
 
 from tqecd.utils import (
-    has_computation_instruction,
     has_measurement,
     has_reset,
     is_combined_measurement_reset,
@@ -27,16 +26,13 @@ def does_not_contain_combined_gates(circuit: stim.Circuit) -> bool:
     return not _has_any_combined_gates(circuit)
 
 
-def has_well_defined_moments(circuit: stim.Circuit) -> bool:
+def does_not_contain_both_reset_and_measurement(circuit: stim.Circuit) -> bool:
     for moment in iter_stim_circuit_by_moments(circuit):
         if isinstance(moment, stim.CircuitRepeatBlock):
-            if not has_well_defined_moments(moment.body_copy()):
+            if not does_not_contain_both_reset_and_measurement(moment.body_copy()):
                 return False
         else:
-            measurement = has_measurement(moment)
-            reset = has_reset(moment)
-            computation = has_computation_instruction(moment)
-            if measurement + reset + computation > 1:
+            if has_measurement(moment) and has_reset(moment):
                 return False
     return True
 
@@ -48,9 +44,9 @@ def is_valid_input_circuit(circuit: stim.Circuit) -> str | None:
             "The provided quantum circuit should not contain any combined instruction (e.g., MR).",
         ),
         (
-            has_well_defined_moments,
-            "The provided quantum circuit contains at least one moment that has two different "
-            "operation types from {reset, measurement, computation}.",
+            does_not_contain_both_reset_and_measurement,
+            "The provided quantum circuit contains at least one moment that has both reset "
+            "and measurement operations.",
         ),
     ]
 

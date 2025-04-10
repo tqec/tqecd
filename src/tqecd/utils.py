@@ -215,6 +215,10 @@ def has_computation_instruction(moment: stim.Circuit) -> bool:
     )
 
 
+def is_collapsing_instruction(instruction: stim.CircuitInstruction) -> bool:
+    return is_reset(instruction) or is_measurement(instruction)
+
+
 def pauli_string_mean_coords(
     pauli_string: PauliString, qubit_coords_map: dict[int, list[float]]
 ) -> tuple[float, ...]:
@@ -292,9 +296,10 @@ def collapse_pauli_strings_at_moment(moment: stim.Circuit) -> list[PauliString]:
 
     pauli_strings: list[PauliString] = []
     for inst in moment:
-        if is_virtual_instruction(inst):  # type: ignore
+        assert isinstance(inst, stim.CircuitInstruction)
+        if not is_collapsing_instruction(inst):
             continue
-        collapsing_operations = _collapsing_inst_to_pauli_strings(inst)  # type: ignore
+        collapsing_operations = _collapsing_inst_to_pauli_strings(inst)
         pauli_strings.extend(collapsing_operations)
     return pauli_strings
 

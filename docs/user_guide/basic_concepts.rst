@@ -57,12 +57,12 @@ Fragments
 
 Fragments are a collection of moments that check the following order:
 
-1. zero or more moments exclusively composed of ``reset``, annotation or
-   noisy-gate instructions,
+1. zero or more moments composed of `reset` and any other instructions
+    except measurement instructions,
 2. zero or more moments composed of "computation" instructions (anything
-   that is not a measurement, a reset, a noisy gate or an annotation),
-3. one or more moments exclusively composed of ``measurement``, annotation
-   or noisy-gate instructions.
+    that is not a measurement or a reset),
+3. one moment composed of `measurement` and any other instructions
+    except reset instructions.
 
 The circuit provided in :ref:`moments-section` contains 4 moments that form
 a fragment.
