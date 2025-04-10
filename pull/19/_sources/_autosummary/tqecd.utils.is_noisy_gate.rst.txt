@@ -1,0 +1,6 @@
+tqecd.utils.is\_noisy\_gate
+===========================
+
+.. currentmodule:: tqecd.utils
+
+.. autofunction:: is_noisy_gate
