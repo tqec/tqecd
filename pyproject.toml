@@ -49,8 +49,8 @@ doc = [
     "pandoc",
     "jupyter",
 ]
+bench = ["pyinstrument", "build", "asv"]
 test = ["pytest", "mypy", "pytest-cov"]
-bench = ["pyinstrument"]
 dev = ["pre-commit", "tqecd[test, doc, bench]"]
 all = ["tqecd[test, dev, doc, bench]"]
 

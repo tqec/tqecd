@@ -188,3 +188,9 @@ requirements-dev.lock
 
 # Ruff
 .ruff_cache
+
+# asv
+benchmarks/results
+benchmarks/html
+benchmarks/env
+benchmarks/tqecd
