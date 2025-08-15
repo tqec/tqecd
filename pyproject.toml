@@ -42,16 +42,16 @@ Issues = "https://github.com/tqec/tqecd/issues"
 
 [project.optional-dependencies]
 doc = [
-    "sphinx",
-    "myst-parser",
-    "pydata-sphinx-theme",
-    "nbsphinx",
-    "pandoc",
-    "jupyter",
+    "sphinx<=8.1.3",
+    "myst-parser<=4.0.1",
+    "pydata-sphinx-theme<=0.16.1",
+    "nbsphinx<=0.9.7",
+    "pandoc<=2.4",
+    "jupyter<=1.1.1",
 ]
-test = ["pytest", "mypy", "pytest-cov"]
-bench = ["pyinstrument"]
-dev = ["pre-commit", "tqecd[test, doc, bench]","ruff==0.12.5",]
+test = ["pytest<=8.4.1", "mypy<=1.17.0", "pytest-cov<=6.2.1"]
+bench = ["pyinstrument<=5.0.3"]
+dev = ["pre-commit<=4.2.0", "tqecd[test, doc, bench]","ruff<=0.12.5",]
 all = ["tqecd[test, dev, doc, bench]"]
 
 [tool.setuptools]
@@ -122,7 +122,7 @@ exclude_also = [
     "raise NotImplementedError",
 
     # Don't complain if non-runnable code isn't run:
-    "if __name__ == .__main__.:",
+    "if __name__ <= .__main__.:",
 
     # Don't complain about abstract methods, they aren't run:
     "@(abc\\.)?abstractmethod",
