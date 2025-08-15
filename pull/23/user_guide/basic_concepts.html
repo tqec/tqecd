@@ -450,23 +450,12 @@ is equivalent to the definition used by <code class="docutils literal notranslat
 <section id="fragments">
 <h3>Fragments<a class="headerlink" href="#fragments" title="Link to this heading">#</a></h3>
 <p>Fragments are a collection of moments that check the following order:</p>
-<ol class="arabic simple">
-<li><dl class="simple">
-<dt>zero or more moments composed of <cite>reset</cite> and any other instructions</dt><dd><p>except measurement instructions,</p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>zero or more moments composed of “computation” instructions (anything</dt><dd><p>that is not a measurement or a reset),</p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>one moment composed of <cite>measurement</cite> and any other instructions</dt><dd><p>except reset instructions.</p>
-</dd>
-</dl>
-</li>
-</ol>
+<p>1. zero or more moments composed of <cite>reset</cite> and any other instructions
+except measurement instructions,
+2. zero or more moments composed of “computation” instructions (anything
+that is not a measurement or a reset),
+3. one moment composed of <cite>measurement</cite> and any other instructions
+except reset instructions.</p>
 <p>The circuit provided in <a class="reference internal" href="#moments-section"><span class="std std-ref">Moments</span></a> contains 4 moments that form
 a fragment.</p>
 <p>Note that the circuit</p>
