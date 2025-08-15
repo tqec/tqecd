@@ -1,0 +1,18 @@
+{
+    "version": 1,
+    "project": "tqecd",
+    "project_url": "https://tqec.github.io/tqecd/",
+    "repo": "..",
+    "build_command": [
+        "python -m build --wheel -o {build_cache_dir} {build_dir}"
+    ],
+    "branches": ["main"],
+    "dvcs": "git",
+    "environment_type": "virtualenv",
+    "show_commit_url": "http://github.com/tqec/tqecd/commit/",
+    "benchmark_dir": "benchmarks",
+    "env_dir": "env",
+    "results_dir": "results",
+    "html_dir": "html",
+    "build_cache_size": 2
+}
