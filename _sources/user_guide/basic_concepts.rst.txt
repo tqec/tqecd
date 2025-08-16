@@ -29,7 +29,7 @@ This definition is close, but not equivalent, to the definition used by ``cirq``
 the main difference is that ``cirq`` defines a moment as a sub-circuit of depth 1: no
 instruction in the moment overlaps with another instruction in the same moment.
 In the definition given above, there is no notion of depth, and even though ``TICK``
-instruction are generally used in ``stim`` such as the moment definition above
+instruction are generally used in ``stim`` to denote the passage of time such as the moment definition above
 is equivalent to the definition used by ``cirq``, this is not required.
 
 For example, the circuit
@@ -57,12 +57,9 @@ Fragments
 
 Fragments are a collection of moments that check the following order:
 
-1. zero or more moments composed of `reset` and any other instructions
-    except measurement instructions,
-2. zero or more moments composed of "computation" instructions (anything
-    that is not a measurement or a reset),
-3. one moment composed of `measurement` and any other instructions
-    except reset instructions.
+1. zero or more moments composed of `reset` and any other instructions except measurement instructions,
+2. zero or more moments composed of "computation" instructions (anything that is not a measurement or a reset),
+3. one moment composed of `measurement` and any other instructions except reset instructions.
 
 The circuit provided in :ref:`moments-section` contains 4 moments that form
 a fragment.
