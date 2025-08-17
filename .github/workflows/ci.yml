@@ -59,6 +59,10 @@ jobs:
 
   coverage-python:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      repository-projects: write
     needs: pre-commit-ci
     steps:
       - uses: actions/checkout@v4
