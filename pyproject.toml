@@ -49,7 +49,7 @@ doc = [
     "pandoc<=2.4",
     "jupyter<=1.1.1",
 ]
-test = ["pytest<=8.4.1", "mypy<=1.17.0", "pytest-cov<=6.3.0"]
+test = ["pytest<=8.4.1", "mypy<=1.17.0", "pytest-cov<=7.0.0"]
 bench = ["pyinstrument<=5.1.1"]
 dev = ["pre-commit<=4.2.0", "tqecd[test, doc, bench]","ruff<=0.12.5",]
 all = ["tqecd[test, dev, doc, bench]"]
