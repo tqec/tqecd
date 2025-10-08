@@ -51,7 +51,7 @@ doc = [
 ]
 test = ["pytest<=8.4.1", "mypy<=1.18.1", "pytest-cov<=7.0.0"]
 bench = ["pyinstrument<=5.1.1"]
-dev = ["pre-commit<=4.2.0", "tqecd[test, doc, bench]","ruff<=0.13.0",]
+dev = ["pre-commit<=4.2.0", "tqecd[test, doc, bench]","ruff<=0.14.0",]
 all = ["tqecd[test, dev, doc, bench]"]
 
 [tool.setuptools]
