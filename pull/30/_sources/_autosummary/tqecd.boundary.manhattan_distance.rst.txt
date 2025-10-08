@@ -1,0 +1,6 @@
+tqecd.boundary.manhattan\_distance
+==================================
+
+.. currentmodule:: tqecd.boundary
+
+.. autofunction:: manhattan_distance
