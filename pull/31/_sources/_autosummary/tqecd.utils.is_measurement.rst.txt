@@ -1,6 +1,0 @@
-tqecd.utils.is\_measurement
-===========================
-
-.. currentmodule:: tqecd.utils
-
-.. autofunction:: is_measurement
