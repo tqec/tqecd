@@ -373,3 +373,51 @@ def push_all_detectors_to_the_end(circuit: stim.Circuit) -> stim.Circuit:
     for detector in sorted(detectors, key=detector_to_targets_tuple, reverse=True):
         new_circuit.append(detector)
     return new_circuit
+
+
+def remove_duplicate_detectors(circuit: stim.Circuit) -> stim.Circuit:
+    """Remove duplicate detectors from the provided circuit.
+
+    Detectors are considered duplicates if they have the same measurement record
+    targets even if the coordinates are different.
+
+    Here we simplify the measurements tracking by always assuming the detectors
+    are still valid even if the repeatition count for the ``stim.CircuitRepeatBlock``
+    instructions equals one.
+
+    Args:
+        circuit: circuit that includes detector instructions to remove duplicates from.
+
+    Returns:
+        A new `stim.Circuit` instance with duplicate detectors removed.
+    """
+    seen_detectors: set[frozenset[int]] = set()
+    num_measurements: int = 0
+
+    def remove_impl(circ: stim.Circuit) -> stim.Circuit:
+        nonlocal seen_detectors, num_measurements
+        new_circuit = stim.Circuit()
+        for inst in circ:
+            if isinstance(inst, stim.CircuitRepeatBlock):
+                new_circuit.append(
+                    stim.CircuitRepeatBlock(
+                        repeat_count=inst.repeat_count,
+                        body=remove_impl(inst.body_copy()),
+                    )
+                )
+            elif inst.name == "DETECTOR":
+                targets = frozenset(
+                    t.value + num_measurements for t in inst.targets_copy()
+                )
+                if targets in seen_detectors:
+                    continue
+                seen_detectors.add(targets)
+                new_circuit.append(inst)
+            elif is_measurement(inst):
+                num_measurements += len(inst.targets_copy())
+                new_circuit.append(inst)
+            else:
+                new_circuit.append(inst)
+        return new_circuit
+
+    return remove_impl(circuit)

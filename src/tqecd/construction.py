@@ -9,6 +9,7 @@ from tqecd.flow import build_flows_from_fragments
 from tqecd.fragment import Fragment, FragmentLoop, split_stim_circuit_into_fragments
 from tqecd.match import MatchedDetector, match_detectors_from_flows_shallow
 from tqecd.predicates import is_valid_input_circuit
+from tqecd.utils import remove_duplicate_detectors
 
 
 def _detectors_to_circuit(
@@ -124,4 +125,4 @@ def compile_fragments_to_circuit_with_detectors(
                 )
                 * fragment.repetitions
             )
-    return circuit
+    return remove_duplicate_detectors(circuit)
