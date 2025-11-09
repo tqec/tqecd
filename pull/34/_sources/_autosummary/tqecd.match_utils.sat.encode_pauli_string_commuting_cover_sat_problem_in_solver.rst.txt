@@ -1,0 +1,6 @@
+tqecd.match\_utils.sat.encode\_pauli\_string\_commuting\_cover\_sat\_problem\_in\_solver
+========================================================================================
+
+.. currentmodule:: tqecd.match_utils.sat
+
+.. autofunction:: encode_pauli_string_commuting_cover_sat_problem_in_solver
