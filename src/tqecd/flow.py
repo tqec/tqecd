@@ -207,14 +207,6 @@ class FragmentLoopFlows:
         for i in sorted(indices, reverse=True):
             self.remove_destruction(i)
 
-    def without_trivial_flows(self) -> FragmentLoopFlows:
-        return FragmentLoopFlows(
-            fragment_flows=[
-                flow.without_trivial_flows() for flow in self.fragment_flows
-            ],
-            repeat=self.repeat,
-        )
-
     def try_merge_anticommuting_flows(self) -> None:
         _try_merge_anticommuting_flows_inplace(self.creation)
         _try_merge_anticommuting_flows_inplace(self.destruction)
