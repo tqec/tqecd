@@ -595,14 +595,6 @@
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">remove_destruction</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">without_trivial_flows</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FragmentLoopFlows</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">FragmentLoopFlows</span><span class="p">(</span>
-            <span class="n">fragment_flows</span><span class="o">=</span><span class="p">[</span>
-                <span class="n">flow</span><span class="o">.</span><span class="n">without_trivial_flows</span><span class="p">()</span> <span class="k">for</span> <span class="n">flow</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fragment_flows</span>
-            <span class="p">],</span>
-            <span class="n">repeat</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">repeat</span><span class="p">,</span>
-        <span class="p">)</span>
-
     <span class="k">def</span><span class="w"> </span><span class="nf">try_merge_anticommuting_flows</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">_try_merge_anticommuting_flows_inplace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">creation</span><span class="p">)</span>
         <span class="n">_try_merge_anticommuting_flows_inplace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destruction</span><span class="p">)</span></div>

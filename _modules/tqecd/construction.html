@@ -392,6 +392,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.fragment</span><span class="w"> </span><span class="kn">import</span> <span class="n">Fragment</span><span class="p">,</span> <span class="n">FragmentLoop</span><span class="p">,</span> <span class="n">split_stim_circuit_into_fragments</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.match</span><span class="w"> </span><span class="kn">import</span> <span class="n">MatchedDetector</span><span class="p">,</span> <span class="n">match_detectors_from_flows_shallow</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.predicates</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_valid_input_circuit</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">remove_duplicate_detectors</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_detectors_to_circuit</span><span class="p">(</span>
@@ -515,7 +516,7 @@
                 <span class="p">)</span>
                 <span class="o">*</span> <span class="n">fragment</span><span class="o">.</span><span class="n">repetitions</span>
             <span class="p">)</span>
-    <span class="k">return</span> <span class="n">circuit</span></div>
+    <span class="k">return</span> <span class="n">remove_duplicate_detectors</span><span class="p">(</span><span class="n">circuit</span><span class="p">)</span></div>
 
 </pre></div>
 

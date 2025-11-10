@@ -35,6 +35,7 @@ tqecd.utils
       pauli_string_mean_coords
       push_all_detectors_to_the_end
       remove_annotations
+      remove_duplicate_detectors
    
    
 

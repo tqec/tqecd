@@ -19,7 +19,6 @@ tqecd.flow.FragmentLoopFlows
       ~FragmentLoopFlows.remove_destruction
       ~FragmentLoopFlows.remove_destructions
       ~FragmentLoopFlows.try_merge_anticommuting_flows
-      ~FragmentLoopFlows.without_trivial_flows
    
    
 

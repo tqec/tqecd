@@ -1,0 +1,6 @@
+tqecd.utils.remove\_duplicate\_detectors
+========================================
+
+.. currentmodule:: tqecd.utils
+
+.. autofunction:: remove_duplicate_detectors
