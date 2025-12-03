@@ -1,0 +1,32 @@
+tqecd.match\_utils.cover
+========================
+
+.. automodule:: tqecd.match_utils.cover
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      find_commuting_cover_on_target_qubits_sat
+      find_cover
+      find_exact_cover_sat
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
