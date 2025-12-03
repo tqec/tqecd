@@ -72,6 +72,7 @@ def _get_detectors_with_time_coordinate(
 def match_detectors_from_flows_shallow(
     flows: list[FragmentFlows | FragmentLoopFlows],
     qubit_coordinates: dict[int, tuple[float, ...]],
+    reuse_flows_for_anticommuting_cover: bool = False,
 ) -> list[list[MatchedDetector]]:
     """Match detectors in the provided fragments.
 
@@ -97,6 +98,12 @@ def match_detectors_from_flows_shallow(
         qubit_coordinates: a mapping from qubit indices to coordinates. Used to annotate
             the matched detectors with the coordinates from the qubits involved in the
             measurement forming the detector.
+        reuse_flows_for_anticommuting_cover: if True, the flows that are used
+            to form a commuting stabilizer are not all removed from the list of
+            flows. Instead, only one of them is removed, and the others are kept
+            to be potentially reused to form other commuting stabilizers. This
+            might lead to detectors involving more measurements than necessary,
+            but it allows to find more detectors in some cases. Defaults to False.
 
     Returns:
         the list of all the detectors found. These detectors are only valid if inserted
@@ -110,7 +117,12 @@ def match_detectors_from_flows_shallow(
     ]
     for i in range(1, len(flows)):
         detectors[i].extend(
-            match_boundary_stabilizers(flows[i - 1], flows[i], qubit_coordinates)
+            match_boundary_stabilizers(
+                flows[i - 1],
+                flows[i],
+                qubit_coordinates,
+                reuse_flows_for_anticommuting_cover=reuse_flows_for_anticommuting_cover,
+            )
         )
 
     return _get_detectors_with_time_coordinate(flows, detectors)
@@ -251,6 +263,7 @@ def match_boundary_stabilizers(
     right_flows: FragmentFlows | FragmentLoopFlows,
     qubit_coordinates: Mapping[int, tuple[float, ...]],
     perform_sanity_check: bool = True,
+    reuse_flows_for_anticommuting_cover: bool = False,
 ) -> list[MatchedDetector]:
     """Match detectors using the boundary stabilizers between the two given
     flows.
@@ -275,6 +288,12 @@ def match_boundary_stabilizers(
             and `right_flows` are compared to the detectors found between the
             last and first fragments of the body of `right_flows`. If the two
             sets are not equal, an exception is raised. Defaults to True.
+        reuse_flows_for_anticommuting_cover: if True, the flows that are used
+            to form a commuting stabilizer are not all removed from the list of
+            flows. Instead, only one of them is removed, and the others are kept
+            to be potentially reused to form other commuting stabilizers. This
+            might lead to detectors involving more measurements than necessary,
+            but it allows to find more detectors in some cases. Defaults to False.
 
     Raises:
         TQECDException: if the sanity check does not pass.
@@ -302,6 +321,7 @@ def match_boundary_stabilizers(
             deepcopy(right_flows.fragment_flows[-1]),  # type: ignore
             deepcopy(right_flows.fragment_flows[0]),  # type: ignore
             qubit_coordinates,
+            reuse_flows_for_anticommuting_cover=reuse_flows_for_anticommuting_cover,
         )
 
     # 0. Combining anti-commuting stabilizers
@@ -317,8 +337,12 @@ def match_boundary_stabilizers(
     # be interesting to perform this step AFTER a first round of commuting stabilizer
     # matching, and repeating the matching steps after to match newly added commuting
     # stabilizers into detectors.
-    left_flows.try_merge_anticommuting_flows()
-    right_flows.try_merge_anticommuting_flows()
+    left_flows.try_merge_anticommuting_flows(
+        reuse_flows=reuse_flows_for_anticommuting_cover
+    )
+    right_flows.try_merge_anticommuting_flows(
+        reuse_flows=reuse_flows_for_anticommuting_cover
+    )
 
     # 1. Match stabilizers 1-to-1 without anti-commuting collapses
     matched_detectors.extend(
