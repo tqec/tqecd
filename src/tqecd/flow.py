@@ -101,7 +101,7 @@ def _try_merge_anticommuting_flows_inplace(
         # 2. Flows remain valid for finding subsequent merging opportunities,
         #    as the removed flow's anti-commuting boundary stabilizer is covered
         #    by the remaining flows.
-        # Note that we have the risk that the reused flows may have unecessarily
+        # Note that we have the risk that the reused flows may have unnecessarily
         # many measurements included in the formed detector. However, we never
         # guarantee minimality of detector structures, so this is not an issue.
         if reuse_flows:
