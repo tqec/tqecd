@@ -87,10 +87,17 @@ def _try_merge_anticommuting_flows_inplace(flows: list[BoundaryStabilizer]) -> N
         stabilizers_to_merge: list[BoundaryStabilizer] = [
             flows[i] for i in flows_indices_of_stabilizers_to_merge
         ]
-        # Update the flows by removing the entries related to stabilizers that
-        # will be merged and re-compute the anti-commuting stabilizers and map.
-        for i in sorted(flows_indices_of_stabilizers_to_merge, reverse=True):
-            flows.pop(i)
+        # Update flows: remove one entry per merged stabilizer.
+        # This ensures:
+        # 1. A stabilizer isn't merged twice.
+        # 2. Flows remain valid for finding subsequent merging opportunities,
+        #    as the removed flow's anti-commuting boundary stabilizer is covered
+        #    by the remaining flows.
+        # Note that we have the risk that the reused flows may have unecessarily
+        # many measurements included in the formed detector. However, we never
+        # guarantee minimality of detector structures, so this is not an issue.
+        flows.pop(flows_indices_of_stabilizers_to_merge[-1])
+
         anti_commuting_index_to_flows_index = _anti_commuting_stabilizers_indices(flows)
         anticommuting_stabilizers = [
             flows[fi].before_collapse for fi in anti_commuting_index_to_flows_index
