@@ -1,0 +1,6 @@
+tqecd.fragment.split\_stim\_circuit\_into\_fragments
+====================================================
+
+.. currentmodule:: tqecd.fragment
+
+.. autofunction:: split_stim_circuit_into_fragments
