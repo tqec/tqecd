@@ -1,0 +1,6 @@
+tqecd.pauli.pauli\_product
+==========================
+
+.. currentmodule:: tqecd.pauli
+
+.. autofunction:: pauli_product
