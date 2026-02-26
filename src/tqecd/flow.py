@@ -4,9 +4,9 @@ import typing as ty
 from dataclasses import dataclass
 
 from tqecd.boundary import BoundaryStabilizer
+from tqecd.cover import find_commuting_cover_on_target_qubits
 from tqecd.exceptions import TQECDException
 from tqecd.fragment import Fragment, FragmentLoop
-from tqecd.match_utils.cover import find_commuting_cover_on_target_qubits
 from tqecd.measurement import get_relative_measurement_index
 from tqecd.pauli import PauliString, pauli_product
 

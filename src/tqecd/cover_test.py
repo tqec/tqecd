@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 import stim
 
-from tqecd.match_utils.cover import (
+from tqecd.cover import (
     find_commuting_cover_on_target_qubits,
     find_exact_cover,
 )

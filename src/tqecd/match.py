@@ -8,9 +8,9 @@ import numpy
 import stim
 
 from tqecd.boundary import BoundaryStabilizer
+from tqecd.cover import find_exact_cover
 from tqecd.exceptions import TQECDException
 from tqecd.flow import FragmentFlows, FragmentLoopFlows
-from tqecd.match_utils.cover import find_exact_cover
 from tqecd.measurement import RelativeMeasurementLocation
 
 
