@@ -33,7 +33,10 @@ classifiers = [
     "Topic :: Utilities",
     "Typing :: Typed",
 ]
-dynamic = ["dependencies"]
+dependencies = [
+    "numpy<=2.3.0",
+    "stim>=1.15.0",
+]
 
 [project.urls]
 Documentation = "https://tqec.github.io/tqecd/"
@@ -106,7 +109,7 @@ warn_return_any = true
 
 # See https://mypy.readthedocs.io/en/stable/config_file.html#using-a-pyproject-toml
 [[tool.mypy.overrides]]
-module = ["stim", "pysat", "pysat.solvers"]
+module = ["stim"]
 ignore_missing_imports = true
 
 [tool.coverage.run]
