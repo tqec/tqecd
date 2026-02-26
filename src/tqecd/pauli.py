@@ -9,6 +9,7 @@ API.
 from __future__ import annotations
 
 import functools
+from itertools import accumulate, chain, repeat
 import operator
 from typing import Iterable, Literal
 
@@ -196,6 +197,20 @@ class PauliString:
 
     def __getitem__(self, index: int) -> PAULI_STRING_TYPE:
         return self._pauli_by_qubit.get(index, "I")
+
+    def to_int(self, qubits: Iterable[int]) -> int:
+        """Convert the Pauli string to an integer representation on the provided qubits."""
+        return _concat_ints_as_bits(
+            chain.from_iterable(pauli_literal_to_bools(self[q]) for q in qubits),
+            bit_length=1,
+        )
+
+
+def _concat_ints_as_bits(ints: Iterable[int], bit_length: int | Iterable[int]) -> int:
+    """Concatenate a list of integers as bits to form a single integer."""
+    if isinstance(bit_length, int):
+        bit_length = repeat(bit_length)
+    return sum(x << shift for x, shift in zip(ints, chain([0], accumulate(bit_length))))
 
 
 def pauli_literal_to_bools(

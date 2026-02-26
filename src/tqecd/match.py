@@ -10,7 +10,7 @@ import stim
 from tqecd.boundary import BoundaryStabilizer
 from tqecd.exceptions import TQECDException
 from tqecd.flow import FragmentFlows, FragmentLoopFlows
-from tqecd.match_utils.cover import find_exact_cover_sat
+from tqecd.match_utils.cover import find_exact_cover
 from tqecd.measurement import RelativeMeasurementLocation
 
 
@@ -457,7 +457,7 @@ def _match_boundary_stabilizers_by_disjoint_cover(
         # Try to find the cover. If unsuccessful, skip `target` and continue the loop.
         # Else, a detector is matched, so insert it into the returned list and mark
         # `target` as "to remove".
-        cover_indices = find_exact_cover_sat(
+        cover_indices = find_exact_cover(
             target.after_collapse, [cs.after_collapse for cs in covering_stabilizers]
         )
         if cover_indices is None:
