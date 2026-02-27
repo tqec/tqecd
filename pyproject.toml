@@ -28,6 +28,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Scientific/Engineering",
     "Topic :: Software Development :: Libraries",
     "Topic :: Utilities",
@@ -66,10 +67,6 @@ exclude = ["*test.py"]
 
 [tool.setuptools.package-data]
 tqecd = ["py.typed"]
-
-[tool.setuptools.dynamic]
-dependencies = { file = "requirements.txt" }
-
 
 [tool.mypy]
 # See https://numpy.org/devdocs/reference/typing.html
