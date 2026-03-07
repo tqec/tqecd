@@ -1,6 +1,0 @@
-tqecd.measurement.get\_relative\_measurement\_index
-===================================================
-
-.. currentmodule:: tqecd.measurement
-
-.. autofunction:: get_relative_measurement_index
