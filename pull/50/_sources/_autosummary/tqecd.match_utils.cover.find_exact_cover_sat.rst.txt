@@ -1,6 +1,0 @@
-tqecd.match\_utils.cover.find\_exact\_cover\_sat
-================================================
-
-.. currentmodule:: tqecd.match_utils.cover
-
-.. autofunction:: find_exact_cover_sat
