@@ -35,7 +35,10 @@ classifiers = [
     "Typing :: Typed",
 ]
 dependencies = [
-    "numpy<=2.3.0",
+    "numpy>=1.22,<2.3",                      # Upper bound: https://github.com/tqec/tqec/pull/659
+    "numpy>=1.24; python_version >= '3.11'",
+    "numpy>=1.26; python_version >= '3.12'",
+    "numpy>=2.1; python_version >= '3.13'",
     "stim>=1.15.0",
 ]
 
@@ -55,7 +58,7 @@ doc = [
 ]
 test = ["pytest<=8.4.1", "mypy<=1.18.1", "pytest-cov<=7.0.0"]
 bench = ["pyinstrument<=5.1.1"]
-dev = ["pre-commit<=4.2.0", "tqecd[test, doc, bench]","ruff<=0.14.2",]
+dev = ["pre-commit<=4.2.0", "tqecd[test, doc, bench]", "ruff<=0.14.2"]
 all = ["tqecd[test, dev, doc, bench]"]
 
 [tool.setuptools]
