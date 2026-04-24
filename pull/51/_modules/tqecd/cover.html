@@ -395,11 +395,10 @@
     <span class="n">target</span><span class="p">:</span> <span class="n">PauliString</span><span class="p">,</span> <span class="n">sources</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">PauliString</span><span class="p">],</span> <span class="n">on_qubits</span><span class="p">:</span> <span class="nb">frozenset</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Try to find a set of boundary stabilizers from ``sources`` that generate</span>
-<span class="sd">    target on qubits ``on_qubits``.</span>
+<span class="sd">    target on qubits ``on_qubits`` (a &quot;cover&quot;).</span>
 
-<span class="sd">    If multiple valid covers exist, the covers involving the lowest number of</span>
-<span class="sd">    :class:`~tqecd.pauli.PauliString` instances from ``sources`` are listed, and</span>
-<span class="sd">    a random cover is picked from that list.</span>
+<span class="sd">    If multiple valid covers exist, only one will be returned. This choice is</span>
+<span class="sd">    deterministic, but not necessarily with the lowest weight.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        target: the stabilizers to cover with stabilizers from ``sources``.</span>
@@ -423,7 +422,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">find_exact_cover</span><span class="p">(</span>
     <span class="n">target</span><span class="p">:</span> <span class="n">PauliString</span><span class="p">,</span> <span class="n">sources</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">PauliString</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Try to find a set of pauli strings from ``sources`` that generate exactly</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Try to find a set of Pauli strings from ``sources`` that generate exactly</span>
 <span class="sd">    ``target``.</span>
 
 <span class="sd">    The Pauli strings returned (via indices over the provided ``sources``), once</span>
@@ -478,7 +477,7 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Try to find a set of boundary stabilizers from ``sources`` that generate a</span>
 <span class="sd">    superset of ``target``.</span>
 
-<span class="sd">    This function try to find a set of Pauli strings from ``sources`` that</span>
+<span class="sd">    This function tries to find a set of Pauli strings from ``sources`` that</span>
 <span class="sd">    includes ``target`` (i.e., on every qubit where ``target`` is non-trivial,</span>
 <span class="sd">    the product of each of the returned Pauli strings should commute with</span>
 <span class="sd">    ``target``).</span>
@@ -511,7 +510,36 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">_solve_linear_system</span><span class="p">(</span>
     <span class="n">basis</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">update_basis</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Gaussian elimination over GF(2).&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Gaussian elimination over GF(2) to decompose ``x`` in terms of ``basis``.</span>
+
+<span class="sd">    Each basis element is stored as a tuple ``(vector, mask)``, keyed by the</span>
+<span class="sd">    position of its highest set bit (the pivot). ``vector`` is the basis</span>
+<span class="sd">    element itself (an integer treated as a bit-vector over GF(2)) and</span>
+<span class="sd">    ``mask`` tracks which of the items previously added to the basis combine</span>
+<span class="sd">    to produce ``vector``: every item that is added receives a unique bit in</span>
+<span class="sd">    ``mask``, at the position equal to the basis size at insertion time.</span>
+
+<span class="sd">    The input ``x`` is reduced by repeatedly XOR-ing in the basis element</span>
+<span class="sd">    whose pivot matches the current highest bit of ``x``. While doing so,</span>
+<span class="sd">    the bookkeeping ``mask`` accumulates which basis elements have been</span>
+<span class="sd">    combined.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        basis: the current basis, mapping each pivot bit position to a</span>
+<span class="sd">            ``(vector, mask)`` pair. Modified in place when ``update_basis``</span>
+<span class="sd">            is ``True`` and ``x`` turns out to be linearly independent.</span>
+<span class="sd">        x: the bit-vector to reduce against ``basis``.</span>
+<span class="sd">        update_basis: if ``True`` (default), ``x`` is added to ``basis`` as</span>
+<span class="sd">            a new basis element whenever it is found to be linearly</span>
+<span class="sd">            independent of the current basis.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A list of indices (in the order items were added to ``basis``)</span>
+<span class="sd">        whose basis vectors XOR to ``x``, if such a decomposition exists.</span>
+<span class="sd">        Returns ``None`` when ``x`` is linearly independent of the current</span>
+<span class="sd">        basis (in which case it may have been added as a new basis element,</span>
+<span class="sd">        depending on ``update_basis``).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">mask</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">basis</span><span class="p">)</span>
     <span class="k">while</span> <span class="n">x</span><span class="p">:</span>
         <span class="n">highest_bit</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span>
@@ -526,14 +554,38 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_int_to_bit_indices</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert an integer to a list of indices where the bits are set.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the positions of the bits that are set in ``x``.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x: a non-negative integer, interpreted as a bit-vector.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The sorted list of indices ``i`` such that bit ``i`` of ``x`` is ``1``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">bit_length</span><span class="p">())</span> <span class="k">if</span> <span class="p">(</span><span class="n">x</span> <span class="o">&gt;&gt;</span> <span class="n">i</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mi">1</span><span class="p">]</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_construct_basis</span><span class="p">(</span>
     <span class="n">basis</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span> <span class="n">items</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="nb">int</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Construct a linear basis from the given items using the provided function.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Populate a linear basis over GF(2) from the provided ``items``.</span>
+
+<span class="sd">    Each item is first mapped to an integer bit-vector via ``func`` and then</span>
+<span class="sd">    fed into :func:`_solve_linear_system`, which extends ``basis`` whenever</span>
+<span class="sd">    the item is linearly independent of the elements already present. Items</span>
+<span class="sd">    that are linearly dependent on the current basis are skipped and do not</span>
+<span class="sd">    contribute a new basis element.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        basis: an existing basis to extend. Modified in place.</span>
+<span class="sd">        items: the items from which to construct the basis.</span>
+<span class="sd">        func: maps each item to the integer bit-vector representation used</span>
+<span class="sd">            for Gaussian elimination over GF(2).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The same ``basis`` dictionary that was passed in, now containing</span>
+<span class="sd">        every linearly independent item produced by ``func``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
         <span class="n">_solve_linear_system</span><span class="p">(</span><span class="n">basis</span><span class="p">,</span> <span class="n">func</span><span class="p">(</span><span class="n">item</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">basis</span>
