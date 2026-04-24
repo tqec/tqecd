@@ -12,11 +12,10 @@ def _find_cover(
     target: PauliString, sources: list[PauliString], on_qubits: frozenset[int]
 ) -> list[int] | None:
     """Try to find a set of boundary stabilizers from ``sources`` that generate
-    target on qubits ``on_qubits``.
+    target on qubits ``on_qubits`` (a "cover").
 
-    If multiple valid covers exist, the covers involving the lowest number of
-    :class:`~tqecd.pauli.PauliString` instances from ``sources`` are listed, and
-    a random cover is picked from that list.
+    If multiple valid covers exist, only one will be returned. This choice is
+    deterministic, but not necessarily with the lowest weight.
 
     Args:
         target: the stabilizers to cover with stabilizers from ``sources``.
@@ -38,7 +37,7 @@ def _find_cover(
 def find_exact_cover(
     target: PauliString, sources: list[PauliString]
 ) -> list[int] | None:
-    """Try to find a set of pauli strings from ``sources`` that generate exactly
+    """Try to find a set of Pauli strings from ``sources`` that generate exactly
     ``target``.
 
     The Pauli strings returned (via indices over the provided ``sources``), once
@@ -90,7 +89,7 @@ def find_commuting_cover_on_target_qubits(
     """Try to find a set of boundary stabilizers from ``sources`` that generate a
     superset of ``target``.
 
-    This function try to find a set of Pauli strings from ``sources`` that
+    This function tries to find a set of Pauli strings from ``sources`` that
     includes ``target`` (i.e., on every qubit where ``target`` is non-trivial,
     the product of each of the returned Pauli strings should commute with
     ``target``).
@@ -122,7 +121,36 @@ def find_commuting_cover_on_target_qubits(
 def _solve_linear_system(
     basis: dict[int, tuple[int, int]], x: int, update_basis: bool = True
 ) -> list[int] | None:
-    """Gaussian elimination over GF(2)."""
+    """Gaussian elimination over GF(2) to decompose ``x`` in terms of ``basis``.
+
+    Each basis element is stored as a tuple ``(vector, mask)``, keyed by the
+    position of its highest set bit (the pivot). ``vector`` is the basis
+    element itself (an integer treated as a bit-vector over GF(2)) and
+    ``mask`` tracks which of the items previously added to the basis combine
+    to produce ``vector``: every item that is added receives a unique bit in
+    ``mask``, at the position equal to the basis size at insertion time.
+
+    The input ``x`` is reduced by repeatedly XOR-ing in the basis element
+    whose pivot matches the current highest bit of ``x``. While doing so,
+    the bookkeeping ``mask`` accumulates which basis elements have been
+    combined.
+
+    Args:
+        basis: the current basis, mapping each pivot bit position to a
+            ``(vector, mask)`` pair. Modified in place when ``update_basis``
+            is ``True`` and ``x`` turns out to be linearly independent.
+        x: the bit-vector to reduce against ``basis``.
+        update_basis: if ``True`` (default), ``x`` is added to ``basis`` as
+            a new basis element whenever it is found to be linearly
+            independent of the current basis.
+
+    Returns:
+        A list of indices (in the order items were added to ``basis``)
+        whose basis vectors XOR to ``x``, if such a decomposition exists.
+        Returns ``None`` when ``x`` is linearly independent of the current
+        basis (in which case it may have been added as a new basis element,
+        depending on ``update_basis``).
+    """
     mask = 1 << len(basis)
     while x:
         highest_bit = x.bit_length() - 1
@@ -137,14 +165,38 @@ def _solve_linear_system(
 
 
 def _int_to_bit_indices(x: int) -> list[int]:
-    """Convert an integer to a list of indices where the bits are set."""
+    """Return the positions of the bits that are set in ``x``.
+
+    Args:
+        x: a non-negative integer, interpreted as a bit-vector.
+
+    Returns:
+        The sorted list of indices ``i`` such that bit ``i`` of ``x`` is ``1``.
+    """
     return [i for i in range(x.bit_length()) if (x >> i) & 1]
 
 
 def _construct_basis(
     basis: dict[int, tuple[int, int]], items: Iterable[Any], func: Callable[[Any], int]
 ) -> dict[int, tuple[int, int]]:
-    """Construct a linear basis from the given items using the provided function."""
+    """Populate a linear basis over GF(2) from the provided ``items``.
+
+    Each item is first mapped to an integer bit-vector via ``func`` and then
+    fed into :func:`_solve_linear_system`, which extends ``basis`` whenever
+    the item is linearly independent of the elements already present. Items
+    that are linearly dependent on the current basis are skipped and do not
+    contribute a new basis element.
+
+    Args:
+        basis: an existing basis to extend. Modified in place.
+        items: the items from which to construct the basis.
+        func: maps each item to the integer bit-vector representation used
+            for Gaussian elimination over GF(2).
+
+    Returns:
+        The same ``basis`` dictionary that was passed in, now containing
+        every linearly independent item produced by ``func``.
+    """
     for item in items:
         _solve_linear_system(basis, func(item))
     return basis
