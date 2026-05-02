@@ -2,36 +2,46 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Iterable
-from typing import Any
-
 from tqecd.pauli import PauliString
 
 
 def _find_cover(
-    target: PauliString, sources: list[PauliString], on_qubits: frozenset[int]
+    target: PauliString,
+    sources: list[PauliString],
+    on_qubits: frozenset[int],
+    commute_with: PauliString | None = None,
 ) -> list[int] | None:
     """Try to find a set of boundary stabilizers from ``sources`` that generate
-    target on qubits ``on_qubits`` (a "cover").
+    ``target`` (or commute with ``target``) on qubits ``on_qubits`` (a "cover").
 
     If multiple valid covers exist, only one will be returned. This choice is
     deterministic, but not necessarily with the lowest weight.
 
     Args:
         target: the stabilizers to cover with stabilizers from ``sources``.
-        sources: stabilizers that can be used to cover `target`.
+        sources: stabilizers that can be used to cover ``target``.
         on_qubits: qubits to consider when trying to cover ``target`` with
             ``sources``.
+        commute_with: if provided, find a commuting-cover to the provided Pauli
+            string; otherwise, find an exact cover.
 
     Returns:
-        Either a list of indices over ``sources`` that, when combined, cover
-        exactly the provided ``target`` on all the qubits provided in
-        ``on_qubits``, or ``None`` if such a list could not be found.
+        A list of source indices forming the exact or commuting cover, or
+        ``None`` if no such cover could be found.
     """
-    return _solve_linear_system(
-        _construct_basis({}, sources, lambda s: s.to_int(on_qubits)),
-        target.to_int(on_qubits),
+    basis: dict[int, tuple[int, int]] = {}
+    for i, source in enumerate(sources):
+        result = _solve_linear_system(
+            basis, source.to_int(on_qubits, commute_with), 1 << i
+        )
+        if result is not None and commute_with is not None:
+            return _int_to_bit_indices(result)
+    if commute_with is not None:
+        return None
+    result = _solve_linear_system(
+        basis, target.to_int(on_qubits, commute_with), update_basis=False
     )
+    return None if result is None else _int_to_bit_indices(result)
 
 
 def find_exact_cover(
@@ -115,24 +125,26 @@ def find_commuting_cover_on_target_qubits(
     """
     if not sources:
         return None
-    return _find_cover(target, sources, frozenset(target.qubits))
+    return _find_cover(target, sources, frozenset(target.qubits), commute_with=target)
 
 
 def _solve_linear_system(
-    basis: dict[int, tuple[int, int]], x: int, update_basis: bool = True
-) -> list[int] | None:
+    basis: dict[int, tuple[int, int]],
+    x: int,
+    mask: int = 0,
+    update_basis: bool = True,
+) -> int | None:
     """Gaussian elimination over GF(2) to decompose ``x`` in terms of ``basis``.
 
     Each basis element is stored as a tuple ``(vector, mask)``, keyed by the
     position of its highest set bit (the pivot). ``vector`` is the basis
     element itself (an integer treated as a bit-vector over GF(2)) and
-    ``mask`` tracks which of the items previously added to the basis combine
-    to produce ``vector``: every item that is added receives a unique bit in
-    ``mask``, at the position equal to the basis size at insertion time.
+    ``mask`` tracks which source items combine to produce ``vector`` — every
+    bit set in ``mask`` corresponds to one source's index.
 
     The input ``x`` is reduced by repeatedly XOR-ing in the basis element
     whose pivot matches the current highest bit of ``x``. While doing so,
-    the bookkeeping ``mask`` accumulates which basis elements have been
+    the bookkeeping ``mask`` accumulates which source indices have been
     combined.
 
     Args:
@@ -140,18 +152,18 @@ def _solve_linear_system(
             ``(vector, mask)`` pair. Modified in place when ``update_basis``
             is ``True`` and ``x`` turns out to be linearly independent.
         x: the bit-vector to reduce against ``basis``.
+        mask: initial mask of source indices already associated with ``x``.
+            Pass ``1 << i`` when reducing the ``i``-th source while building
+            the basis, or ``0`` when reducing an external target.
         update_basis: if ``True`` (default), ``x`` is added to ``basis`` as
             a new basis element whenever it is found to be linearly
             independent of the current basis.
 
     Returns:
-        A list of indices (in the order items were added to ``basis``)
-        whose basis vectors XOR to ``x``, if such a decomposition exists.
-        Returns ``None`` when ``x`` is linearly independent of the current
-        basis (in which case it may have been added as a new basis element,
-        depending on ``update_basis``).
+        The final ``mask`` (a bit-set of source indices whose encoded
+        vectors XOR to the original ``x``) when ``x`` is fully reduced, or
+        ``None`` when ``x`` is linearly independent of the current basis.
     """
-    mask = 1 << len(basis)
     while x:
         highest_bit = x.bit_length() - 1
         if highest_bit not in basis:
@@ -161,7 +173,7 @@ def _solve_linear_system(
         pivot, pivot_mask = basis[highest_bit]
         x ^= pivot
         mask ^= pivot_mask
-    return _int_to_bit_indices(mask)[:-1]
+    return mask
 
 
 def _int_to_bit_indices(x: int) -> list[int]:
@@ -174,29 +186,3 @@ def _int_to_bit_indices(x: int) -> list[int]:
         The sorted list of indices ``i`` such that bit ``i`` of ``x`` is ``1``.
     """
     return [i for i in range(x.bit_length()) if (x >> i) & 1]
-
-
-def _construct_basis(
-    basis: dict[int, tuple[int, int]], items: Iterable[Any], func: Callable[[Any], int]
-) -> dict[int, tuple[int, int]]:
-    """Populate a linear basis over GF(2) from the provided ``items``.
-
-    Each item is first mapped to an integer bit-vector via ``func`` and then
-    fed into :func:`_solve_linear_system`, which extends ``basis`` whenever
-    the item is linearly independent of the elements already present. Items
-    that are linearly dependent on the current basis are skipped and do not
-    contribute a new basis element.
-
-    Args:
-        basis: an existing basis to extend. Modified in place.
-        items: the items from which to construct the basis.
-        func: maps each item to the integer bit-vector representation used
-            for Gaussian elimination over GF(2).
-
-    Returns:
-        The same ``basis`` dictionary that was passed in, now containing
-        every linearly independent item produced by ``func``.
-    """
-    for item in items:
-        _solve_linear_system(basis, func(item))
-    return basis
