@@ -103,6 +103,11 @@ def test_exact_match(
             [_pss("ZZZZZZZZ"), _pss("XX____XX"), _pss("XXXXXXXX")],
             [0, 1, 2],
         ),
+        (
+            _pss("ZZZZ"),
+            [_pss("XXZ_"), _pss("XX_Z")],
+            [0, 1],
+        ),
     ],
 )
 def test_commuting_match(
