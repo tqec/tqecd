@@ -206,8 +206,8 @@ class PauliString:
         Args:
             qubits: the qubits over which to encode.
             reference: if ``None``, each qubit contributes 2 bits encoding the
-                Pauli at that qubit. If a reference Pauli string is provided, 
-                each qubit contributes 1 bit indicating whether the Pauli at 
+                Pauli at that qubit. If a reference Pauli string is provided,
+                each qubit contributes 1 bit indicating whether the Pauli at
                 that qubit anti-commutes with the reference's Pauli at the same qubit.
         """
         if reference is None:
