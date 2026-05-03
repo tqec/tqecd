@@ -1,4 +1,0 @@
-numpy
-stim
-pycryptosat!=5.11.23
-python-sat[cryptosat]

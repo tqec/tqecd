@@ -1,63 +1,17 @@
 from __future__ import annotations
 
-import itertools
-from typing import Iterator
-
 import pytest
 import stim
 
-from tqecd.match_utils.cover import (
-    _all_pauli_string_combination_results,  # pyright: ignore[reportPrivateUsage]
-    find_commuting_cover_on_target_qubits_sat,
-    find_exact_cover_sat,
+from tqecd.cover import (
+    find_commuting_cover_on_target_qubits,
+    find_exact_cover,
 )
 from tqecd.pauli import PauliString, pauli_product
 
 
 def _pss(pauli_string: str) -> PauliString:
     return PauliString.from_stim_pauli_string(stim.PauliString(pauli_string))
-
-
-def _all_pauli_string_combination_results_alternative_implementation(
-    pauli_string_list: list[PauliString],
-) -> Iterator[PauliString]:
-    yield from (
-        pauli_product([p for p, c in zip(pauli_string_list, choices) if c])
-        for choices in itertools.product([True, False], repeat=len(pauli_string_list))
-    )
-
-
-def test_all_pauli_string_combination_results_randomized() -> None:
-    paulis = [
-        PauliString.from_stim_pauli_string(stim.PauliString.random(10))
-        for _ in range(5)
-    ]
-
-    from_function = {
-        pauli for _, pauli in _all_pauli_string_combination_results(paulis)
-    }
-    from_alternative_implementation = set(
-        _all_pauli_string_combination_results_alternative_implementation(paulis)
-    )
-    assert from_function == from_alternative_implementation
-
-
-def test_all_pauli_string_combination_results() -> None:
-    paulis = [PauliString({i: "Z"}) for i in range(3)]
-    all_combinations = list(
-        pauli for _, pauli in _all_pauli_string_combination_results(paulis)
-    )
-    assert len(all_combinations) == 2 ** len(paulis)
-    assert set(all_combinations) == {
-        PauliString({}),
-        PauliString({0: "Z"}),
-        PauliString({1: "Z"}),
-        PauliString({2: "Z"}),
-        PauliString({0: "Z", 1: "Z"}),
-        PauliString({0: "Z", 2: "Z"}),
-        PauliString({1: "Z", 2: "Z"}),
-        PauliString({0: "Z", 1: "Z", 2: "Z"}),
-    }
 
 
 @pytest.mark.parametrize(
@@ -117,7 +71,7 @@ def test_all_pauli_string_combination_results() -> None:
 def test_exact_match(
     target: PauliString, sources: list[PauliString], expected_result: list[int] | None
 ) -> None:
-    obtained_result = find_exact_cover_sat(target, sources)
+    obtained_result = find_exact_cover(target, sources)
     # We expect the results to either both be None, or both be a list.
     assert (obtained_result is None) == (expected_result is None)
     # If they are both a list, compare them and check the post-condition documented.
@@ -149,12 +103,17 @@ def test_exact_match(
             [_pss("ZZZZZZZZ"), _pss("XX____XX"), _pss("XXXXXXXX")],
             [0, 1, 2],
         ),
+        (
+            _pss("ZZZZ"),
+            [_pss("XXZ_"), _pss("XX_Z")],
+            [0, 1],
+        ),
     ],
 )
 def test_commuting_match(
     target: PauliString, sources: list[PauliString], expected_result: list[int] | None
 ) -> None:
-    obtained_result = find_commuting_cover_on_target_qubits_sat(target, sources)
+    obtained_result = find_commuting_cover_on_target_qubits(target, sources)
     # We expect the results to either both be None, or both be a list.
     assert (obtained_result is None) == (expected_result is None)
     # If they are both a list, compare them and check the post-condition documented.

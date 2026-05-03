@@ -8,8 +8,9 @@ API.
 
 from __future__ import annotations
 
-import functools
 import operator
+from functools import reduce
+from itertools import chain
 from typing import Iterable, Literal
 
 import stim
@@ -197,6 +198,31 @@ class PauliString:
     def __getitem__(self, index: int) -> PAULI_STRING_TYPE:
         return self._pauli_by_qubit.get(index, "I")
 
+    def to_int(
+        self, qubits: Iterable[int], reference: PauliString | None = None
+    ) -> int:
+        """Convert the Pauli string to an integer representation on the provided qubits.
+
+        Args:
+            qubits: the qubits over which to encode.
+            reference: if ``None``, each qubit contributes 2 bits encoding the
+                Pauli at that qubit. If a reference Pauli string is provided,
+                each qubit contributes 1 bit indicating whether the Pauli at
+                that qubit anti-commutes with the reference's Pauli at the same qubit.
+        """
+        if reference is None:
+            return reduce(
+                lambda acc, bit: acc << 1 | bit,
+                chain.from_iterable(pauli_literal_to_bools(self[q]) for q in qubits),
+                0,
+            )
+        result = 0
+        for q in qubits:
+            sxt, szt = pauli_literal_to_bools(self[q])
+            rxt, rzt = pauli_literal_to_bools(reference[q])
+            result = (result << 1) | int((sxt and rzt) ^ (szt and rxt))
+        return result
+
 
 def pauli_literal_to_bools(
     literal: PAULI_STRING_TYPE,
@@ -212,4 +238,4 @@ def pauli_literal_to_bools(
 
 
 def pauli_product(paulis: Iterable[PauliString]) -> PauliString:
-    return functools.reduce(operator.mul, paulis, PauliString({}))
+    return reduce(operator.mul, paulis, PauliString({}))

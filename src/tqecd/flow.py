@@ -4,9 +4,9 @@ import typing as ty
 from dataclasses import dataclass
 
 from tqecd.boundary import BoundaryStabilizer
+from tqecd.cover import find_commuting_cover_on_target_qubits
 from tqecd.exceptions import TQECDException
 from tqecd.fragment import Fragment, FragmentLoop
-from tqecd.match_utils.cover import find_commuting_cover_on_target_qubits_sat
 from tqecd.measurement import get_relative_measurement_index
 from tqecd.pauli import PauliString, pauli_product
 
@@ -73,7 +73,7 @@ def _try_merge_anticommuting_flows_inplace(flows: list[BoundaryStabilizer]) -> N
         flows[fi].before_collapse for fi in anti_commuting_index_to_flows_index
     ]
     indices_of_anti_commuting_stabilizers_to_merge = (
-        find_commuting_cover_on_target_qubits_sat(
+        find_commuting_cover_on_target_qubits(
             collapsing_pauli, anticommuting_stabilizers
         )
     )
@@ -105,7 +105,7 @@ def _try_merge_anticommuting_flows_inplace(flows: list[BoundaryStabilizer]) -> N
         flows.append(new_commuting_stabilizer)
         # Update for loop condition
         indices_of_anti_commuting_stabilizers_to_merge = (
-            find_commuting_cover_on_target_qubits_sat(
+            find_commuting_cover_on_target_qubits(
                 collapsing_pauli, anticommuting_stabilizers
             )
         )

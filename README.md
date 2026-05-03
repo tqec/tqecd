@@ -16,8 +16,6 @@ Currently, `tqecd` needs to be installed from source using
 python -m pip install git+https://github.com/tqec/tqecd.git
 ```
 
-The `tqecd` package has some dependencies that might be harder to install than a simple `pip install`. If you have any issues with the simple installation method above, please look at the [full installation page](https://tqec.github.io/tqecd/user_guide/installation.html).
-
 ## Basic usage
 
 ```py
