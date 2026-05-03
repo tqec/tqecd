@@ -10,21 +10,6 @@ Python version
 The ``tqecd`` package only supports Python 3.10 and onward. If you have Python 3.9 or below,
 please update your Python installation.
 
-Additional toolchains
-~~~~~~~~~~~~~~~~~~~~~
-
-Some of the dependencies of ``tqecd`` are implemented using compiled languages. This is for
-example the case of the `pycryptosat <https://pypi.org/project/pycryptosat/>`_ dependency.
-Pre-compiled Python packages that should be compatible with any GNU/Linux are provided
-by the author, but no pre-compiled package exist for Windows or MacOS.
-
-This means that, if you try to install the ``tqecd`` package on Windows or MacOS, a working
-C++ toolchain should also be installed on your system.
-
-Here is a list of potential issues you might encounter and how to solve them:
-
-- `Failed building wheel for pycryptosat <https://github.com/tqec/tqec/issues/311>`_
-
 Installation procedure
 ----------------------
 

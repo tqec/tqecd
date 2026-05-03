@@ -391,9 +391,9 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">stim</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.boundary</span><span class="w"> </span><span class="kn">import</span> <span class="n">BoundaryStabilizer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.cover</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_exact_cover</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">TQECDException</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.flow</span><span class="w"> </span><span class="kn">import</span> <span class="n">FragmentFlows</span><span class="p">,</span> <span class="n">FragmentLoopFlows</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.match_utils.cover</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_exact_cover_sat</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.measurement</span><span class="w"> </span><span class="kn">import</span> <span class="n">RelativeMeasurementLocation</span>
 
 
@@ -852,7 +852,7 @@
         <span class="c1"># Try to find the cover. If unsuccessful, skip `target` and continue the loop.</span>
         <span class="c1"># Else, a detector is matched, so insert it into the returned list and mark</span>
         <span class="c1"># `target` as &quot;to remove&quot;.</span>
-        <span class="n">cover_indices</span> <span class="o">=</span> <span class="n">find_exact_cover_sat</span><span class="p">(</span>
+        <span class="n">cover_indices</span> <span class="o">=</span> <span class="n">find_exact_cover</span><span class="p">(</span>
             <span class="n">target</span><span class="o">.</span><span class="n">after_collapse</span><span class="p">,</span> <span class="p">[</span><span class="n">cs</span><span class="o">.</span><span class="n">after_collapse</span> <span class="k">for</span> <span class="n">cs</span> <span class="ow">in</span> <span class="n">covering_stabilizers</span><span class="p">]</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">cover_indices</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>

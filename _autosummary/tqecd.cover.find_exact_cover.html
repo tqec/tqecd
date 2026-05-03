@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>tqecd.match_utils.cover.find_cover &#8212; TQECD  documentation</title>
+    <title>tqecd.cover.find_exact_cover &#8212; TQECD  documentation</title>
   
   
   
@@ -42,11 +42,11 @@
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = '_autosummary/tqecd.match_utils.cover.find_cover';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_autosummary/tqecd.cover.find_exact_cover';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="tqecd.match_utils.cover.find_exact_cover_sat" href="tqecd.match_utils.cover.find_exact_cover_sat.html" />
-    <link rel="prev" title="tqecd.match_utils.cover.find_commuting_cover_on_target_qubits_sat" href="tqecd.match_utils.cover.find_commuting_cover_on_target_qubits_sat.html" />
+    <link rel="next" title="tqecd.exceptions" href="tqecd.exceptions.html" />
+    <link rel="prev" title="tqecd.cover.find_commuting_cover_on_target_qubits" href="tqecd.cover.find_commuting_cover_on_target_qubits.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -348,6 +348,11 @@
 <li class="toctree-l3"><a class="reference internal" href="tqecd.construction.compile_fragments_to_circuit_with_detectors.html">tqecd.construction.compile_fragments_to_circuit_with_detectors</a></li>
 </ul>
 </details></li>
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="tqecd.cover.html">tqecd.cover</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="tqecd.cover.find_commuting_cover_on_target_qubits.html">tqecd.cover.find_commuting_cover_on_target_qubits</a></li>
+<li class="toctree-l3 current active"><a class="current reference internal" href="#">tqecd.cover.find_exact_cover</a></li>
+</ul>
+</details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="tqecd.exceptions.html">tqecd.exceptions</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="tqecd.exceptions.TQECDException.html">tqecd.exceptions.TQECDException</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tqecd.exceptions.TQECDWarning.html">tqecd.exceptions.TQECDWarning</a></li>
@@ -370,20 +375,6 @@
 <li class="toctree-l3"><a class="reference internal" href="tqecd.match.match_detectors_from_flows_shallow.html">tqecd.match.match_detectors_from_flows_shallow</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tqecd.match.match_detectors_within_fragment.html">tqecd.match.match_detectors_within_fragment</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tqecd.match.MatchedDetector.html">tqecd.match.MatchedDetector</a></li>
-</ul>
-</details></li>
-<li class="toctree-l2 current active has-children"><a class="reference internal" href="tqecd.match_utils.html">tqecd.match_utils</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l3 current active has-children"><a class="reference internal" href="tqecd.match_utils.cover.html">tqecd.match_utils.cover</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="tqecd.match_utils.cover.find_commuting_cover_on_target_qubits_sat.html">tqecd.match_utils.cover.find_commuting_cover_on_target_qubits_sat</a></li>
-<li class="toctree-l4 current active"><a class="current reference internal" href="#">tqecd.match_utils.cover.find_cover</a></li>
-<li class="toctree-l4"><a class="reference internal" href="tqecd.match_utils.cover.find_exact_cover_sat.html">tqecd.match_utils.cover.find_exact_cover_sat</a></li>
-</ul>
-</details></li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="tqecd.match_utils.sat.html">tqecd.match_utils.sat</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l4"><a class="reference internal" href="tqecd.match_utils.sat.encode_pauli_string_commuting_cover_sat_problem_in_solver.html">tqecd.match_utils.sat.encode_pauli_string_commuting_cover_sat_problem_in_solver</a></li>
-<li class="toctree-l4"><a class="reference internal" href="tqecd.match_utils.sat.encode_pauli_string_exact_cover_sat_problem_in_solver.html">tqecd.match_utils.sat.encode_pauli_string_exact_cover_sat_problem_in_solver</a></li>
-</ul>
-</details></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="tqecd.measurement.html">tqecd.measurement</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -477,12 +468,9 @@
     <li class="breadcrumb-item"><a href="tqecd.html" class="nav-link">tqecd</a></li>
     
     
-    <li class="breadcrumb-item"><a href="tqecd.match_utils.html" class="nav-link">tqecd.match_utils</a></li>
+    <li class="breadcrumb-item"><a href="tqecd.cover.html" class="nav-link">tqecd.cover</a></li>
     
-    
-    <li class="breadcrumb-item"><a href="tqecd.match_utils.cover.html" class="nav-link">tqecd.match_utils.cover</a></li>
-    
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">tqecd.match_utils.cover.find_cover</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">tqecd.cover.find_exact_cover</span></li>
   </ul>
 </nav>
 </div>
@@ -499,49 +487,36 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="tqecd-match-utils-cover-find-cover">
-<h1>tqecd.match_utils.cover.find_cover<a class="headerlink" href="#tqecd-match-utils-cover-find-cover" title="Link to this heading">#</a></h1>
+  <section id="tqecd-cover-find-exact-cover">
+<h1>tqecd.cover.find_exact_cover<a class="headerlink" href="#tqecd-cover-find-exact-cover" title="Link to this heading">#</a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="tqecd.match_utils.cover.find_cover">
-<span class="sig-name descname"><span class="pre">find_cover</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="tqecd.boundary.BoundaryStabilizer.html#tqecd.boundary.BoundaryStabilizer" title="tqecd.boundary.BoundaryStabilizer"><span class="pre">BoundaryStabilizer</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">sources</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="tqecd.boundary.BoundaryStabilizer.html#tqecd.boundary.BoundaryStabilizer" title="tqecd.boundary.BoundaryStabilizer"><span class="pre">BoundaryStabilizer</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qubit_coordinates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximum_qubit_distance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="tqecd.boundary.BoundaryStabilizer.html#tqecd.boundary.BoundaryStabilizer" title="tqecd.boundary.BoundaryStabilizer"><span class="pre">BoundaryStabilizer</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/tqecd/match_utils/cover.html#find_cover"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tqecd.match_utils.cover.find_cover" title="Link to this definition">#</a></dt>
-<dd><p>Try to cover the provided <code class="docutils literal notranslate"><span class="pre">target</span></code> stabilizer with stabilizers from
-<code class="docutils literal notranslate"><span class="pre">sources</span></code>.</p>
-<p>This function is currently performing a bruteforce search: it tries all
-combinations of stabilizers from <code class="docutils literal notranslate"><span class="pre">sources</span></code> and check if one matches with
-the provided <code class="docutils literal notranslate"><span class="pre">target</span></code>.
-This approach blows up very quickly, as it may test up to <code class="docutils literal notranslate"><span class="pre">2**len(sources)</span></code>
-different combinations before being able to tell that no match has been found.</p>
-<p>Note that <strong>all</strong> the combinations are tested, even the only combination that
-consist in “picking nothing from the list”, resulting in an empty PauliString.
-To avoid any surprise, and because we do not expect an empty <code class="docutils literal notranslate"><span class="pre">target</span></code> to make
-sense here, this function will raise on such a case.</p>
+<dt class="sig sig-object py" id="tqecd.cover.find_exact_cover">
+<span class="sig-name descname"><span class="pre">find_exact_cover</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="tqecd.pauli.PauliString.html#tqecd.pauli.PauliString" title="tqecd.pauli.PauliString"><span class="pre">PauliString</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">sources</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="tqecd.pauli.PauliString.html#tqecd.pauli.PauliString" title="tqecd.pauli.PauliString"><span class="pre">PauliString</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/tqecd/cover.html#find_exact_cover"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tqecd.cover.find_exact_cover" title="Link to this definition">#</a></dt>
+<dd><p>Try to find a set of Pauli strings from <code class="docutils literal notranslate"><span class="pre">sources</span></code> that generate exactly
+<code class="docutils literal notranslate"><span class="pre">target</span></code>.</p>
+<p>The Pauli strings returned (via indices over the provided <code class="docutils literal notranslate"><span class="pre">sources</span></code>), once
+multiplied together, should be exactly equal to <code class="docutils literal notranslate"><span class="pre">target</span></code>. In particular, the
+following post-condition should hold:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">target</span> <span class="o">=</span> <span class="kc">None</span>     <span class="c1"># to replace</span>
+<span class="n">sources</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span>  <span class="c1"># to replace</span>
+<span class="n">cover_indices</span> <span class="o">=</span> <span class="n">find_exact_cover</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">sources</span><span class="p">)</span>
+<span class="n">resulting_pauli_string</span> <span class="o">=</span> <span class="n">PauliString</span><span class="p">({})</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">cover_indices</span><span class="p">:</span>
+    <span class="n">resulting_pauli_string</span> <span class="o">=</span> <span class="n">resulting_pauli_string</span> <span class="o">*</span> <span class="n">sources</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+<span class="k">assert</span> <span class="n">resulting_pauli_string</span> <span class="o">==</span> <span class="n">target</span><span class="p">,</span> <span class="s2">&quot;Should hold&quot;</span>
+</pre></div>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>target</strong> – the boundary stabilizer to try to match with the provided
-<code class="docutils literal notranslate"><span class="pre">sources</span></code>.</p></li>
-<li><p><strong>sources</strong> – the boundary stabilizers that this function will try to combine to
-find a stabilizer involving <code class="docutils literal notranslate"><span class="pre">target</span></code>.</p></li>
-<li><p><strong>qubit_coordinates</strong> – a mapping from qubit indices to coordinates. Used to
-annotate the matched detectors with the coordinates from the qubits
-involved in the measurement forming the detector.</p></li>
-<li><p><strong>maximum_qubit_distance</strong> – radius (in number of qubits) to consider when
-searching for covering boundary stabilizers. Any boundary stabilizer
-in <code class="docutils literal notranslate"><span class="pre">sources</span></code> that has coordinates outside of that radius from
-<code class="docutils literal notranslate"><span class="pre">target</span></code> will not be considered, reducing the overall complexity
-of this function. The radius is computed with the Manhattan distance.</p></li>
+<li><p><strong>target</strong> – the stabilizers to cover with stabilizers from <code class="docutils literal notranslate"><span class="pre">sources</span></code>.</p></li>
+<li><p><strong>sources</strong> – stabilizers that can be used to cover <code class="docutils literal notranslate"><span class="pre">target</span></code>.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><ul class="simple">
-<li><p><a class="reference internal" href="tqecd.exceptions.TQECDException.html#tqecd.exceptions.TQECDException" title="tqecd.exceptions.TQECDException"><strong>TQECDException</strong></a> – if <code class="docutils literal notranslate"><span class="pre">target</span></code> is the empty PauliString.</p></li>
-<li><p><a class="reference internal" href="tqecd.exceptions.TQECDException.html#tqecd.exceptions.TQECDException" title="tqecd.exceptions.TQECDException"><strong>TQECDException</strong></a> – if any of the provided instances in <code class="docutils literal notranslate"><span class="pre">target</span></code> or
-    <code class="docutils literal notranslate"><span class="pre">sources</span></code> has anti-commuting stabilizers.</p></li>
-</ul>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>a matching set of boundary stabilizers or None if no matching stabilizers
-could be found.</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Either a list of indices over <code class="docutils literal notranslate"><span class="pre">sources</span></code> that, when combined, cover
+exactly the provided <code class="docutils literal notranslate"><span class="pre">target</span></code>, or <code class="docutils literal notranslate"><span class="pre">None</span></code> if such a list could not be
+found.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -559,20 +534,20 @@ could be found.</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="tqecd.match_utils.cover.find_commuting_cover_on_target_qubits_sat.html"
+       href="tqecd.cover.find_commuting_cover_on_target_qubits.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">tqecd.match_utils.cover.find_commuting_cover_on_target_qubits_sat</p>
+        <p class="prev-next-title">tqecd.cover.find_commuting_cover_on_target_qubits</p>
       </div>
     </a>
     <a class="right-next"
-       href="tqecd.match_utils.cover.find_exact_cover_sat.html"
+       href="tqecd.exceptions.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">tqecd.match_utils.cover.find_exact_cover_sat</p>
+        <p class="prev-next-title">tqecd.exceptions</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -595,7 +570,7 @@ could be found.</p>
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#tqecd.match_utils.cover.find_cover"><code class="docutils literal notranslate"><span class="pre">find_cover()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#tqecd.cover.find_exact_cover"><code class="docutils literal notranslate"><span class="pre">find_exact_cover()</span></code></a></li>
 </ul>
   </nav></div>
 
@@ -603,7 +578,7 @@ could be found.</p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="../_sources/_autosummary/tqecd.match_utils.cover.find_cover.rst.txt"
+      <li><a href="../_sources/_autosummary/tqecd.cover.find_exact_cover.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div></div>

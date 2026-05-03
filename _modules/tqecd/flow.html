@@ -387,9 +387,9 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.boundary</span><span class="w"> </span><span class="kn">import</span> <span class="n">BoundaryStabilizer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.cover</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_commuting_cover_on_target_qubits</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">TQECDException</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.fragment</span><span class="w"> </span><span class="kn">import</span> <span class="n">Fragment</span><span class="p">,</span> <span class="n">FragmentLoop</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.match_utils.cover</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_commuting_cover_on_target_qubits_sat</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.measurement</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_relative_measurement_index</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.pauli</span><span class="w"> </span><span class="kn">import</span> <span class="n">PauliString</span><span class="p">,</span> <span class="n">pauli_product</span>
 
@@ -456,7 +456,7 @@
         <span class="n">flows</span><span class="p">[</span><span class="n">fi</span><span class="p">]</span><span class="o">.</span><span class="n">before_collapse</span> <span class="k">for</span> <span class="n">fi</span> <span class="ow">in</span> <span class="n">anti_commuting_index_to_flows_index</span>
     <span class="p">]</span>
     <span class="n">indices_of_anti_commuting_stabilizers_to_merge</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">find_commuting_cover_on_target_qubits_sat</span><span class="p">(</span>
+        <span class="n">find_commuting_cover_on_target_qubits</span><span class="p">(</span>
             <span class="n">collapsing_pauli</span><span class="p">,</span> <span class="n">anticommuting_stabilizers</span>
         <span class="p">)</span>
     <span class="p">)</span>
@@ -488,7 +488,7 @@
         <span class="n">flows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_commuting_stabilizer</span><span class="p">)</span>
         <span class="c1"># Update for loop condition</span>
         <span class="n">indices_of_anti_commuting_stabilizers_to_merge</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">find_commuting_cover_on_target_qubits_sat</span><span class="p">(</span>
+            <span class="n">find_commuting_cover_on_target_qubits</span><span class="p">(</span>
                 <span class="n">collapsing_pauli</span><span class="p">,</span> <span class="n">anticommuting_stabilizers</span>
             <span class="p">)</span>
         <span class="p">)</span>

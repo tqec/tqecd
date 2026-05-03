@@ -21,6 +21,7 @@ tqecd.pauli.PauliString
       ~PauliString.contains
       ~PauliString.from_stim_pauli_string
       ~PauliString.overlaps
+      ~PauliString.to_int
       ~PauliString.to_stim_pauli_string
    
    
