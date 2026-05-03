@@ -385,36 +385,46 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Iterable</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
-
 <span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.pauli</span><span class="w"> </span><span class="kn">import</span> <span class="n">PauliString</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_find_cover</span><span class="p">(</span>
-    <span class="n">target</span><span class="p">:</span> <span class="n">PauliString</span><span class="p">,</span> <span class="n">sources</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">PauliString</span><span class="p">],</span> <span class="n">on_qubits</span><span class="p">:</span> <span class="nb">frozenset</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>
+    <span class="n">target</span><span class="p">:</span> <span class="n">PauliString</span><span class="p">,</span>
+    <span class="n">sources</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">PauliString</span><span class="p">],</span>
+    <span class="n">on_qubits</span><span class="p">:</span> <span class="nb">frozenset</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+    <span class="n">commute_with</span><span class="p">:</span> <span class="n">PauliString</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Try to find a set of boundary stabilizers from ``sources`` that generate</span>
-<span class="sd">    target on qubits ``on_qubits`` (a &quot;cover&quot;).</span>
+<span class="sd">    ``target`` (or commute with ``target``) on qubits ``on_qubits`` (a &quot;cover&quot;).</span>
 
 <span class="sd">    If multiple valid covers exist, only one will be returned. This choice is</span>
 <span class="sd">    deterministic, but not necessarily with the lowest weight.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        target: the stabilizers to cover with stabilizers from ``sources``.</span>
-<span class="sd">        sources: stabilizers that can be used to cover `target`.</span>
+<span class="sd">        sources: stabilizers that can be used to cover ``target``.</span>
 <span class="sd">        on_qubits: qubits to consider when trying to cover ``target`` with</span>
 <span class="sd">            ``sources``.</span>
+<span class="sd">        commute_with: if provided, find a commuting-cover to the provided Pauli</span>
+<span class="sd">            string; otherwise, find an exact cover.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        Either a list of indices over ``sources`` that, when combined, cover</span>
-<span class="sd">        exactly the provided ``target`` on all the qubits provided in</span>
-<span class="sd">        ``on_qubits``, or ``None`` if such a list could not be found.</span>
+<span class="sd">        A list of source indices forming the exact or commuting cover, or</span>
+<span class="sd">        ``None`` if no such cover could be found.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">_solve_linear_system</span><span class="p">(</span>
-        <span class="n">_construct_basis</span><span class="p">({},</span> <span class="n">sources</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">to_int</span><span class="p">(</span><span class="n">on_qubits</span><span class="p">)),</span>
-        <span class="n">target</span><span class="o">.</span><span class="n">to_int</span><span class="p">(</span><span class="n">on_qubits</span><span class="p">),</span>
+    <span class="n">basis</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">source</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sources</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">_solve_linear_system</span><span class="p">(</span>
+            <span class="n">basis</span><span class="p">,</span> <span class="n">source</span><span class="o">.</span><span class="n">to_int</span><span class="p">(</span><span class="n">on_qubits</span><span class="p">,</span> <span class="n">commute_with</span><span class="p">),</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">i</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">commute_with</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">_int_to_bit_indices</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">commute_with</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">_solve_linear_system</span><span class="p">(</span>
+        <span class="n">basis</span><span class="p">,</span> <span class="n">target</span><span class="o">.</span><span class="n">to_int</span><span class="p">(</span><span class="n">on_qubits</span><span class="p">,</span> <span class="n">commute_with</span><span class="p">),</span> <span class="n">update_basis</span><span class="o">=</span><span class="kc">False</span>
     <span class="p">)</span>
+    <span class="k">return</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">_int_to_bit_indices</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="find_exact_cover">
@@ -503,25 +513,27 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">sources</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
-    <span class="k">return</span> <span class="n">_find_cover</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">sources</span><span class="p">,</span> <span class="nb">frozenset</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">qubits</span><span class="p">))</span></div>
+    <span class="k">return</span> <span class="n">_find_cover</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">sources</span><span class="p">,</span> <span class="nb">frozenset</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">qubits</span><span class="p">),</span> <span class="n">commute_with</span><span class="o">=</span><span class="n">target</span><span class="p">)</span></div>
 
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_solve_linear_system</span><span class="p">(</span>
-    <span class="n">basis</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">update_basis</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">basis</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span>
+    <span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">mask</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">update_basis</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Gaussian elimination over GF(2) to decompose ``x`` in terms of ``basis``.</span>
 
 <span class="sd">    Each basis element is stored as a tuple ``(vector, mask)``, keyed by the</span>
 <span class="sd">    position of its highest set bit (the pivot). ``vector`` is the basis</span>
 <span class="sd">    element itself (an integer treated as a bit-vector over GF(2)) and</span>
-<span class="sd">    ``mask`` tracks which of the items previously added to the basis combine</span>
-<span class="sd">    to produce ``vector``: every item that is added receives a unique bit in</span>
-<span class="sd">    ``mask``, at the position equal to the basis size at insertion time.</span>
+<span class="sd">    ``mask`` tracks which source items combine to produce ``vector`` — every</span>
+<span class="sd">    bit set in ``mask`` corresponds to one source&#39;s index.</span>
 
 <span class="sd">    The input ``x`` is reduced by repeatedly XOR-ing in the basis element</span>
 <span class="sd">    whose pivot matches the current highest bit of ``x``. While doing so,</span>
-<span class="sd">    the bookkeeping ``mask`` accumulates which basis elements have been</span>
+<span class="sd">    the bookkeeping ``mask`` accumulates which source indices have been</span>
 <span class="sd">    combined.</span>
 
 <span class="sd">    Args:</span>
@@ -529,18 +541,18 @@
 <span class="sd">            ``(vector, mask)`` pair. Modified in place when ``update_basis``</span>
 <span class="sd">            is ``True`` and ``x`` turns out to be linearly independent.</span>
 <span class="sd">        x: the bit-vector to reduce against ``basis``.</span>
+<span class="sd">        mask: initial mask of source indices already associated with ``x``.</span>
+<span class="sd">            Pass ``1 &lt;&lt; i`` when reducing the ``i``-th source while building</span>
+<span class="sd">            the basis, or ``0`` when reducing an external target.</span>
 <span class="sd">        update_basis: if ``True`` (default), ``x`` is added to ``basis`` as</span>
 <span class="sd">            a new basis element whenever it is found to be linearly</span>
 <span class="sd">            independent of the current basis.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        A list of indices (in the order items were added to ``basis``)</span>
-<span class="sd">        whose basis vectors XOR to ``x``, if such a decomposition exists.</span>
-<span class="sd">        Returns ``None`` when ``x`` is linearly independent of the current</span>
-<span class="sd">        basis (in which case it may have been added as a new basis element,</span>
-<span class="sd">        depending on ``update_basis``).</span>
+<span class="sd">        The final ``mask`` (a bit-set of source indices whose encoded</span>
+<span class="sd">        vectors XOR to the original ``x``) when ``x`` is fully reduced, or</span>
+<span class="sd">        ``None`` when ``x`` is linearly independent of the current basis.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">mask</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">basis</span><span class="p">)</span>
     <span class="k">while</span> <span class="n">x</span><span class="p">:</span>
         <span class="n">highest_bit</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span>
         <span class="k">if</span> <span class="n">highest_bit</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">basis</span><span class="p">:</span>
@@ -550,7 +562,7 @@
         <span class="n">pivot</span><span class="p">,</span> <span class="n">pivot_mask</span> <span class="o">=</span> <span class="n">basis</span><span class="p">[</span><span class="n">highest_bit</span><span class="p">]</span>
         <span class="n">x</span> <span class="o">^=</span> <span class="n">pivot</span>
         <span class="n">mask</span> <span class="o">^=</span> <span class="n">pivot_mask</span>
-    <span class="k">return</span> <span class="n">_int_to_bit_indices</span><span class="p">(</span><span class="n">mask</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">mask</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_int_to_bit_indices</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
@@ -563,32 +575,6 @@
 <span class="sd">        The sorted list of indices ``i`` such that bit ``i`` of ``x`` is ``1``.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">bit_length</span><span class="p">())</span> <span class="k">if</span> <span class="p">(</span><span class="n">x</span> <span class="o">&gt;&gt;</span> <span class="n">i</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mi">1</span><span class="p">]</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_construct_basis</span><span class="p">(</span>
-    <span class="n">basis</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span> <span class="n">items</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="nb">int</span><span class="p">]</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Populate a linear basis over GF(2) from the provided ``items``.</span>
-
-<span class="sd">    Each item is first mapped to an integer bit-vector via ``func`` and then</span>
-<span class="sd">    fed into :func:`_solve_linear_system`, which extends ``basis`` whenever</span>
-<span class="sd">    the item is linearly independent of the elements already present. Items</span>
-<span class="sd">    that are linearly dependent on the current basis are skipped and do not</span>
-<span class="sd">    contribute a new basis element.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        basis: an existing basis to extend. Modified in place.</span>
-<span class="sd">        items: the items from which to construct the basis.</span>
-<span class="sd">        func: maps each item to the integer bit-vector representation used</span>
-<span class="sd">            for Gaussian elimination over GF(2).</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        The same ``basis`` dictionary that was passed in, now containing</span>
-<span class="sd">        every linearly independent item produced by ``func``.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
-        <span class="n">_solve_linear_system</span><span class="p">(</span><span class="n">basis</span><span class="p">,</span> <span class="n">func</span><span class="p">(</span><span class="n">item</span><span class="p">))</span>
-    <span class="k">return</span> <span class="n">basis</span>
 </pre></div>
 
                 </article>
