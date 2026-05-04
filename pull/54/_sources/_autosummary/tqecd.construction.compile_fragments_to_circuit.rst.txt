@@ -1,6 +1,0 @@
-tqecd.construction.compile\_fragments\_to\_circuit
-==================================================
-
-.. currentmodule:: tqecd.construction
-
-.. autofunction:: compile_fragments_to_circuit
