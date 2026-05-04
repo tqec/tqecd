@@ -1,6 +1,0 @@
-tqecd.predicates.is\_valid\_input\_circuit
-==========================================
-
-.. currentmodule:: tqecd.predicates
-
-.. autofunction:: is_valid_input_circuit
