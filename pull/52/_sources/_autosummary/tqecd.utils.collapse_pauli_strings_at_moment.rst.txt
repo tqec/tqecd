@@ -1,0 +1,6 @@
+tqecd.utils.collapse\_pauli\_strings\_at\_moment
+================================================
+
+.. currentmodule:: tqecd.utils
+
+.. autofunction:: collapse_pauli_strings_at_moment
