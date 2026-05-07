@@ -1,0 +1,6 @@
+tqecd.construction.annotate\_detectors\_automatically
+=====================================================
+
+.. currentmodule:: tqecd.construction
+
+.. autofunction:: annotate_detectors_automatically
