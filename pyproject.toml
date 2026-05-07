@@ -80,6 +80,7 @@ warn_redundant_casts = true
 # Explicitly disable that for the moment, will eventually be turned on again.
 warn_unused_ignores = false
 warn_unreachable = true
+exclude = ["docs/"]
 
 # Getting these passing should be easy
 strict_equality = true
