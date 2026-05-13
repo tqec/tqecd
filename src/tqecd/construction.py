@@ -43,7 +43,9 @@ def _shift_time_instruction(number_of_spatial_coordinates: int) -> stim.Circuit:
     return circuit
 
 
-def annotate_detectors_automatically(circuit: stim.Circuit) -> stim.Circuit:
+def annotate_detectors_automatically(
+    circuit: stim.Circuit, reuse_flows_for_anticommuting_cover: bool = False
+) -> stim.Circuit:
     """Insert detectors into the provided circuit instance.
 
     This is the main user-facing function to automatically insert detectors into
@@ -55,6 +57,15 @@ def annotate_detectors_automatically(circuit: stim.Circuit) -> stim.Circuit:
 
     Args:
         circuit: circuit to insert detectors in.
+        reuse_flows_for_anticommuting_cover: if True, the flows that are used
+            to form a commuting stabilizer are not all removed from the list of
+            flows. Instead, only one of them is removed, and the others are kept
+            to be potentially reused to form other commuting stabilizers. This
+            might lead to detectors involving more measurements than necessary,
+            but it allows to find more detectors in some cases.
+            WARNING: Enabling this feature might significantly increase the
+            runtime of the detector finding algorithm, as it increases the
+            number of flows to consider at each step. Defaults to False.
 
     Returns:
         A new ``stim.Circuit`` instance with automatically computed detectors.
@@ -67,7 +78,11 @@ def annotate_detectors_automatically(circuit: stim.Circuit) -> stim.Circuit:
     qubit_coords_map: dict[int, tuple[float, ...]] = {
         q: tuple(coords) for q, coords in circuit.get_final_qubit_coordinates().items()
     }
-    return compile_fragments_to_circuit_with_detectors(fragments, qubit_coords_map)
+    return compile_fragments_to_circuit_with_detectors(
+        fragments,
+        qubit_coords_map,
+        reuse_flows_for_anticommuting_cover=reuse_flows_for_anticommuting_cover,
+    )
 
 
 def compile_fragments_to_circuit(
@@ -100,9 +115,14 @@ def _insert_before_last_tick_instruction(
 def compile_fragments_to_circuit_with_detectors(
     fragments: list[Fragment | FragmentLoop],
     qubit_coords_map: dict[int, tuple[float, ...]],
+    reuse_flows_for_anticommuting_cover: bool = False,
 ) -> stim.Circuit:
     flows = build_flows_from_fragments(fragments)
-    detectors_from_flows = match_detectors_from_flows_shallow(flows, qubit_coords_map)
+    detectors_from_flows = match_detectors_from_flows_shallow(
+        flows,
+        qubit_coords_map,
+        reuse_flows_for_anticommuting_cover=reuse_flows_for_anticommuting_cover,
+    )
 
     circuit = stim.Circuit()
     number_of_spatial_coordinates = len(
@@ -117,7 +137,9 @@ def compile_fragments_to_circuit_with_detectors(
         else:  # isinstance(fragment, FragmentLoop):
             shift_circuit = _shift_time_instruction(number_of_spatial_coordinates)
             loop_body = compile_fragments_to_circuit_with_detectors(
-                fragment.fragments, qubit_coords_map
+                fragment.fragments,
+                qubit_coords_map,
+                reuse_flows_for_anticommuting_cover=reuse_flows_for_anticommuting_cover,
             )
             circuit += (
                 _insert_before_last_tick_instruction(

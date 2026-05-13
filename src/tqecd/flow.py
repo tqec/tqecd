@@ -15,7 +15,9 @@ def _anti_commuting_stabilizers_indices(flows: list[BoundaryStabilizer]) -> list
     return [i for i in range(len(flows)) if flows[i].has_anticommuting_operations]
 
 
-def _try_merge_anticommuting_flows_inplace(flows: list[BoundaryStabilizer]) -> None:
+def _try_merge_anticommuting_flows_inplace(
+    flows: list[BoundaryStabilizer], reuse_flows: bool = False
+) -> None:
     """Merge as much anti-commuting flows as possible from the provided flows.
 
     This function try to merge together several :class:`BoundaryStabilizer`
@@ -27,6 +29,12 @@ def _try_merge_anticommuting_flows_inplace(flows: list[BoundaryStabilizer]) -> N
     Args:
         flows: a list of flows that might or might not contains flows that
             anti-commute with its collapsing operations.
+        reuse_flows: if True, the flows that are used to form a commuting
+            stabilizer are not all removed from the list of flows. Instead,
+            only one of them is removed, and the others are kept to be potentially
+            reused to form other commuting stabilizers. This might lead to
+            detectors involving more measurements than necessary, but it allows
+            to find more detectors in some cases. Defaults to False.
 
     Raises:
         TQECDException: if the provided flows have different collapsing
@@ -87,10 +95,21 @@ def _try_merge_anticommuting_flows_inplace(flows: list[BoundaryStabilizer]) -> N
         stabilizers_to_merge: list[BoundaryStabilizer] = [
             flows[i] for i in flows_indices_of_stabilizers_to_merge
         ]
-        # Update the flows by removing the entries related to stabilizers that
-        # will be merged and re-compute the anti-commuting stabilizers and map.
-        for i in sorted(flows_indices_of_stabilizers_to_merge, reverse=True):
-            flows.pop(i)
+        # Update flows: remove one entry per merged stabilizer.
+        # This ensures:
+        # 1. A stabilizer isn't merged twice.
+        # 2. Flows remain valid for finding subsequent merging opportunities,
+        #    as the removed flow's anti-commuting boundary stabilizer is covered
+        #    by the remaining flows.
+        # Note that we have the risk that the reused flows may have unnecessarily
+        # many measurements included in the formed detector. However, we never
+        # guarantee minimality of detector structures, so this is not an issue.
+        if reuse_flows:
+            flows.pop(flows_indices_of_stabilizers_to_merge[-1])
+        else:
+            for i in sorted(flows_indices_of_stabilizers_to_merge, reverse=True):
+                flows.pop(i)
+
         anti_commuting_index_to_flows_index = _anti_commuting_stabilizers_indices(flows)
         anticommuting_stabilizers = [
             flows[fi].before_collapse for fi in anti_commuting_index_to_flows_index
@@ -158,9 +177,11 @@ class FragmentFlows:
             total_number_of_measurements=self.total_number_of_measurements,
         )
 
-    def try_merge_anticommuting_flows(self) -> None:
-        _try_merge_anticommuting_flows_inplace(self.creation)
-        _try_merge_anticommuting_flows_inplace(self.destruction)
+    def try_merge_anticommuting_flows(self, reuse_flows: bool = False) -> None:
+        _try_merge_anticommuting_flows_inplace(self.creation, reuse_flows=reuse_flows)
+        _try_merge_anticommuting_flows_inplace(
+            self.destruction, reuse_flows=reuse_flows
+        )
 
 
 @dataclass
@@ -207,9 +228,11 @@ class FragmentLoopFlows:
         for i in sorted(indices, reverse=True):
             self.remove_destruction(i)
 
-    def try_merge_anticommuting_flows(self) -> None:
-        _try_merge_anticommuting_flows_inplace(self.creation)
-        _try_merge_anticommuting_flows_inplace(self.destruction)
+    def try_merge_anticommuting_flows(self, reuse_flows: bool = False) -> None:
+        _try_merge_anticommuting_flows_inplace(self.creation, reuse_flows=reuse_flows)
+        _try_merge_anticommuting_flows_inplace(
+            self.destruction, reuse_flows=reuse_flows
+        )
 
 
 def build_flows_from_fragments(
