@@ -61,6 +61,24 @@ def test_pauli_string_commutation() -> None:
     assert c.commutes(b)
 
 
+def test_pauli_string_fast_paths_match_stim() -> None:
+    strings = [
+        PauliString({}),
+        PauliString({0: "X", 2: "Y", 5: "Z"}),
+        PauliString({1: "Z", 2: "X", 5: "Y"}),
+        PauliString({0: "Y", 1: "Y", 4: "X"}),
+    ]
+    for a in strings:
+        for b in strings:
+            expected_product = PauliString.from_stim_pauli_string(
+                a.to_stim_pauli_string(6) * b.to_stim_pauli_string(6)
+            )
+            assert a * b == expected_product
+            assert a.commutes(b) == a.to_stim_pauli_string(6).commutes(
+                b.to_stim_pauli_string(6)
+            )
+
+
 def test_pauli_string_collapse_by() -> None:
     X0Z1 = PauliString({0: "X", 1: "Z"})
     Z0 = PauliString({0: "Z"})
@@ -70,6 +88,17 @@ def test_pauli_string_collapse_by() -> None:
     assert X0Z1.collapse_by([X0, Z1]) == PauliString({})
     with pytest.raises(TQECDException):
         X0Z1.collapse_by([Z0])
+
+
+def test_pauli_string_contains_requires_matching_terms() -> None:
+    assert PauliString({0: "X", 1: "Y"}).contains(PauliString({0: "X"}))
+    assert not PauliString({0: "Y"}).contains(PauliString({0: "X"}))
+    assert not PauliString({0: "X"}).contains(PauliString({0: "Y"}))
+
+
+def test_empty_pauli_string_to_stim_pauli_string() -> None:
+    assert len(PauliString({}).to_stim_pauli_string(None)) == 0
+    assert len(PauliString({}).to_stim_pauli_string(3)) == 3
 
 
 def test_pauli_string_weight() -> None:

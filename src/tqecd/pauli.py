@@ -22,6 +22,25 @@ _IXYZ: list[PAULI_STRING_TYPE] = ["I", "X", "Y", "Z"]
 _IXZY: list[PAULI_STRING_TYPE] = ["I", "X", "Z", "Y"]
 
 
+def _pauli_dict_from_masks(x_mask: int, z_mask: int) -> dict[int, PAULI_STRING_TYPE]:
+    result: dict[int, PAULI_STRING_TYPE] = {}
+    qubit_mask = x_mask | z_mask
+    while qubit_mask:
+        bit = qubit_mask & -qubit_mask
+        qubit = bit.bit_length() - 1
+        has_x = 1 if x_mask & bit else 0
+        has_z = 1 if z_mask & bit else 0
+        result[qubit] = _IXZY[has_x + 2 * has_z]
+        qubit_mask ^= bit
+    return result
+
+
+def _anticommutes_from_masks(
+    x_mask: int, z_mask: int, other_x_mask: int, other_z_mask: int
+) -> bool:
+    return (((x_mask & other_z_mask) ^ (z_mask & other_x_mask)).bit_count() % 2) == 1
+
+
 class PauliString:
     """A mapping from qubits to Pauli operators that represent a Pauli string.
 
@@ -40,11 +59,36 @@ class PauliString:
         self._pauli_by_qubit: dict[int, PAULI_STRING_TYPE] = {
             q: pauli for q, pauli in sorted(pauli_by_qubit.items()) if pauli != "I"
         }
+        x_mask = 0
+        z_mask = 0
+        for qubit, pauli in self._pauli_by_qubit.items():
+            if qubit < 0:
+                raise TQECDException(
+                    f"Invalid qubit index {qubit}, expected a non-negative integer."
+                )
+            bit = 1 << qubit
+            if pauli in ("X", "Y"):
+                x_mask |= bit
+            if pauli in ("Y", "Z"):
+                z_mask |= bit
+        self._x_mask = x_mask
+        self._z_mask = z_mask
+        self._qubit_mask = x_mask | z_mask
         self._hash = hash(tuple(self._pauli_by_qubit.items()))
+
+    @staticmethod
+    def _from_masks(x_mask: int, z_mask: int) -> PauliString:
+        pauli_string = PauliString.__new__(PauliString)
+        pauli_string._pauli_by_qubit = _pauli_dict_from_masks(x_mask, z_mask)
+        pauli_string._x_mask = x_mask
+        pauli_string._z_mask = z_mask
+        pauli_string._qubit_mask = x_mask | z_mask
+        pauli_string._hash = hash(tuple(pauli_string._pauli_by_qubit.items()))
+        return pauli_string
 
     @property
     def non_trivial_pauli_count(self) -> int:
-        return len(self._pauli_by_qubit)
+        return self._qubit_mask.bit_count()
 
     @property
     def qubits(self) -> Iterable[int]:
@@ -65,13 +109,16 @@ class PauliString:
     ) -> PauliString:
         """Convert a `stim.PauliString` to a `PauliString` instance, ignoring
         the sign."""
-        return PauliString(
-            {
-                q: _IXYZ[stim_pauli_string[q]]
-                for q in range(len(stim_pauli_string))
-                if stim_pauli_string[q] != 0
-            }
-        )
+        x_mask = 0
+        z_mask = 0
+        for qubit in stim_pauli_string.pauli_indices():
+            bit = 1 << qubit
+            pauli = stim_pauli_string[qubit]
+            if pauli in (1, 2):
+                x_mask |= bit
+            if pauli in (2, 3):
+                z_mask |= bit
+        return PauliString._from_masks(x_mask, z_mask)
 
     def to_stim_pauli_string(self, length: int | None) -> stim.PauliString:
         """Convert a `PauliString` to a `stim.PauliString` instance.
@@ -80,7 +127,9 @@ class PauliString:
             length: The length of the `stim.PauliString`. If `None`, the length is set to the
                 maximum qubit index in the `PauliString` plus one.
         """
-        max_qubit_index = max(self._pauli_by_qubit.keys())
+        if not self._qubit_mask:
+            return stim.PauliString(length or 0)
+        max_qubit_index = self._qubit_mask.bit_length() - 1
         length = length or max_qubit_index + 1
         if length <= max_qubit_index:
             raise TQECDException(
@@ -92,23 +141,12 @@ class PauliString:
         return stim_pauli_string
 
     def __bool__(self) -> bool:
-        return bool(self._pauli_by_qubit)
+        return bool(self._qubit_mask)
 
     def __mul__(self, other: PauliString) -> PauliString:
-        result: dict[int, PAULI_STRING_TYPE] = {}
-        for q in self._pauli_by_qubit.keys() | other._pauli_by_qubit.keys():
-            a = self._pauli_by_qubit.get(q, "I")
-            b = other._pauli_by_qubit.get(q, "I")
-            ax = a in "XY"
-            az = a in "YZ"
-            bx = b in "XY"
-            bz = b in "YZ"
-            cx = ax ^ bx
-            cz = az ^ bz
-            c = _IXZY[cx + cz * 2]
-            if c != "I":
-                result[q] = c
-        return PauliString(result)
+        return PauliString._from_masks(
+            self._x_mask ^ other._x_mask, self._z_mask ^ other._z_mask
+        )
 
     def __repr__(self) -> str:
         return f"PauliString(qubits={self._pauli_by_qubit!r})"
@@ -128,10 +166,9 @@ class PauliString:
     def anticommutes(self, other: PauliString) -> bool:
         """Check if this Pauli string anticommutes with another Pauli
         string."""
-        t = 0
-        for q in self._pauli_by_qubit.keys() & other._pauli_by_qubit.keys():
-            t += self._pauli_by_qubit[q] != other._pauli_by_qubit[q]
-        return t % 2 == 1
+        return _anticommutes_from_masks(
+            self._x_mask, self._z_mask, other._x_mask, other._z_mask
+        )
 
     def collapse_by(self, collapse_operators: Iterable[PauliString]) -> PauliString:
         """Collapse the provided Pauli string by the provided operators.
@@ -154,16 +191,17 @@ class PauliString:
         Returns:
             a copy of self, collapsed by the provided operators.
         """
-        ret = PauliString(self._pauli_by_qubit.copy())
+        ret_x_mask = self._x_mask
+        ret_z_mask = self._z_mask
         for op in collapse_operators:
-            if not ret.commutes(op):
+            if _anticommutes_from_masks(ret_x_mask, ret_z_mask, op._x_mask, op._z_mask):
+                ret = PauliString._from_masks(ret_x_mask, ret_z_mask)
                 raise TQECDException(
                     f"Cannot collapse {ret} by a non-commuting operator {op}."
                 )
-            for qubit in op.qubits:
-                if qubit in ret._pauli_by_qubit:
-                    del ret._pauli_by_qubit[qubit]
-        return ret
+            ret_x_mask &= ~op._qubit_mask
+            ret_z_mask &= ~op._qubit_mask
+        return PauliString._from_masks(ret_x_mask, ret_z_mask)
 
     def after(self, tableau: stim.Tableau, targets: Iterable[int]) -> PauliString:
         stim_pauli_string = self.to_stim_pauli_string(
@@ -173,10 +211,12 @@ class PauliString:
         return PauliString.from_stim_pauli_string(stim_pauli_string_after)
 
     def contains(self, other: PauliString) -> bool:
-        return self._pauli_by_qubit.items() >= other._pauli_by_qubit.items()
+        matching_x_mask = (self._x_mask & other._qubit_mask) == other._x_mask
+        matching_z_mask = (self._z_mask & other._qubit_mask) == other._z_mask
+        return matching_x_mask and matching_z_mask
 
     def overlaps(self, other: PauliString) -> bool:
-        return bool(self._pauli_by_qubit.keys() & other._pauli_by_qubit.keys())
+        return bool(self._qubit_mask & other._qubit_mask)
 
     def __eq__(self, other: object) -> bool:
         """Check if two PauliString are equal.
