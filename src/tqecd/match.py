@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from copy import deepcopy
 from dataclasses import dataclass
 from typing import Final, Iterator, Mapping
 
@@ -299,8 +298,8 @@ def match_boundary_stabilizers(
             # Type checking is disabled below. right_flows is guaranteed to be of type
             # FragmentLoopFlows (per the value of should_sanity_check), and so have a
             # "fragment_flows" attribute.
-            deepcopy(right_flows.fragment_flows[-1]),  # type: ignore
-            deepcopy(right_flows.fragment_flows[0]),  # type: ignore
+            right_flows.fragment_flows[-1].copy(),  # type: ignore
+            right_flows.fragment_flows[0].copy(),  # type: ignore
             qubit_coordinates,
         )
 
