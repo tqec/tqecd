@@ -40,14 +40,18 @@ jobs:
           publish_dir: ./docs/_build/html/
       - name: Deploy if PR
         uses: peaceiris/actions-gh-pages@v4
-        if: github.ref != 'refs/heads/main'
+        if: >-
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.head.repo.full_name == github.repository
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs/_build/html/
           destination_dir: ./pull/${{github.event.number}}/
       - name: Add comment if PR
         uses: marocchino/sticky-pull-request-comment@v2
-        if: github.event_name == 'pull_request'
+        if: >-
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.head.repo.full_name == github.repository
         with:
           header: documentation-preview
           recreate: true
