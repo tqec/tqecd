@@ -43,29 +43,36 @@ class BoundaryStabilizer:
             forward:
                 ``True`` if the stabilizer propagated forward (i.e., ends on
                 measurements), else ``False``.
+            _collapsing_pauli_masks: Optional precomputed bit masks for the
+                single-qubit X, Y, and Z collapsing operations, in that order.
+                When provided, they avoid iterating over
+                ``collapsing_operations`` to test and apply the collapse.
         """
         self._stabilizer = stabilizer
         self._measurements = measurements
         self._collapsing_operations = frozenset(collapsing_operations)
         self._collapsing_pauli_masks = _collapsing_pauli_masks
-        self._has_anticommuting_collapsing_operations = (
-            any(co.anticommutes(stabilizer) for co in self._collapsing_operations)
-            if _collapsing_pauli_masks is None
-            else stabilizer._anticommutes_single_qubit_masks(*_collapsing_pauli_masks)
-        )
-        self._after_collapse = (
-            None
-            if self._has_anticommuting_collapsing_operations
-            else (
-                stabilizer.collapse_by(self._collapsing_operations)
-                if _collapsing_pauli_masks is None
-                else stabilizer._without_qubits(
-                    _collapsing_pauli_masks[0]
-                    | _collapsing_pauli_masks[1]
-                    | _collapsing_pauli_masks[2]
-                )
+        if _collapsing_pauli_masks is None:
+            self._has_anticommuting_collapsing_operations = any(
+                operation.anticommutes(stabilizer)
+                for operation in self._collapsing_operations
             )
-        )
+        else:
+            self._has_anticommuting_collapsing_operations = (
+                stabilizer._anticommutes_single_qubit_masks(*_collapsing_pauli_masks)
+            )
+
+        self._after_collapse: PauliString | None
+        if self._has_anticommuting_collapsing_operations:
+            self._after_collapse = None
+        elif _collapsing_pauli_masks is None:
+            self._after_collapse = stabilizer.collapse_by(self._collapsing_operations)
+        else:
+            self._after_collapse = stabilizer._without_qubits(
+                _collapsing_pauli_masks[0]
+                | _collapsing_pauli_masks[1]
+                | _collapsing_pauli_masks[2]
+            )
         self._reset_qubits: frozenset[int] = reset_qubits
         self._is_forward = forward
 
@@ -93,13 +100,13 @@ class BoundaryStabilizer:
             The collapsed :class:`~tqecd.pauli.PauliString` that goes out of the
             :class:`~tqecd.fragment.Fragment`.
         """
-        if self.has_anticommuting_operations:
+        after_collapse = self._after_collapse
+        if after_collapse is None:
             raise TQECDException(
                 "Cannot collapse a BoundaryStabilizer if it has "
                 "anticommuting operations."
             )
-        assert self._after_collapse is not None
-        return self._after_collapse
+        return after_collapse
 
     @property
     def before_collapse(self) -> PauliString:
@@ -146,17 +153,14 @@ class BoundaryStabilizer:
             operations (i.e., the same boundary), but with the two pre-collapsing
             stabilizers multiplied together.
         """
-        self_collapsing_operations = self._collapsing_operations
-        other_collapsing_operations = other._collapsing_operations
-        if (
-            self_collapsing_operations is not other_collapsing_operations
-            and self_collapsing_operations != other_collapsing_operations
-        ):
+        if self._collapsing_operations != other._collapsing_operations:
             raise TQECDException(
                 "Breaking pre-condition: trying to merge two BoundaryStabilizer "
                 "instances that are not defined on the same boundary.\n"
-                f"Collapsing operations for left-hand side: {self_collapsing_operations}.\n"
-                f"Collapsing operations for right-hand side: {other_collapsing_operations}.\n"
+                "Collapsing operations for left-hand side: "
+                f"{self._collapsing_operations}.\n"
+                "Collapsing operations for right-hand side: "
+                f"{other._collapsing_operations}.\n"
             )
         if self._is_forward != other._is_forward:
             raise TQECDException(
@@ -201,7 +205,7 @@ class BoundaryStabilizer:
             )
         return BoundaryStabilizer(
             stabilizer,
-            self_collapsing_operations,
+            self._collapsing_operations,
             measurements,
             reset_qubits,
             is_forward_merge,

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import typing as ty
+from copy import copy
 from dataclasses import dataclass
 
 from tqecd.boundary import BoundaryStabilizer
@@ -14,6 +15,13 @@ from tqecd.pauli import PauliString, pauli_product
 def _single_qubit_pauli_masks(
     paulis: frozenset[PauliString],
 ) -> tuple[int, int, int] | None:
+    """Encode disjoint single-qubit Pauli operators into X, Y, and Z masks.
+
+    Each set bit identifies the qubit targeted by an operator of the
+    corresponding type. ``None`` is returned when an operator spans several
+    qubits or when different operators target the same qubit, because those
+    inputs cannot use the single-qubit collapse fast path.
+    """
     x_mask = 0
     y_mask = 0
     z_mask = 0
@@ -75,10 +83,7 @@ def _try_merge_anticommuting_flows_inplace(flows: list[BoundaryStabilizer]) -> N
     # This is checked by comparing the collapsing operations for each
     # anti-commuting stabilizer and asserting that they are all equal.
     for i in range(1, len(collapsing_operations)):
-        if (
-            collapsing_operations[0] is not collapsing_operations[i]
-            and collapsing_operations[0] != collapsing_operations[i]
-        ):
+        if collapsing_operations[0] != collapsing_operations[i]:
             raise TQECDException(
                 "Cannot merge anti-commuting flows defined on different collapsing "
                 "operations. Found the following difference:\nFlow 0 has the "
@@ -164,7 +169,8 @@ class FragmentFlows:
         yield from self.creation
         yield from self.destruction
 
-    def copy(self) -> FragmentFlows:
+    def __copy__(self) -> FragmentFlows:
+        """Copy the flow lists without duplicating their stabilizer entries."""
         return FragmentFlows(
             creation=self.creation.copy(),
             destruction=self.destruction.copy(),
@@ -223,9 +229,10 @@ class FragmentLoopFlows:
         yield from self.creation
         yield from self.destruction
 
-    def copy(self) -> FragmentLoopFlows:
+    def __copy__(self) -> FragmentLoopFlows:
+        """Recursively copy flow containers without duplicating stabilizers."""
         return FragmentLoopFlows(
-            fragment_flows=[flow.copy() for flow in self.fragment_flows],
+            fragment_flows=[copy(flow) for flow in self.fragment_flows],
             repeat=self.repeat,
         )
 

@@ -25,10 +25,16 @@ class PauliString:
 
     Invariant:
         This class never stores identity Pauli terms. Any missing Pauli term is
-        considered to be an identity.
-        As such, it is illegal to initialise this class with an identity term.
+        considered to be an identity, and identity entries passed to the
+        constructor are ignored.
+
+        Instances are treated as immutable after construction. Hashing,
+        identity-preserving copies, and shared references in flow copies rely
+        on the private bit fields never being mutated.
     """
 
+    # Avoid a per-instance __dict__ and restrict instances to these fields:
+    # https://docs.python.org/3/reference/datamodel.html#object.__slots__
     __slots__ = ("_hash", "_support", "_x_bits", "_z_bits")
 
     def __init__(self, pauli_by_qubit: dict[int, PAULI_STRING_TYPE]) -> None:
@@ -144,6 +150,13 @@ class PauliString:
     def _anticommutes_single_qubit_masks(
         self, x_mask: int, y_mask: int, z_mask: int
     ) -> bool:
+        """Check for anticommutation with any encoded single-qubit operator.
+
+        The three masks identify qubits carrying X, Y, and Z collapsing
+        operators respectively. Unlike :meth:`anticommutes`, this method
+        checks each single-qubit operator independently and returns ``True``
+        when at least one of them anticommutes with this Pauli string.
+        """
         x_terms = self._x_bits & ~self._z_bits
         y_terms = self._x_bits & self._z_bits
         z_terms = self._z_bits & ~self._x_bits
@@ -195,16 +208,18 @@ class PauliString:
         return PauliString._from_bits(x_bits, z_bits)
 
     def after(self, tableau: stim.Tableau, targets: Iterable[int]) -> PauliString:
-        target_list = list(targets)
+        target_tuple = tuple(targets)
         stim_pauli_string = self.to_stim_pauli_string(
-            length=max(max(target_list, default=-1), self._support.bit_length() - 1) + 1
+            length=max(max(target_tuple, default=-1), self._support.bit_length() - 1)
+            + 1
         )
-        stim_pauli_string_after = stim_pauli_string.after(tableau, targets=target_list)
+        stim_pauli_string_after = stim_pauli_string.after(tableau, targets=target_tuple)
         return PauliString.from_stim_pauli_string(stim_pauli_string_after)
 
     def contains(self, other: PauliString) -> bool:
+        """Check whether all non-identity terms in ``other`` match this string."""
         differences = (self._x_bits ^ other._x_bits) | (self._z_bits ^ other._z_bits)
-        return not differences & other._support
+        return not (differences & other._support)
 
     def overlaps(self, other: PauliString) -> bool:
         return bool(self._support & other._support)

@@ -130,6 +130,7 @@ def test_pauli_string_indexing() -> None:
 
 def test_pauli_string_contains_requires_matching_terms() -> None:
     assert PauliString({0: "X", 1: "Y"}).contains(PauliString({0: "X"}))
+    assert PauliString({0: "X", 1: "X", 2: "X"}).contains(PauliString({2: "X"}))
     assert not PauliString({0: "Y"}).contains(PauliString({0: "X"}))
     assert not PauliString({0: "X"}).contains(PauliString({0: "Y"}))
 

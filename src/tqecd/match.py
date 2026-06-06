@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import copy
 from dataclasses import dataclass
 from typing import Final, Iterator, Mapping
 
@@ -294,12 +295,15 @@ def match_boundary_stabilizers(
         isinstance(right_flows, FragmentLoopFlows) and right_flows.repeat > 1
     )
     if should_sanity_check:
+        # copy() duplicates the mutable flow containers via their __copy__
+        # implementations. BoundaryStabilizer entries remain shared because
+        # matching only removes entries from the containers and does not mutate them.
         matched_detectors_within_loop = match_boundary_stabilizers(
             # Type checking is disabled below. right_flows is guaranteed to be of type
             # FragmentLoopFlows (per the value of should_sanity_check), and so have a
             # "fragment_flows" attribute.
-            right_flows.fragment_flows[-1].copy(),  # type: ignore
-            right_flows.fragment_flows[0].copy(),  # type: ignore
+            copy(right_flows.fragment_flows[-1]),  # type: ignore
+            copy(right_flows.fragment_flows[0]),  # type: ignore
             qubit_coordinates,
         )
 
