@@ -100,13 +100,12 @@ class BoundaryStabilizer:
             The collapsed :class:`~tqecd.pauli.PauliString` that goes out of the
             :class:`~tqecd.fragment.Fragment`.
         """
-        after_collapse = self._after_collapse
-        if after_collapse is None:
+        if self._after_collapse is None:
             raise TQECDException(
                 "Cannot collapse a BoundaryStabilizer if it has "
                 "anticommuting operations."
             )
-        return after_collapse
+        return self._after_collapse
 
     @property
     def before_collapse(self) -> PauliString:
