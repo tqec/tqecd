@@ -61,7 +61,7 @@ class PauliString:
 
     @classmethod
     def _from_bits(cls, x_bits: int, z_bits: int) -> PauliString:
-        pauli_string = cls.__new__(cls)
+        pauli_string: PauliString = cls.__new__(cls)
         pauli_string._x_bits = x_bits
         pauli_string._z_bits = z_bits
         pauli_string._support = x_bits | z_bits
@@ -243,9 +243,11 @@ class PauliString:
         return self._hash
 
     def __copy__(self) -> PauliString:
+        # Returning self is safe because PauliString instances are immutable.
         return self
 
     def __deepcopy__(self, memo: dict[int, object]) -> PauliString:
+        # Returning self is safe because PauliString instances are immutable.
         return self
 
     def __getitem__(self, index: int) -> PAULI_STRING_TYPE:
@@ -276,18 +278,24 @@ class PauliString:
                     | int(bool(self._z_bits & bit))
                 )
             return result
+        anticommutations = (self._x_bits & reference._z_bits) ^ (
+            self._z_bits & reference._x_bits
+        )
         result = 0
         for q in qubits:
             bit = 1 << q
-            result = (result << 1) | int(
-                bool(self._x_bits & reference._z_bits & bit)
-                ^ bool(self._z_bits & reference._x_bits & bit)
-            )
+            result = (result << 1) | int(bool(anticommutations & bit))
         return result
 
     def _to_int_mask(
         self, qubit_mask: int, reference: PauliString | None = None
     ) -> int:
+        """Encode selected qubits while preserving their original bit positions.
+
+        Without a reference, X bits occupy their original positions and Z bits
+        are shifted above the width of ``qubit_mask``. With a reference, each
+        selected position records whether the two local Pauli terms anticommute.
+        """
         if reference is None:
             z_shift = qubit_mask.bit_length()
             return (self._x_bits & qubit_mask) | (

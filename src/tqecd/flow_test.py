@@ -6,9 +6,32 @@ from tqecd.flow import (
     FragmentFlows,
     FragmentLoopFlows,
     _build_flows_from_fragment,
+    _single_qubit_pauli_masks,
 )
 from tqecd.fragment import Fragment
 from tqecd.measurement import RelativeMeasurementLocation
+from tqecd.pauli import PauliString
+
+
+def test_single_qubit_pauli_masks() -> None:
+    assert _single_qubit_pauli_masks(frozenset()) == (0, 0, 0)
+    assert _single_qubit_pauli_masks(
+        frozenset(
+            {
+                PauliString({1: "X"}),
+                PauliString({4: "Y"}),
+                PauliString({9: "Z"}),
+            }
+        )
+    ) == (1 << 1, 1 << 4, 1 << 9)
+
+    assert _single_qubit_pauli_masks(frozenset({PauliString({0: "X", 2: "Z"})})) is None
+    assert (
+        _single_qubit_pauli_masks(
+            frozenset({PauliString({3: "X"}), PauliString({3: "Z"})})
+        )
+        is None
+    )
 
 
 def test_repeated_measurements_keep_first_offset_and_order() -> None:

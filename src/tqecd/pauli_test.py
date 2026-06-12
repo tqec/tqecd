@@ -99,6 +99,13 @@ def test_pauli_string_collapse_by() -> None:
     with pytest.raises(TQECDException):
         X0Z1.collapse_by([Z0])
 
+    # The commutation check must use the partially collapsed result. X0*X1
+    # commutes with Z0*Z1, but after collapsing X0 the remaining X1 does not.
+    with pytest.raises(TQECDException):
+        PauliString({0: "X", 1: "X"}).collapse_by(
+            [PauliString({0: "X"}), PauliString({0: "Z", 1: "Z"})]
+        )
+
 
 def test_pauli_string_weight() -> None:
     X0Z1 = PauliString({0: "X", 1: "Z", 2: "I"})
