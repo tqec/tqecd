@@ -7,8 +7,8 @@ from tqecd.boundary import BoundaryStabilizer
 from tqecd.cover import find_commuting_cover_on_target_qubits
 from tqecd.exceptions import TQECDException
 from tqecd.fragment import Fragment, FragmentLoop
-from tqecd.measurement import get_relative_measurement_index
-from tqecd.pauli import PauliString, pauli_product
+from tqecd.measurement import RelativeMeasurementLocation
+from tqecd.pauli import CollapsingOperators, PauliString
 
 
 def _anti_commuting_stabilizers_indices(flows: list[BoundaryStabilizer]) -> list[int]:
@@ -43,29 +43,38 @@ def _try_merge_anticommuting_flows_inplace(flows: list[BoundaryStabilizer]) -> N
     if not anti_commuting_index_to_flows_index:
         return
 
-    collapsing_operations: list[set[PauliString]] = [
-        set(flows[fi].collapsing_operations)
-        for fi in anti_commuting_index_to_flows_index
-    ]
-    # Checking that all the provided flows are defined on the same boundary.
-    # This is checked by comparing the collapsing operations for each
-    # anti-commuting stabilizer and asserting that they are all equal.
-    for i in range(1, len(collapsing_operations)):
-        if collapsing_operations[0] != collapsing_operations[i]:
+    # Two anti-commuting flows are on the same boundary iff their
+    # CollapsingOperators compare equal (value equality on the combined masks),
+    # which is cheaper than rebuilding and comparing sets of PauliString objects.
+    collapse = [flows[fi].collapse for fi in anti_commuting_index_to_flows_index]
+    # Checking that all the provided flows are defined on the same boundary, by
+    # asserting that their collapsing operations are all equal.
+    for i in range(1, len(collapse)):
+        if collapse[0] != collapse[i]:
             raise TQECDException(
                 "Cannot merge anti-commuting flows defined on different collapsing "
                 "operations. Found the following difference:\nFlow 0 has the "
                 "collapsing operations:\n\t"
-                + "\n\t".join(f"- {c}" for c in collapsing_operations[0])
+                + "\n\t".join(
+                    f"- {c}"
+                    for c in flows[
+                        anti_commuting_index_to_flows_index[0]
+                    ].collapsing_operations
+                )
                 + f"\nFlow {i} has the collapsing operations:\n\t"
-                + "\n\t".join(f"- {c}" for c in collapsing_operations[i])
+                + "\n\t".join(
+                    f"- {c}"
+                    for c in flows[
+                        anti_commuting_index_to_flows_index[i]
+                    ].collapsing_operations
+                )
                 + "\n"
             )
 
-    # Computation of the Pauli string representing all the collapsing operations.
+    # Pauli string representing the product of all the collapsing operations.
     # The goal of this method will be to find a cover from the provided flows such
     # as the resulting propagated Pauli string commutes with this one.
-    collapsing_pauli = pauli_product(collapsing_operations[0])
+    collapsing_pauli = flows[anti_commuting_index_to_flows_index[0]].collapse.pauli
 
     # Now, we want to find flows in anticommuting_stabilizers that, when taken
     # into account together, commute with collapsing_pauli.
@@ -251,23 +260,39 @@ def _build_flows_from_fragment(fragment: Fragment) -> FragmentFlows:
     targets = list(range(len(tableau)))
     sorted_qubit_involved_in_measurements = fragment.measurements_qubits
 
+    # The collapsing operations of every creation (resp. destruction) flow of the
+    # fragment are exactly its measurements (resp. resets), so their combined
+    # masks are computed once and shared by all the boundary stabilizers below.
+    measurement_collapse = CollapsingOperators.from_paulis(fragment.measurements)
+    reset_collapse = CollapsingOperators.from_paulis(fragment.resets)
+    # Support masks (one bit per touched qubit) and a qubit -> relative
+    # measurement location map, precomputed once so that finding the measurements
+    # (resp. resets) a propagated stabilizer overlaps reduces to a bitwise AND
+    # plus a lookup, instead of testing the stabilizer against every operation.
+    measurement_support = measurement_collapse.support
+    reset_support = reset_collapse.support
+    number_of_measured_qubits = len(sorted_qubit_involved_in_measurements)
+    measurement_location_by_qubit = {
+        qubit: RelativeMeasurementLocation(index - number_of_measured_qubits, qubit)
+        for index, qubit in enumerate(sorted_qubit_involved_in_measurements)
+    }
+
     # First compute the flows created within the Fragment (i.e., originating from
     # reset instructions).
     creation_flows: list[BoundaryStabilizer] = []
     for reset_stabilizer in fragment.resets:
         final_stabilizer = reset_stabilizer.after(tableau, targets)
+        measurement_overlap = final_stabilizer.support & measurement_support
         involved_measurements_offsets = [
-            get_relative_measurement_index(
-                sorted_qubit_involved_in_measurements, m.qubit
-            )
-            for m in fragment.measurements
-            if final_stabilizer.overlaps(m)
+            measurement_location_by_qubit[qubit]
+            for qubit in range(measurement_overlap.bit_length())
+            if (measurement_overlap >> qubit) & 1
         ]
         involved_resets_qubits = [reset_stabilizer.qubit]
         creation_flows.append(
             BoundaryStabilizer(
                 final_stabilizer,
-                fragment.measurements,
+                measurement_collapse,
                 involved_measurements_offsets,
                 frozenset(involved_resets_qubits),
                 forward=True,
@@ -287,17 +312,18 @@ def _build_flows_from_fragment(fragment: Fragment) -> FragmentFlows:
             )
         initial_stabilizer = measurement.after(tableau_inv, targets)
         involved_measurements_offsets = [
-            get_relative_measurement_index(
-                sorted_qubit_involved_in_measurements, measurement.qubit
-            )
+            measurement_location_by_qubit[measurement.qubit]
         ]
+        reset_overlap = initial_stabilizer.support & reset_support
         involved_resets_qubits = [
-            m.qubit for m in fragment.resets if initial_stabilizer.overlaps(m)
+            qubit
+            for qubit in range(reset_overlap.bit_length())
+            if (reset_overlap >> qubit) & 1
         ]
         destruction_flows.append(
             BoundaryStabilizer(
                 initial_stabilizer,
-                fragment.resets,
+                reset_collapse,
                 involved_measurements_offsets,
                 frozenset(involved_resets_qubits),
                 forward=False,

@@ -6,14 +6,14 @@ import numpy
 
 from tqecd.exceptions import TQECDException
 from tqecd.measurement import RelativeMeasurementLocation
-from tqecd.pauli import PauliString
+from tqecd.pauli import CollapsingOperators, PauliString
 
 
 class BoundaryStabilizer:
     def __init__(
         self,
         stabilizer: PauliString,
-        collapsing_operations: Iterable[PauliString],
+        collapsing_operations: Iterable[PauliString] | CollapsingOperators,
         measurements: list[RelativeMeasurementLocation],
         reset_qubits: frozenset[int],
         forward: bool,
@@ -29,6 +29,10 @@ class BoundaryStabilizer:
                 operation has been applied.
             collapsing_operations: The collapsing operations the stabilizer will
                 have to go through to exit the :class:`~tqecd.fragment.Fragment`.
+                Either the individual single-qubit operators, or an already-built
+                :class:`~tqecd.pauli.CollapsingOperators` (used by
+                :meth:`merge`, :meth:`with_measurement_offset` and fragment-level
+                construction to share the precomputed masks).
             measurements: measurement offsets relative to the **end** of the
                 fragment (even if the created :class:`BoundaryStabilizer`
                 instance represents a stabilizer on the beginning boundary) of
@@ -44,12 +48,24 @@ class BoundaryStabilizer:
         """
         self._stabilizer = stabilizer
         self._measurements = measurements
-        self._collapsing_operations = frozenset(collapsing_operations)
-        self._has_anticommuting_collapsing_operations = any(
-            co.anticommutes(stabilizer) for co in collapsing_operations
+        self._collapse = (
+            collapsing_operations
+            if isinstance(collapsing_operations, CollapsingOperators)
+            else CollapsingOperators.from_paulis(collapsing_operations)
+        )
+        # The individual operators are reconstructed from the masks only on
+        # demand (repr, external access); see ``collapsing_operations``.
+        self._collapsing_operations_cache: frozenset[PauliString] | None = None
+        self._has_anticommuting_collapsing_operations = (
+            self._collapse.anticommutes_with(stabilizer)
         )
         self._reset_qubits: frozenset[int] = reset_qubits
         self._is_forward = forward
+        # Lazily-cached return value of ``after_collapse``. ``BoundaryStabilizer``
+        # is immutable after construction, so the collapsed stabilizer is
+        # computed at most once and reused (it is accessed repeatedly while
+        # matching detectors).
+        self._after_collapse: PauliString | None = None
 
     @property
     def has_anticommuting_operations(self) -> bool:
@@ -67,6 +83,10 @@ class BoundaryStabilizer:
         """Compute the stabilizer obtained after applying the collapsing
         operations.
 
+        The result is computed once on first access and cached for subsequent
+        accesses, which is safe because ``BoundaryStabilizer`` is immutable
+        after construction.
+
         Raises:
             TQECDException: If any of the collapsing operation anti-commutes
                 with the stored stabilizer.
@@ -80,7 +100,9 @@ class BoundaryStabilizer:
                 "Cannot collapse a BoundaryStabilizer if it has "
                 "anticommuting operations."
             )
-        return self._stabilizer.collapse_by(self._collapsing_operations)
+        if self._after_collapse is None:
+            self._after_collapse = self._collapse.collapse(self._stabilizer)
+        return self._after_collapse
 
     @property
     def before_collapse(self) -> PauliString:
@@ -96,9 +118,21 @@ class BoundaryStabilizer:
 
     @property
     def collapsing_operations(self) -> Iterable[PauliString]:
-        """Iterator on all the collapsing operations defining the boundary this
-        stabilizer is applied to."""
-        return self._collapsing_operations
+        """All the collapsing operations defining the boundary this stabilizer is
+        applied to.
+
+        The single-qubit operations are reconstructed (and cached) from the
+        stored ``(X, Z)`` masks on first access.
+        """
+        if self._collapsing_operations_cache is None:
+            self._collapsing_operations_cache = self._collapse.to_paulis()
+        return self._collapsing_operations_cache
+
+    @property
+    def collapse(self) -> CollapsingOperators:
+        """The collapsing operators defining the boundary this stabilizer is
+        applied to."""
+        return self._collapse
 
     @property
     def measurements(self) -> list[RelativeMeasurementLocation]:
@@ -127,14 +161,12 @@ class BoundaryStabilizer:
             operations (i.e., the same boundary), but with the two pre-collapsing
             stabilizers multiplied together.
         """
-        self_collapsing_operations = set(self.collapsing_operations)
-        other_collapsing_operations = set(other.collapsing_operations)
-        if self_collapsing_operations != other_collapsing_operations:
+        if self.collapse != other.collapse:
             raise TQECDException(
                 "Breaking pre-condition: trying to merge two BoundaryStabilizer "
                 "instances that are not defined on the same boundary.\n"
-                f"Collapsing operations for left-hand side: {self_collapsing_operations}.\n"
-                f"Collapsing operations for right-hand side: {other_collapsing_operations}.\n"
+                f"Collapsing operations for left-hand side: {set(self.collapsing_operations)}.\n"
+                f"Collapsing operations for right-hand side: {set(other.collapsing_operations)}.\n"
             )
         if self._is_forward != other._is_forward:
             raise TQECDException(
@@ -179,7 +211,7 @@ class BoundaryStabilizer:
             )
         return BoundaryStabilizer(
             stabilizer,
-            self_collapsing_operations,
+            self.collapse,
             measurements,
             reset_qubits,
             is_forward_merge,
@@ -227,7 +259,7 @@ class BoundaryStabilizer:
     def with_measurement_offset(self, offset: int) -> BoundaryStabilizer:
         return BoundaryStabilizer(
             self._stabilizer,
-            self.collapsing_operations,
+            self.collapse,
             [m.offset_by(offset) for m in self.measurements],
             self._reset_qubits,
             self._is_forward,
