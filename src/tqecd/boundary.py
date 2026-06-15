@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from functools import cached_property
 from typing import Iterable, Mapping
 
 import numpy
@@ -62,10 +63,14 @@ class BoundaryStabilizer:
         """
         return self._has_anticommuting_collapsing_operations
 
-    @property
+    @cached_property
     def after_collapse(self) -> PauliString:
         """Compute the stabilizer obtained after applying the collapsing
         operations.
+
+        Cached: a BoundaryStabilizer is immutable (its stabilizer and collapsing
+        operations are fixed at construction), and this collapse is one of the
+        package's hottest operations (#47), so the result is memoised.
 
         Raises:
             TQECDException: If any of the collapsing operation anti-commutes
