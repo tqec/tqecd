@@ -400,9 +400,9 @@
   <h1>Source code for tqecd.match</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">copy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Final</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Mapping</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Mapping</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">stim</span>
@@ -702,16 +702,18 @@
     <span class="c1">#     is repeated at least twice).</span>
     <span class="c1">#     Because the matching functions are modifying flows in-place, we pre-compute the</span>
     <span class="c1">#     detectors here on copies and will compare them before returning.</span>
-    <span class="n">should_sanity_check</span><span class="p">:</span> <span class="n">Final</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="n">perform_sanity_check</span> <span class="ow">and</span> <span class="p">(</span>
-        <span class="nb">isinstance</span><span class="p">(</span><span class="n">right_flows</span><span class="p">,</span> <span class="n">FragmentLoopFlows</span><span class="p">)</span> <span class="ow">and</span> <span class="n">right_flows</span><span class="o">.</span><span class="n">repeat</span> <span class="o">&gt;</span> <span class="mi">1</span>
-    <span class="p">)</span>
-    <span class="k">if</span> <span class="n">should_sanity_check</span><span class="p">:</span>
+    <span class="n">matched_detectors_within_loop</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">MatchedDetector</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="n">perform_sanity_check</span>
+        <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">right_flows</span><span class="p">,</span> <span class="n">FragmentLoopFlows</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="n">right_flows</span><span class="o">.</span><span class="n">repeat</span> <span class="o">&gt;</span> <span class="mi">1</span>
+    <span class="p">):</span>
+        <span class="c1"># copy() duplicates the mutable flow containers via their __copy__</span>
+        <span class="c1"># implementations. BoundaryStabilizer entries remain shared because</span>
+        <span class="c1"># matching only removes entries from the containers and does not mutate them.</span>
         <span class="n">matched_detectors_within_loop</span> <span class="o">=</span> <span class="n">match_boundary_stabilizers</span><span class="p">(</span>
-            <span class="c1"># Type checking is disabled below. right_flows is guaranteed to be of type</span>
-            <span class="c1"># FragmentLoopFlows (per the value of should_sanity_check), and so have a</span>
-            <span class="c1"># &quot;fragment_flows&quot; attribute.</span>
-            <span class="n">deepcopy</span><span class="p">(</span><span class="n">right_flows</span><span class="o">.</span><span class="n">fragment_flows</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span>  <span class="c1"># type: ignore</span>
-            <span class="n">deepcopy</span><span class="p">(</span><span class="n">right_flows</span><span class="o">.</span><span class="n">fragment_flows</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>  <span class="c1"># type: ignore</span>
+            <span class="n">copy</span><span class="p">(</span><span class="n">right_flows</span><span class="o">.</span><span class="n">fragment_flows</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span>
+            <span class="n">copy</span><span class="p">(</span><span class="n">right_flows</span><span class="o">.</span><span class="n">fragment_flows</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
             <span class="n">qubit_coordinates</span><span class="p">,</span>
         <span class="p">)</span>
 
@@ -742,15 +744,8 @@
         <span class="n">_match_by_disjoint_cover</span><span class="p">(</span><span class="n">left_flows</span><span class="p">,</span> <span class="n">right_flows</span><span class="p">,</span> <span class="n">qubit_coordinates</span><span class="p">)</span>
     <span class="p">)</span>
     <span class="c1"># Perform the sanity check if needed.</span>
-    <span class="k">if</span> <span class="n">should_sanity_check</span><span class="p">:</span>
-        <span class="c1"># Notes about the following &quot;type: ignore&quot;:</span>
-        <span class="c1"># - should_sanity_check is &quot;constant&quot; (annotated as Final) and so cannot</span>
-        <span class="c1">#   be changed.</span>
-        <span class="c1"># - matched_detectors_within_loop is unconditionally bound to a value if</span>
-        <span class="c1">#   should_sanity_check is True.</span>
-        <span class="c1"># - if we are here, then should_sanity_check is True, and so</span>
-        <span class="c1">#   matched_detectors_within_loop should be bound to a value.</span>
-        <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">matched_detectors_within_loop</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">set</span><span class="p">(</span><span class="n">matched_detectors</span><span class="p">):</span>  <span class="c1"># type: ignore[reportPossiblyUnboundVariable]</span>
+    <span class="k">if</span> <span class="n">matched_detectors_within_loop</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">matched_detectors_within_loop</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">set</span><span class="p">(</span><span class="n">matched_detectors</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">TQECDException</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;The set of detectors computed from measurements in</span><span class="se">\n</span><span class="si">{</span><span class="n">left_flows</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
                 <span class="sa">f</span><span class="s2">&quot;and</span><span class="se">\n</span><span class="si">{</span><span class="n">right_flows</span><span class="si">}</span><span class="se">\n</span><span class="s2">is not the same as the set of detectors computed &quot;</span>

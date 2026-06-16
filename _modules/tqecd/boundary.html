@@ -421,6 +421,8 @@
         <span class="n">measurements</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">RelativeMeasurementLocation</span><span class="p">],</span>
         <span class="n">reset_qubits</span><span class="p">:</span> <span class="nb">frozenset</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
         <span class="n">forward</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">_collapsing_pauli_masks</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Represents a stabilizer that has been propagated and is now at the</span>
 <span class="sd">        boundary of a :class:`~tqecd.fragment.Fragment`.</span>
@@ -445,13 +447,36 @@
 <span class="sd">            forward:</span>
 <span class="sd">                ``True`` if the stabilizer propagated forward (i.e., ends on</span>
 <span class="sd">                measurements), else ``False``.</span>
+<span class="sd">            _collapsing_pauli_masks: Optional precomputed bit masks for the</span>
+<span class="sd">                single-qubit X, Y, and Z collapsing operations, in that order.</span>
+<span class="sd">                When provided, they avoid iterating over</span>
+<span class="sd">                ``collapsing_operations`` to test and apply the collapse.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_stabilizer</span> <span class="o">=</span> <span class="n">stabilizer</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_measurements</span> <span class="o">=</span> <span class="n">measurements</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_collapsing_operations</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">(</span><span class="n">collapsing_operations</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_has_anticommuting_collapsing_operations</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span>
-            <span class="n">co</span><span class="o">.</span><span class="n">anticommutes</span><span class="p">(</span><span class="n">stabilizer</span><span class="p">)</span> <span class="k">for</span> <span class="n">co</span> <span class="ow">in</span> <span class="n">collapsing_operations</span>
-        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_collapsing_pauli_masks</span> <span class="o">=</span> <span class="n">_collapsing_pauli_masks</span>
+        <span class="k">if</span> <span class="n">_collapsing_pauli_masks</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_has_anticommuting_collapsing_operations</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span>
+                <span class="n">operation</span><span class="o">.</span><span class="n">anticommutes</span><span class="p">(</span><span class="n">stabilizer</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">operation</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collapsing_operations</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_has_anticommuting_collapsing_operations</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">stabilizer</span><span class="o">.</span><span class="n">_anticommutes_single_qubit_masks</span><span class="p">(</span><span class="o">*</span><span class="n">_collapsing_pauli_masks</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_after_collapse</span><span class="p">:</span> <span class="n">PauliString</span> <span class="o">|</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_has_anticommuting_collapsing_operations</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_after_collapse</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">elif</span> <span class="n">_collapsing_pauli_masks</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_after_collapse</span> <span class="o">=</span> <span class="n">stabilizer</span><span class="o">.</span><span class="n">collapse_by</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_collapsing_operations</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_after_collapse</span> <span class="o">=</span> <span class="n">stabilizer</span><span class="o">.</span><span class="n">_without_qubits</span><span class="p">(</span>
+                <span class="n">_collapsing_pauli_masks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="o">|</span> <span class="n">_collapsing_pauli_masks</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="o">|</span> <span class="n">_collapsing_pauli_masks</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+            <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_reset_qubits</span><span class="p">:</span> <span class="nb">frozenset</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">reset_qubits</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_is_forward</span> <span class="o">=</span> <span class="n">forward</span></div>
 
@@ -480,12 +505,12 @@
 <span class="sd">            The collapsed :class:`~tqecd.pauli.PauliString` that goes out of the</span>
 <span class="sd">            :class:`~tqecd.fragment.Fragment`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_anticommuting_operations</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_after_collapse</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">TQECDException</span><span class="p">(</span>
                 <span class="s2">&quot;Cannot collapse a BoundaryStabilizer if it has &quot;</span>
                 <span class="s2">&quot;anticommuting operations.&quot;</span>
             <span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stabilizer</span><span class="o">.</span><span class="n">collapse_by</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_collapsing_operations</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_after_collapse</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">before_collapse</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PauliString</span><span class="p">:</span>
@@ -500,7 +525,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stabilizer</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">collapsing_operations</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">PauliString</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">collapsing_operations</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">frozenset</span><span class="p">[</span><span class="n">PauliString</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Iterator on all the collapsing operations defining the boundary this</span>
 <span class="sd">        stabilizer is applied to.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collapsing_operations</span>
@@ -532,14 +557,14 @@
 <span class="sd">            operations (i.e., the same boundary), but with the two pre-collapsing</span>
 <span class="sd">            stabilizers multiplied together.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">self_collapsing_operations</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">collapsing_operations</span><span class="p">)</span>
-        <span class="n">other_collapsing_operations</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">collapsing_operations</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">self_collapsing_operations</span> <span class="o">!=</span> <span class="n">other_collapsing_operations</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collapsing_operations</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">_collapsing_operations</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">TQECDException</span><span class="p">(</span>
                 <span class="s2">&quot;Breaking pre-condition: trying to merge two BoundaryStabilizer &quot;</span>
                 <span class="s2">&quot;instances that are not defined on the same boundary.</span><span class="se">\n</span><span class="s2">&quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;Collapsing operations for left-hand side: </span><span class="si">{</span><span class="n">self_collapsing_operations</span><span class="si">}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">&quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;Collapsing operations for right-hand side: </span><span class="si">{</span><span class="n">other_collapsing_operations</span><span class="si">}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="s2">&quot;Collapsing operations for left-hand side: &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_collapsing_operations</span><span class="si">}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="s2">&quot;Collapsing operations for right-hand side: &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">other</span><span class="o">.</span><span class="n">_collapsing_operations</span><span class="si">}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">&quot;</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_forward</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">_is_forward</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">TQECDException</span><span class="p">(</span>
@@ -584,10 +609,11 @@
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">BoundaryStabilizer</span><span class="p">(</span>
             <span class="n">stabilizer</span><span class="p">,</span>
-            <span class="n">self_collapsing_operations</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_collapsing_operations</span><span class="p">,</span>
             <span class="n">measurements</span><span class="p">,</span>
             <span class="n">reset_qubits</span><span class="p">,</span>
             <span class="n">is_forward_merge</span><span class="p">,</span>
+            <span class="n">_collapsing_pauli_masks</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_collapsing_pauli_masks</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -636,6 +662,7 @@
             <span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">offset_by</span><span class="p">(</span><span class="n">offset</span><span class="p">)</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">measurements</span><span class="p">],</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_reset_qubits</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_is_forward</span><span class="p">,</span>
+            <span class="n">_collapsing_pauli_masks</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_collapsing_pauli_masks</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">is_trivial</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>

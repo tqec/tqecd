@@ -401,14 +401,47 @@
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ty</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">copy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.boundary</span><span class="w"> </span><span class="kn">import</span> <span class="n">BoundaryStabilizer</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.cover</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_commuting_cover_on_target_qubits</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">TQECDException</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.fragment</span><span class="w"> </span><span class="kn">import</span> <span class="n">Fragment</span><span class="p">,</span> <span class="n">FragmentLoop</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.measurement</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_relative_measurement_index</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.measurement</span><span class="w"> </span><span class="kn">import</span> <span class="n">RelativeMeasurementLocation</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.pauli</span><span class="w"> </span><span class="kn">import</span> <span class="n">PauliString</span><span class="p">,</span> <span class="n">pauli_product</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_single_qubit_pauli_masks</span><span class="p">(</span>
+    <span class="n">paulis</span><span class="p">:</span> <span class="nb">frozenset</span><span class="p">[</span><span class="n">PauliString</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Encode disjoint single-qubit Pauli operators into X, Y, and Z masks.</span>
+
+<span class="sd">    Each set bit identifies the qubit targeted by an operator of the</span>
+<span class="sd">    corresponding type. ``None`` is returned when an operator spans several</span>
+<span class="sd">    qubits or when different operators target the same qubit, because those</span>
+<span class="sd">    inputs cannot use the single-qubit collapse fast path.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">x_mask</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">y_mask</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">z_mask</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">support</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">pauli</span> <span class="ow">in</span> <span class="n">paulis</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">pauli</span><span class="o">.</span><span class="n">non_trivial_pauli_count</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">qubit</span> <span class="o">=</span> <span class="n">pauli</span><span class="o">.</span><span class="n">qubit</span>
+        <span class="n">bit</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">qubit</span>
+        <span class="k">if</span> <span class="n">support</span> <span class="o">&amp;</span> <span class="n">bit</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">support</span> <span class="o">|=</span> <span class="n">bit</span>
+        <span class="n">literal</span> <span class="o">=</span> <span class="n">pauli</span><span class="p">[</span><span class="n">qubit</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">literal</span> <span class="o">==</span> <span class="s2">&quot;X&quot;</span><span class="p">:</span>
+            <span class="n">x_mask</span> <span class="o">|=</span> <span class="n">bit</span>
+        <span class="k">elif</span> <span class="n">literal</span> <span class="o">==</span> <span class="s2">&quot;Y&quot;</span><span class="p">:</span>
+            <span class="n">y_mask</span> <span class="o">|=</span> <span class="n">bit</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">z_mask</span> <span class="o">|=</span> <span class="n">bit</span>
+    <span class="k">return</span> <span class="n">x_mask</span><span class="p">,</span> <span class="n">y_mask</span><span class="p">,</span> <span class="n">z_mask</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_anti_commuting_stabilizers_indices</span><span class="p">(</span><span class="n">flows</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">BoundaryStabilizer</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
@@ -443,9 +476,8 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="n">anti_commuting_index_to_flows_index</span><span class="p">:</span>
         <span class="k">return</span>
 
-    <span class="n">collapsing_operations</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">set</span><span class="p">[</span><span class="n">PauliString</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="nb">set</span><span class="p">(</span><span class="n">flows</span><span class="p">[</span><span class="n">fi</span><span class="p">]</span><span class="o">.</span><span class="n">collapsing_operations</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">fi</span> <span class="ow">in</span> <span class="n">anti_commuting_index_to_flows_index</span>
+    <span class="n">collapsing_operations</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">frozenset</span><span class="p">[</span><span class="n">PauliString</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">flows</span><span class="p">[</span><span class="n">fi</span><span class="p">]</span><span class="o">.</span><span class="n">collapsing_operations</span> <span class="k">for</span> <span class="n">fi</span> <span class="ow">in</span> <span class="n">anti_commuting_index_to_flows_index</span>
     <span class="p">]</span>
     <span class="c1"># Checking that all the provided flows are defined on the same boundary.</span>
     <span class="c1"># This is checked by comparing the collapsing operations for each</span>
@@ -539,6 +571,14 @@
         <span class="k">yield from</span> <span class="bp">self</span><span class="o">.</span><span class="n">creation</span>
         <span class="k">yield from</span> <span class="bp">self</span><span class="o">.</span><span class="n">destruction</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">__copy__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FragmentFlows</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Copy the flow lists without duplicating their stabilizer entries.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">FragmentFlows</span><span class="p">(</span>
+            <span class="n">creation</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">creation</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+            <span class="n">destruction</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">destruction</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+            <span class="n">total_number_of_measurements</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">total_number_of_measurements</span><span class="p">,</span>
+        <span class="p">)</span>
+
     <span class="k">def</span><span class="w"> </span><span class="nf">remove_creation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">creation</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
 
@@ -593,6 +633,13 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">all_flows</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ty</span><span class="o">.</span><span class="n">Iterator</span><span class="p">[</span><span class="n">BoundaryStabilizer</span><span class="p">]:</span>
         <span class="k">yield from</span> <span class="bp">self</span><span class="o">.</span><span class="n">creation</span>
         <span class="k">yield from</span> <span class="bp">self</span><span class="o">.</span><span class="n">destruction</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__copy__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FragmentLoopFlows</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Recursively copy flow containers without duplicating stabilizers.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">FragmentLoopFlows</span><span class="p">(</span>
+            <span class="n">fragment_flows</span><span class="o">=</span><span class="p">[</span><span class="n">copy</span><span class="p">(</span><span class="n">flow</span><span class="p">)</span> <span class="k">for</span> <span class="n">flow</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fragment_flows</span><span class="p">],</span>
+            <span class="n">repeat</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">repeat</span><span class="p">,</span>
+        <span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">total_number_of_measurements</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
@@ -659,6 +706,25 @@
     <span class="n">tableau</span> <span class="o">=</span> <span class="n">fragment</span><span class="o">.</span><span class="n">get_tableau</span><span class="p">()</span>
     <span class="n">targets</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tableau</span><span class="p">)))</span>
     <span class="n">sorted_qubit_involved_in_measurements</span> <span class="o">=</span> <span class="n">fragment</span><span class="o">.</span><span class="n">measurements_qubits</span>
+    <span class="n">measurements</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">(</span><span class="n">fragment</span><span class="o">.</span><span class="n">measurements</span><span class="p">)</span>
+    <span class="n">resets</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">(</span><span class="n">fragment</span><span class="o">.</span><span class="n">resets</span><span class="p">)</span>
+    <span class="n">measurement_masks</span> <span class="o">=</span> <span class="n">_single_qubit_pauli_masks</span><span class="p">(</span><span class="n">measurements</span><span class="p">)</span>
+    <span class="n">reset_masks</span> <span class="o">=</span> <span class="n">_single_qubit_pauli_masks</span><span class="p">(</span><span class="n">resets</span><span class="p">)</span>
+    <span class="n">measurement_entries_by_qubit</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span>
+        <span class="nb">int</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">RelativeMeasurementLocation</span><span class="p">]]</span>
+    <span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">qubit</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sorted_qubit_involved_in_measurements</span><span class="p">):</span>
+        <span class="n">entries</span> <span class="o">=</span> <span class="n">measurement_entries_by_qubit</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">qubit</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="n">measurement_location</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">entries</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">entries</span>
+            <span class="k">else</span> <span class="n">RelativeMeasurementLocation</span><span class="p">(</span>
+                <span class="n">offset</span><span class="o">=</span><span class="n">index</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">sorted_qubit_involved_in_measurements</span><span class="p">),</span>
+                <span class="n">qubit_index</span><span class="o">=</span><span class="n">qubit</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">entries</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">index</span><span class="p">,</span> <span class="n">measurement_location</span><span class="p">))</span>
+    <span class="n">reset_qubits</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">(</span><span class="n">reset</span><span class="o">.</span><span class="n">qubit</span> <span class="k">for</span> <span class="n">reset</span> <span class="ow">in</span> <span class="n">fragment</span><span class="o">.</span><span class="n">resets</span><span class="p">)</span>
 
     <span class="c1"># First compute the flows created within the Fragment (i.e., originating from</span>
     <span class="c1"># reset instructions).</span>
@@ -666,20 +732,25 @@
     <span class="k">for</span> <span class="n">reset_stabilizer</span> <span class="ow">in</span> <span class="n">fragment</span><span class="o">.</span><span class="n">resets</span><span class="p">:</span>
         <span class="n">final_stabilizer</span> <span class="o">=</span> <span class="n">reset_stabilizer</span><span class="o">.</span><span class="n">after</span><span class="p">(</span><span class="n">tableau</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
         <span class="n">involved_measurements_offsets</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">get_relative_measurement_index</span><span class="p">(</span>
-                <span class="n">sorted_qubit_involved_in_measurements</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">qubit</span>
+            <span class="n">measurement</span>
+            <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">measurement</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="n">entry</span>
+                    <span class="k">for</span> <span class="n">qubit</span> <span class="ow">in</span> <span class="n">final_stabilizer</span><span class="o">.</span><span class="n">qubits</span>
+                    <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">measurement_entries_by_qubit</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">qubit</span><span class="p">,</span> <span class="p">())</span>
+                <span class="p">),</span>
+                <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">entry</span><span class="p">:</span> <span class="n">entry</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
             <span class="p">)</span>
-            <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">fragment</span><span class="o">.</span><span class="n">measurements</span>
-            <span class="k">if</span> <span class="n">final_stabilizer</span><span class="o">.</span><span class="n">overlaps</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
         <span class="p">]</span>
         <span class="n">involved_resets_qubits</span> <span class="o">=</span> <span class="p">[</span><span class="n">reset_stabilizer</span><span class="o">.</span><span class="n">qubit</span><span class="p">]</span>
         <span class="n">creation_flows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
             <span class="n">BoundaryStabilizer</span><span class="p">(</span>
                 <span class="n">final_stabilizer</span><span class="p">,</span>
-                <span class="n">fragment</span><span class="o">.</span><span class="n">measurements</span><span class="p">,</span>
+                <span class="n">measurements</span><span class="p">,</span>
                 <span class="n">involved_measurements_offsets</span><span class="p">,</span>
                 <span class="nb">frozenset</span><span class="p">(</span><span class="n">involved_resets_qubits</span><span class="p">),</span>
                 <span class="n">forward</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">_collapsing_pauli_masks</span><span class="o">=</span><span class="n">measurement_masks</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="p">)</span>
 
@@ -696,20 +767,19 @@
             <span class="p">)</span>
         <span class="n">initial_stabilizer</span> <span class="o">=</span> <span class="n">measurement</span><span class="o">.</span><span class="n">after</span><span class="p">(</span><span class="n">tableau_inv</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
         <span class="n">involved_measurements_offsets</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">get_relative_measurement_index</span><span class="p">(</span>
-                <span class="n">sorted_qubit_involved_in_measurements</span><span class="p">,</span> <span class="n">measurement</span><span class="o">.</span><span class="n">qubit</span>
-            <span class="p">)</span>
+            <span class="n">measurement_entries_by_qubit</span><span class="p">[</span><span class="n">measurement</span><span class="o">.</span><span class="n">qubit</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
         <span class="p">]</span>
         <span class="n">involved_resets_qubits</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">m</span><span class="o">.</span><span class="n">qubit</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">fragment</span><span class="o">.</span><span class="n">resets</span> <span class="k">if</span> <span class="n">initial_stabilizer</span><span class="o">.</span><span class="n">overlaps</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+            <span class="n">qubit</span> <span class="k">for</span> <span class="n">qubit</span> <span class="ow">in</span> <span class="n">initial_stabilizer</span><span class="o">.</span><span class="n">qubits</span> <span class="k">if</span> <span class="n">qubit</span> <span class="ow">in</span> <span class="n">reset_qubits</span>
         <span class="p">]</span>
         <span class="n">destruction_flows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
             <span class="n">BoundaryStabilizer</span><span class="p">(</span>
                 <span class="n">initial_stabilizer</span><span class="p">,</span>
-                <span class="n">fragment</span><span class="o">.</span><span class="n">resets</span><span class="p">,</span>
+                <span class="n">resets</span><span class="p">,</span>
                 <span class="n">involved_measurements_offsets</span><span class="p">,</span>
                 <span class="nb">frozenset</span><span class="p">(</span><span class="n">involved_resets_qubits</span><span class="p">),</span>
                 <span class="n">forward</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">_collapsing_pauli_masks</span><span class="o">=</span><span class="n">reset_masks</span><span class="p">,</span>
             <span class="p">),</span>
         <span class="p">)</span>
 

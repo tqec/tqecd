@@ -517,10 +517,13 @@
 <dt class="sig sig-object py" id="tqecd.pauli.PauliString">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PauliString</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pauli_by_qubit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'I'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'X'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Y'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Z'</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tqecd/pauli.html#PauliString"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tqecd.pauli.PauliString" title="Link to this definition">#</a></dt>
 <dd><p>A mapping from qubits to Pauli operators that represent a Pauli string.</p>
-<dl class="simple">
+<dl>
 <dt>Invariant:</dt><dd><p>This class never stores identity Pauli terms. Any missing Pauli term is
-considered to be an identity.
-As such, it is illegal to initialise this class with an identity term.</p>
+considered to be an identity, and identity entries passed to the
+constructor are ignored.</p>
+<p>Instances are treated as immutable after construction. Hashing,
+identity-preserving copies, and shared references in flow copies rely
+on the private bit fields never being mutated.</p>
 </dd>
 </dl>
 <dl class="py method">
@@ -547,7 +550,7 @@ As such, it is illegal to initialise this class with an identity term.</p>
 <td><p>Check if this Pauli string commutes with another Pauli string.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">contains</span></code>(other)</p></td>
-<td><p></p></td>
+<td><p>Check whether all non-identity terms in <code class="docutils literal notranslate"><span class="pre">other</span></code> match this string.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_stim_pauli_string</span></code>(stim_pauli_string)</p></td>
 <td><p>Convert a <cite>stim.PauliString</cite> to a <cite>PauliString</cite> instance, ignoring the sign.</p></td>
