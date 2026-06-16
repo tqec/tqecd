@@ -75,6 +75,19 @@ def test_after_and_before_collapse() -> None:
     assert stab.after_collapse == X0Z1
 
 
+def test_after_collapse_is_cached() -> None:
+    X0Z1 = PauliString({0: "X", 1: "Z"})
+    X0 = PauliString({0: "X"})
+    Z1 = PauliString({1: "Z"})
+
+    stab = BoundaryStabilizer(X0Z1, [X0, Z1], [], frozenset([0]), True)
+    first = stab.after_collapse
+    second = stab.after_collapse
+    assert first == PauliString({})
+    # The collapsed stabilizer is computed once and reused on later accesses.
+    assert first is second
+
+
 def test_merge() -> None:
     X0Z1 = PauliString({0: "X", 1: "Z"})
     Z0Z1 = PauliString({0: "Z", 1: "Z"})

@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from copy import deepcopy
 from dataclasses import dataclass
-from typing import Final, Iterator, Mapping
+from typing import Final, Iterator, Mapping, cast
 
 import numpy
 import stim
@@ -246,6 +245,29 @@ def _find_non_propagating_non_trivial_flows(
             yield i
 
 
+def _shallow_copy_flows(
+    flows: FragmentFlows | FragmentLoopFlows,
+) -> FragmentFlows | FragmentLoopFlows:
+    """Duplicate ``flows`` for a throwaway, mutating match.
+
+    Only the mutable ``creation``/``destruction`` lists (recursively, for a
+    :class:`~tqecd.flow.FragmentLoopFlows`) are copied; the
+    :class:`~tqecd.boundary.BoundaryStabilizer` entries are shared, as the
+    matching functions never mutate a boundary stabilizer in place (they only
+    add/remove entries from the lists). This is the cheap equivalent of a
+    ``deepcopy`` for the sole purpose of the sanity check below.
+    """
+    if isinstance(flows, FragmentLoopFlows):
+        return FragmentLoopFlows(
+            [_shallow_copy_flows(f) for f in flows.fragment_flows], flows.repeat
+        )
+    return FragmentFlows(
+        list(flows.creation),
+        list(flows.destruction),
+        flows.total_number_of_measurements,
+    )
+
+
 def match_boundary_stabilizers(
     left_flows: FragmentFlows | FragmentLoopFlows,
     right_flows: FragmentFlows | FragmentLoopFlows,
@@ -295,12 +317,12 @@ def match_boundary_stabilizers(
         isinstance(right_flows, FragmentLoopFlows) and right_flows.repeat > 1
     )
     if should_sanity_check:
+        # right_flows is guaranteed to be a FragmentLoopFlows here (per the
+        # value of should_sanity_check), so the cast below is safe.
+        loop_flows = cast(FragmentLoopFlows, right_flows)
         matched_detectors_within_loop = match_boundary_stabilizers(
-            # Type checking is disabled below. right_flows is guaranteed to be of type
-            # FragmentLoopFlows (per the value of should_sanity_check), and so have a
-            # "fragment_flows" attribute.
-            deepcopy(right_flows.fragment_flows[-1]),  # type: ignore
-            deepcopy(right_flows.fragment_flows[0]),  # type: ignore
+            _shallow_copy_flows(loop_flows.fragment_flows[-1]),
+            _shallow_copy_flows(loop_flows.fragment_flows[0]),
             qubit_coordinates,
         )
 

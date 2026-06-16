@@ -5,45 +5,6 @@ from __future__ import annotations
 from tqecd.pauli import PauliString
 
 
-def _find_cover(
-    target: PauliString,
-    sources: list[PauliString],
-    on_qubits: frozenset[int],
-    commute_with: PauliString | None = None,
-) -> list[int] | None:
-    """Try to find a set of boundary stabilizers from ``sources`` that generate
-    ``target`` (or commute with ``target``) on qubits ``on_qubits`` (a "cover").
-
-    If multiple valid covers exist, only one will be returned. This choice is
-    deterministic, but not necessarily with the lowest weight.
-
-    Args:
-        target: the stabilizers to cover with stabilizers from ``sources``.
-        sources: stabilizers that can be used to cover ``target``.
-        on_qubits: qubits to consider when trying to cover ``target`` with
-            ``sources``.
-        commute_with: if provided, find a commuting-cover to the provided Pauli
-            string; otherwise, find an exact cover.
-
-    Returns:
-        A list of source indices forming the exact or commuting cover, or
-        ``None`` if no such cover could be found.
-    """
-    basis: dict[int, tuple[int, int]] = {}
-    for i, source in enumerate(sources):
-        result = _solve_linear_system(
-            basis, source.to_int(on_qubits, commute_with), 1 << i
-        )
-        if result is not None and commute_with is not None:
-            return _int_to_bit_indices(result)
-    if commute_with is not None:
-        return None
-    result = _solve_linear_system(
-        basis, target.to_int(on_qubits, commute_with), update_basis=False
-    )
-    return None if result is None else _int_to_bit_indices(result)
-
-
 def find_exact_cover(
     target: PauliString, sources: list[PauliString]
 ) -> list[int] | None:
@@ -64,6 +25,9 @@ def find_exact_cover(
             resulting_pauli_string = resulting_pauli_string * sources[i]
         assert resulting_pauli_string == target, "Should hold"
 
+    If multiple valid covers exist, only one will be returned. This choice is
+    deterministic, but not necessarily with the lowest weight.
+
     Args:
         target: the stabilizers to cover with stabilizers from ``sources``.
         sources: stabilizers that can be used to cover ``target``.
@@ -82,38 +46,34 @@ def find_exact_cover(
     if not sources:
         return None
 
-    # We want an exact (i.e., equality) cover on all qubits, to be sure that
-    # the post-condition in the docstring holds. For that, it is sufficient to
-    # only consider all the qubits where either `target` or at least one of the
-    # items of `sources` acts non-trivially (i.e., something else than the identity).
-    involved_qubits = frozenset(target.qubits)
+    # Each Pauli string is encoded as a GF(2) bit-vector concatenating its X and
+    # Z masks (see ``PauliString.exact_cover_vector``). ``shift`` keeps the two
+    # halves disjoint and must exceed the highest involved qubit index, so it is
+    # derived from the union of all the supports.
+    support = target.support
     for source in sources:
-        involved_qubits |= frozenset(source.qubits)
+        support |= source.support
+    shift = support.bit_length()
 
-    return _find_cover(target, sources, involved_qubits)
+    basis: dict[int, tuple[int, int]] = {}
+    for i, source in enumerate(sources):
+        _solve_linear_system(basis, source.exact_cover_vector(shift), 1 << i)
+    result = _solve_linear_system(
+        basis, target.exact_cover_vector(shift), update_basis=False
+    )
+    return None if result is None else _int_to_bit_indices(result)
 
 
 def find_commuting_cover_on_target_qubits(
     target: PauliString, sources: list[PauliString]
 ) -> list[int] | None:
-    """Try to find a set of boundary stabilizers from ``sources`` that generate a
-    superset of ``target``.
+    """Try to find a set of boundary stabilizers from ``sources`` whose product
+    commutes with ``target`` on every qubit where ``target`` is non-trivial.
 
-    This function tries to find a set of Pauli strings from ``sources`` that
-    includes ``target`` (i.e., on every qubit where ``target`` is non-trivial,
-    the product of each of the returned Pauli strings should commute with
-    ``target``).
-
-    The differences with :func:`find_cover` are:
-
-    1. this function does not restrict the output of the product of each of
-       the returned Pauli string on qubits where ``target`` acts trivially (i.e.
-       "I"). So in practice, on qubits where ``target[qubit] == "I"``, the value
-       of the returned Pauli string can be anything.
-    2. this function does not restrict the output of the product of each of
-       the returned Pauli string to exactly match ``target`` on qubits where
-       it acts non-trivially, but rather requires the output to commute with
-       ``target`` on those qubits.
+    Unlike :func:`find_exact_cover`, this function does not constrain the product
+    of the returned Pauli strings on qubits where ``target`` acts trivially, and
+    only requires the product to commute with ``target`` (rather than to equal
+    it) on qubits where ``target`` is non-trivial.
 
     Args:
         target: the stabilizers to cover with stabilizers from ``sources``.
@@ -125,7 +85,19 @@ def find_commuting_cover_on_target_qubits(
     """
     if not sources:
         return None
-    return _find_cover(target, sources, frozenset(target.qubits), commute_with=target)
+
+    # Each source is encoded as the bit-vector of its per-qubit anti-commutation
+    # with ``target`` (see ``PauliString.commuting_cover_vector``). A subset of
+    # sources commutes with ``target`` exactly when their vectors XOR to zero,
+    # i.e. when a source is linearly dependent on the previous ones.
+    basis: dict[int, tuple[int, int]] = {}
+    for i, source in enumerate(sources):
+        result = _solve_linear_system(
+            basis, source.commuting_cover_vector(target), 1 << i
+        )
+        if result is not None:
+            return _int_to_bit_indices(result)
+    return None
 
 
 def _solve_linear_system(
