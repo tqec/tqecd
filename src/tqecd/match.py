@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from copy import deepcopy
+from copy import copy
 from dataclasses import dataclass
-from typing import Final, Iterator, Mapping
+from typing import Iterator, Mapping
 
 import numpy
 import stim
@@ -291,16 +291,18 @@ def match_boundary_stabilizers(
     #     is repeated at least twice).
     #     Because the matching functions are modifying flows in-place, we pre-compute the
     #     detectors here on copies and will compare them before returning.
-    should_sanity_check: Final[bool] = perform_sanity_check and (
-        isinstance(right_flows, FragmentLoopFlows) and right_flows.repeat > 1
-    )
-    if should_sanity_check:
+    matched_detectors_within_loop: list[MatchedDetector] | None = None
+    if (
+        perform_sanity_check
+        and isinstance(right_flows, FragmentLoopFlows)
+        and right_flows.repeat > 1
+    ):
+        # copy() duplicates the mutable flow containers via their __copy__
+        # implementations. BoundaryStabilizer entries remain shared because
+        # matching only removes entries from the containers and does not mutate them.
         matched_detectors_within_loop = match_boundary_stabilizers(
-            # Type checking is disabled below. right_flows is guaranteed to be of type
-            # FragmentLoopFlows (per the value of should_sanity_check), and so have a
-            # "fragment_flows" attribute.
-            deepcopy(right_flows.fragment_flows[-1]),  # type: ignore
-            deepcopy(right_flows.fragment_flows[0]),  # type: ignore
+            copy(right_flows.fragment_flows[-1]),
+            copy(right_flows.fragment_flows[0]),
             qubit_coordinates,
         )
 
@@ -331,15 +333,8 @@ def match_boundary_stabilizers(
         _match_by_disjoint_cover(left_flows, right_flows, qubit_coordinates)
     )
     # Perform the sanity check if needed.
-    if should_sanity_check:
-        # Notes about the following "type: ignore":
-        # - should_sanity_check is "constant" (annotated as Final) and so cannot
-        #   be changed.
-        # - matched_detectors_within_loop is unconditionally bound to a value if
-        #   should_sanity_check is True.
-        # - if we are here, then should_sanity_check is True, and so
-        #   matched_detectors_within_loop should be bound to a value.
-        if set(matched_detectors_within_loop) != set(matched_detectors):  # type: ignore[reportPossiblyUnboundVariable]
+    if matched_detectors_within_loop is not None:
+        if set(matched_detectors_within_loop) != set(matched_detectors):
             raise TQECDException(
                 f"The set of detectors computed from measurements in\n{left_flows}\n"
                 f"and\n{right_flows}\nis not the same as the set of detectors computed "
