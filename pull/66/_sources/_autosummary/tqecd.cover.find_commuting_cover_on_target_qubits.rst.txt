@@ -1,6 +1,0 @@
-tqecd.cover.find\_commuting\_cover\_on\_target\_qubits
-======================================================
-
-.. currentmodule:: tqecd.cover
-
-.. autofunction:: find_commuting_cover_on_target_qubits
