@@ -75,6 +75,54 @@ def test_after_and_before_collapse() -> None:
     assert stab.after_collapse == X0Z1
 
 
+def test_precomputed_collapsing_pauli_masks_match_regular_path() -> None:
+    collapsing_operations = frozenset(
+        {
+            PauliString({0: "X"}),
+            PauliString({1: "Y"}),
+            PauliString({2: "Z"}),
+        }
+    )
+    masks = (1 << 0, 1 << 1, 1 << 2)
+
+    commuting = PauliString({0: "X", 1: "Y", 2: "Z", 3: "X"})
+    regular = BoundaryStabilizer(
+        commuting, collapsing_operations, [], frozenset(), True
+    )
+    optimized = BoundaryStabilizer(
+        commuting,
+        collapsing_operations,
+        [],
+        frozenset(),
+        True,
+        _collapsing_pauli_masks=masks,
+    )
+    assert (
+        optimized.has_anticommuting_operations == regular.has_anticommuting_operations
+    )
+    assert optimized.after_collapse == regular.after_collapse == PauliString({3: "X"})
+
+    anticommuting = PauliString({0: "Z", 3: "X"})
+    regular = BoundaryStabilizer(
+        anticommuting, collapsing_operations, [], frozenset(), True
+    )
+    optimized = BoundaryStabilizer(
+        anticommuting,
+        collapsing_operations,
+        [],
+        frozenset(),
+        True,
+        _collapsing_pauli_masks=masks,
+    )
+    assert (
+        optimized.has_anticommuting_operations == regular.has_anticommuting_operations
+    )
+    with pytest.raises(TQECDException):
+        regular.after_collapse
+    with pytest.raises(TQECDException):
+        optimized.after_collapse
+
+
 def test_merge() -> None:
     X0Z1 = PauliString({0: "X", 1: "Z"})
     Z0Z1 = PauliString({0: "Z", 1: "Z"})

@@ -29,17 +29,20 @@ def _find_cover(
         A list of source indices forming the exact or commuting cover, or
         ``None`` if no such cover could be found.
     """
+    qubit_mask = sum(1 << q for q in on_qubits)
     basis: dict[int, tuple[int, int]] = {}
     for i, source in enumerate(sources):
         result = _solve_linear_system(
-            basis, source.to_int(on_qubits, commute_with), 1 << i
+            basis, source._to_int_mask(qubit_mask, commute_with), 1 << i
         )
         if result is not None and commute_with is not None:
             return _int_to_bit_indices(result)
     if commute_with is not None:
         return None
     result = _solve_linear_system(
-        basis, target.to_int(on_qubits, commute_with), update_basis=False
+        basis,
+        target._to_int_mask(qubit_mask, commute_with),
+        update_basis=False,
     )
     return None if result is None else _int_to_bit_indices(result)
 

@@ -8,11 +8,9 @@ API.
 
 from __future__ import annotations
 
-import operator
-from functools import reduce
-from itertools import chain
-from typing import Iterable, Literal
+from typing import Iterable, Iterator, Literal
 
+import numpy
 import stim
 
 from tqecd.exceptions import TQECDException
@@ -27,50 +25,75 @@ class PauliString:
 
     Invariant:
         This class never stores identity Pauli terms. Any missing Pauli term is
-        considered to be an identity.
-        As such, it is illegal to initialise this class with an identity term.
+        considered to be an identity, and identity entries passed to the
+        constructor are ignored.
+
+        Instances are treated as immutable after construction. Hashing,
+        identity-preserving copies, and shared references in flow copies rely
+        on the private bit fields never being mutated.
     """
 
+    # Avoid a per-instance __dict__ and restrict instances to these fields:
+    # https://docs.python.org/3/reference/datamodel.html#object.__slots__
+    __slots__ = ("_hash", "_support", "_x_bits", "_z_bits")
+
     def __init__(self, pauli_by_qubit: dict[int, PAULI_STRING_TYPE]) -> None:
+        x_bits = 0
+        z_bits = 0
         for qubit, pauli in pauli_by_qubit.items():
+            if qubit < 0:
+                raise TQECDException(
+                    f"Invalid negative qubit index {qubit}, expected a non-negative integer."
+                )
             if pauli not in _IXYZ:
                 raise TQECDException(
                     f"Invalid Pauli operator {pauli} for qubit {qubit}, expected I, X, Y, or Z."
                 )
-        self._pauli_by_qubit: dict[int, PAULI_STRING_TYPE] = {
-            q: pauli for q, pauli in sorted(pauli_by_qubit.items()) if pauli != "I"
-        }
-        self._hash = hash(tuple(self._pauli_by_qubit.items()))
+            bit = 1 << qubit
+            if pauli in ("X", "Y"):
+                x_bits |= bit
+            if pauli in ("Y", "Z"):
+                z_bits |= bit
+        self._x_bits = x_bits
+        self._z_bits = z_bits
+        self._support = x_bits | z_bits
+        self._hash = hash((x_bits, z_bits))
+
+    @classmethod
+    def _from_bits(cls, x_bits: int, z_bits: int) -> PauliString:
+        pauli_string: PauliString = cls.__new__(cls)
+        pauli_string._x_bits = x_bits
+        pauli_string._z_bits = z_bits
+        pauli_string._support = x_bits | z_bits
+        pauli_string._hash = hash((x_bits, z_bits))
+        return pauli_string
 
     @property
     def non_trivial_pauli_count(self) -> int:
-        return len(self._pauli_by_qubit)
+        return self._support.bit_count()
 
     @property
     def qubits(self) -> Iterable[int]:
-        return self._pauli_by_qubit.keys()
+        return _bit_indices(self._support)
 
     @property
     def qubit(self) -> int:
-        if len(self._pauli_by_qubit) != 1:
+        non_trivial_pauli_count = self.non_trivial_pauli_count
+        if non_trivial_pauli_count != 1:
             raise TQECDException(
                 "Cannot retrieve only one qubit from a Pauli string with "
-                f"{len(self._pauli_by_qubit)} qubits."
+                f"{non_trivial_pauli_count} qubits."
             )
-        return next(iter(self.qubits))
+        return self._support.bit_length() - 1
 
-    @staticmethod
-    def from_stim_pauli_string(
-        stim_pauli_string: stim.PauliString,
-    ) -> PauliString:
+    @classmethod
+    def from_stim_pauli_string(cls, stim_pauli_string: stim.PauliString) -> PauliString:
         """Convert a `stim.PauliString` to a `PauliString` instance, ignoring
         the sign."""
-        return PauliString(
-            {
-                q: _IXYZ[stim_pauli_string[q]]
-                for q in range(len(stim_pauli_string))
-                if stim_pauli_string[q] != 0
-            }
+        xs, zs = stim_pauli_string.to_numpy(bit_packed=True)
+        return cls._from_bits(
+            int.from_bytes(xs.tobytes(), byteorder="little"),
+            int.from_bytes(zs.tobytes(), byteorder="little"),
         )
 
     def to_stim_pauli_string(self, length: int | None) -> stim.PauliString:
@@ -80,46 +103,37 @@ class PauliString:
             length: The length of the `stim.PauliString`. If `None`, the length is set to the
                 maximum qubit index in the `PauliString` plus one.
         """
-        max_qubit_index = max(self._pauli_by_qubit.keys())
-        length = length or max_qubit_index + 1
+        max_qubit_index = self._support.bit_length() - 1
+        length = length if length is not None else max_qubit_index + 1
         if length <= max_qubit_index:
             raise TQECDException(
                 f"The length specified {length} <= the maximum qubit index {max_qubit_index} in the pauli string."
             )
-        stim_pauli_string = stim.PauliString(length)
-        for q, p in self._pauli_by_qubit.items():
-            stim_pauli_string[q] = p
-        return stim_pauli_string
+        byte_length = (length + 7) // 8
+        xs = numpy.frombuffer(
+            self._x_bits.to_bytes(byte_length, byteorder="little"), dtype=numpy.uint8
+        )
+        zs = numpy.frombuffer(
+            self._z_bits.to_bytes(byte_length, byteorder="little"), dtype=numpy.uint8
+        )
+        return stim.PauliString.from_numpy(xs=xs, zs=zs, num_qubits=length)
 
     def __bool__(self) -> bool:
-        return bool(self._pauli_by_qubit)
+        return bool(self._support)
 
     def __mul__(self, other: PauliString) -> PauliString:
-        result: dict[int, PAULI_STRING_TYPE] = {}
-        for q in self._pauli_by_qubit.keys() | other._pauli_by_qubit.keys():
-            a = self._pauli_by_qubit.get(q, "I")
-            b = other._pauli_by_qubit.get(q, "I")
-            ax = a in "XY"
-            az = a in "YZ"
-            bx = b in "XY"
-            bz = b in "YZ"
-            cx = ax ^ bx
-            cz = az ^ bz
-            c = _IXZY[cx + cz * 2]
-            if c != "I":
-                result[q] = c
-        return PauliString(result)
-
-    def __repr__(self) -> str:
-        return f"PauliString(qubits={self._pauli_by_qubit!r})"
-
-    def __str__(self) -> str:
-        return "*".join(
-            f"{self._pauli_by_qubit[q]}{q}" for q in sorted(self._pauli_by_qubit.keys())
+        return PauliString._from_bits(
+            self._x_bits ^ other._x_bits, self._z_bits ^ other._z_bits
         )
 
+    def __repr__(self) -> str:
+        return f"PauliString(qubits={self._as_dict()!r})"
+
+    def __str__(self) -> str:
+        return "*".join(f"{self[q]}{q}" for q in self.qubits)
+
     def __len__(self) -> int:
-        return len(self._pauli_by_qubit)
+        return self.non_trivial_pauli_count
 
     def commutes(self, other: PauliString) -> bool:
         """Check if this Pauli string commutes with another Pauli string."""
@@ -128,10 +142,34 @@ class PauliString:
     def anticommutes(self, other: PauliString) -> bool:
         """Check if this Pauli string anticommutes with another Pauli
         string."""
-        t = 0
-        for q in self._pauli_by_qubit.keys() & other._pauli_by_qubit.keys():
-            t += self._pauli_by_qubit[q] != other._pauli_by_qubit[q]
-        return t % 2 == 1
+        anticommutations = (self._x_bits & other._z_bits) ^ (
+            self._z_bits & other._x_bits
+        )
+        return bool(anticommutations.bit_count() & 1)
+
+    def _anticommutes_single_qubit_masks(
+        self, x_mask: int, y_mask: int, z_mask: int
+    ) -> bool:
+        """Check for anticommutation with any encoded single-qubit operator.
+
+        The three masks identify qubits carrying X, Y, and Z collapsing
+        operators respectively. Unlike :meth:`anticommutes`, this method
+        checks each single-qubit operator independently and returns ``True``
+        when at least one of them anticommutes with this Pauli string.
+        """
+        x_terms = self._x_bits & ~self._z_bits
+        y_terms = self._x_bits & self._z_bits
+        z_terms = self._z_bits & ~self._x_bits
+        return bool(
+            (x_terms & (y_mask | z_mask))
+            | (y_terms & (x_mask | z_mask))
+            | (z_terms & (x_mask | y_mask))
+        )
+
+    def _without_qubits(self, qubit_mask: int) -> PauliString:
+        return PauliString._from_bits(
+            self._x_bits & ~qubit_mask, self._z_bits & ~qubit_mask
+        )
 
     def collapse_by(self, collapse_operators: Iterable[PauliString]) -> PauliString:
         """Collapse the provided Pauli string by the provided operators.
@@ -154,29 +192,37 @@ class PauliString:
         Returns:
             a copy of self, collapsed by the provided operators.
         """
-        ret = PauliString(self._pauli_by_qubit.copy())
+        x_bits = self._x_bits
+        z_bits = self._z_bits
         for op in collapse_operators:
-            if not ret.commutes(op):
+            anticommutations = (x_bits & op._z_bits) ^ (z_bits & op._x_bits)
+            if anticommutations.bit_count() & 1:
                 raise TQECDException(
-                    f"Cannot collapse {ret} by a non-commuting operator {op}."
+                    "Cannot collapse "
+                    f"{PauliString._from_bits(x_bits, z_bits)} "
+                    f"by a non-commuting operator {op}."
                 )
-            for qubit in op.qubits:
-                if qubit in ret._pauli_by_qubit:
-                    del ret._pauli_by_qubit[qubit]
-        return ret
+            keep_mask = ~op._support
+            x_bits &= keep_mask
+            z_bits &= keep_mask
+        return PauliString._from_bits(x_bits, z_bits)
 
     def after(self, tableau: stim.Tableau, targets: Iterable[int]) -> PauliString:
+        target_tuple = tuple(targets)
         stim_pauli_string = self.to_stim_pauli_string(
-            length=max(list(targets) + list(self._pauli_by_qubit.keys())) + 1
+            length=max(max(target_tuple, default=-1), self._support.bit_length() - 1)
+            + 1
         )
-        stim_pauli_string_after = stim_pauli_string.after(tableau, targets=targets)
+        stim_pauli_string_after = stim_pauli_string.after(tableau, targets=target_tuple)
         return PauliString.from_stim_pauli_string(stim_pauli_string_after)
 
     def contains(self, other: PauliString) -> bool:
-        return self._pauli_by_qubit.items() >= other._pauli_by_qubit.items()
+        """Check whether all non-identity terms in ``other`` match this string."""
+        differences = (self._x_bits ^ other._x_bits) | (self._z_bits ^ other._z_bits)
+        return not (differences & other._support)
 
     def overlaps(self, other: PauliString) -> bool:
-        return bool(self._pauli_by_qubit.keys() & other._pauli_by_qubit.keys())
+        return bool(self._support & other._support)
 
     def __eq__(self, other: object) -> bool:
         """Check if two PauliString are equal.
@@ -189,14 +235,26 @@ class PauliString:
         """
         return (
             isinstance(other, PauliString)
-            and self._pauli_by_qubit == other._pauli_by_qubit
+            and self._x_bits == other._x_bits
+            and self._z_bits == other._z_bits
         )
 
     def __hash__(self) -> int:
         return self._hash
 
+    def __copy__(self) -> PauliString:
+        # Returning self is safe because PauliString instances are immutable.
+        return self
+
+    def __deepcopy__(self, memo: dict[int, object]) -> PauliString:
+        # Returning self is safe because PauliString instances are immutable.
+        return self
+
     def __getitem__(self, index: int) -> PAULI_STRING_TYPE:
-        return self._pauli_by_qubit.get(index, "I")
+        if index < 0:
+            return "I"
+        bit = 1 << index
+        return _IXZY[bool(self._x_bits & bit) + 2 * bool(self._z_bits & bit)]
 
     def to_int(
         self, qubits: Iterable[int], reference: PauliString | None = None
@@ -211,17 +269,51 @@ class PauliString:
                 that qubit anti-commutes with the reference's Pauli at the same qubit.
         """
         if reference is None:
-            return reduce(
-                lambda acc, bit: acc << 1 | bit,
-                chain.from_iterable(pauli_literal_to_bools(self[q]) for q in qubits),
-                0,
-            )
+            result = 0
+            for q in qubits:
+                bit = 1 << q
+                result = (
+                    result << 2
+                    | int(bool(self._x_bits & bit)) << 1
+                    | int(bool(self._z_bits & bit))
+                )
+            return result
+        anticommutations = (self._x_bits & reference._z_bits) ^ (
+            self._z_bits & reference._x_bits
+        )
         result = 0
         for q in qubits:
-            sxt, szt = pauli_literal_to_bools(self[q])
-            rxt, rzt = pauli_literal_to_bools(reference[q])
-            result = (result << 1) | int((sxt and rzt) ^ (szt and rxt))
+            bit = 1 << q
+            result = (result << 1) | int(bool(anticommutations & bit))
         return result
+
+    def _to_int_mask(
+        self, qubit_mask: int, reference: PauliString | None = None
+    ) -> int:
+        """Encode selected qubits while preserving their original bit positions.
+
+        Without a reference, X bits occupy their original positions and Z bits
+        are shifted above the width of ``qubit_mask``. With a reference, each
+        selected position records whether the two local Pauli terms anticommute.
+        """
+        if reference is None:
+            z_shift = qubit_mask.bit_length()
+            return (self._x_bits & qubit_mask) | (
+                (self._z_bits & qubit_mask) << z_shift
+            )
+        return (
+            (self._x_bits & reference._z_bits) ^ (self._z_bits & reference._x_bits)
+        ) & qubit_mask
+
+    def _as_dict(self) -> dict[int, PAULI_STRING_TYPE]:
+        return {q: self[q] for q in self.qubits}
+
+
+def _bit_indices(bits: int) -> Iterator[int]:
+    while bits:
+        least_significant_bit = bits & -bits
+        yield least_significant_bit.bit_length() - 1
+        bits ^= least_significant_bit
 
 
 def pauli_literal_to_bools(
@@ -238,4 +330,9 @@ def pauli_literal_to_bools(
 
 
 def pauli_product(paulis: Iterable[PauliString]) -> PauliString:
-    return reduce(operator.mul, paulis, PauliString({}))
+    x_bits = 0
+    z_bits = 0
+    for pauli in paulis:
+        x_bits ^= pauli._x_bits
+        z_bits ^= pauli._z_bits
+    return PauliString._from_bits(x_bits, z_bits)

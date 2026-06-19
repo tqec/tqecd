@@ -51,12 +51,12 @@ Issues = "https://github.com/tqec/tqecd/issues"
 doc = [
     "sphinx<=9.1.0",
     "myst-parser<=4.0.1",
-    "pydata-sphinx-theme<=0.17.1",
+    "pydata-sphinx-theme<=0.19.0",
     "nbsphinx<=0.9.7",
     "pandoc<=2.4",
     "jupyter<=1.1.1",
 ]
-test = ["pytest<=9.0.2", "mypy<=2.1.0", "pytest-cov<=7.1.0"]
+test = ["pytest<=9.1.0", "mypy<=2.1.0", "pytest-cov<=7.1.0"]
 bench = ["pyinstrument<=5.1.1"]
 dev = ["pre-commit<=4.6.0", "tqecd[test, doc, bench]","ruff<=0.15.4",]
 all = ["tqecd[test, dev, doc, bench]"]
