@@ -9,11 +9,12 @@ from tqecd.utils import (
     has_reset,
     is_combined_measurement_reset,
     iter_stim_circuit_by_moments,
+    iter_circuit,
 )
 
 
 def _has_any_combined_gates(circuit: stim.Circuit) -> bool:
-    for instruction in circuit:
+    for instruction in iter_circuit(circuit):
         if isinstance(instruction, stim.CircuitRepeatBlock):
             if _has_any_combined_gates(instruction.body_copy()):
                 return True

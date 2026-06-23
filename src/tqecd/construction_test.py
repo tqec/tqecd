@@ -11,6 +11,7 @@ from tqecd.utils import (
     detector_to_targets_tuple,
     push_all_detectors_to_the_end,
     remove_annotations,
+    iter_circuit,
 )
 
 _HERE = Path(__file__).parent
@@ -55,7 +56,7 @@ def invalid_test_circuits() -> list[tuple[str, stim.Circuit, str]]:
 
 def get_detectors_tuples_shallow(circuit: stim.Circuit) -> list[tuple[int, ...]]:
     detectors_tuples: list[tuple[int, ...]] = []
-    for inst in circuit:
+    for inst in iter_circuit(circuit):
         if inst.name == "DETECTOR":
             assert isinstance(inst, stim.CircuitInstruction)
             detectors_tuples.append(detector_to_targets_tuple(inst))

@@ -72,8 +72,6 @@ exclude = ["*test.py"]
 tqecd = ["py.typed"]
 
 [tool.mypy]
-# See https://numpy.org/devdocs/reference/typing.html
-plugins = "numpy.typing.mypy_plugin"
 # Start off with these
 warn_unused_configs = true
 warn_redundant_casts = true
@@ -111,7 +109,7 @@ warn_return_any = true
 # See https://mypy.readthedocs.io/en/stable/config_file.html#using-a-pyproject-toml
 [[tool.mypy.overrides]]
 module = ["stim"]
-ignore_missing_imports = true
+follow_untyped_imports = true
 
 [tool.coverage.run]
 omit = ["*/*_test.py"]

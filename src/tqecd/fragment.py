@@ -20,6 +20,7 @@ from tqecd.utils import (
     has_reset,
     is_virtual_moment,
     iter_stim_circuit_by_moments,
+    iter_circuit,
 )
 
 
@@ -236,7 +237,7 @@ def split_stim_circuit_into_fragments(
                 raise TQECDException(
                     "Trying to start a REPEAT block without a cleanly finished Fragment. "
                     "The following instructions were found preceding the REPEAT block:\n"
-                    + "\n\t".join(f"{m}" for m in current_fragment)
+                    + "\n\t".join(f"{m}" for m in iter_circuit(current_fragment))
                     + "\nbut these instructions do not form a valid Fragment."
                 )
             # Recurse to produce the Fragment instances for the loop body.

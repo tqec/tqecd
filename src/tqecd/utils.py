@@ -18,6 +18,13 @@ ANNOTATIONS = {
 }
 
 
+def iter_circuit(
+    circuit: stim.Circuit,
+) -> ty.Iterator[stim.CircuitInstruction | stim.CircuitRepeatBlock]:
+    for i in range(len(circuit)):
+        yield circuit[i]
+
+
 def iter_stim_circuit_by_moments(
     circuit: stim.Circuit,
 ) -> ty.Iterator[stim.Circuit | stim.CircuitRepeatBlock]:
@@ -40,7 +47,7 @@ def iter_stim_circuit_by_moments(
           or within the body of a `stim.CircuitRepeatBlock`.
     """
     cur_moment = stim.Circuit()
-    for inst in circuit:
+    for inst in iter_circuit(circuit):
         if isinstance(inst, stim.CircuitRepeatBlock):
             if cur_moment:
                 yield cur_moment
@@ -61,7 +68,7 @@ def is_measurement(instruction: stim.CircuitInstruction) -> bool:
 
 
 def is_reset(instruction: stim.CircuitInstruction) -> bool:
-    return stim.gate_data(instruction.name).is_reset  # type: ignore
+    return stim.gate_data(instruction.name).is_reset
 
 
 def is_noisy_gate(instruction: stim.CircuitInstruction) -> bool:
@@ -95,7 +102,7 @@ def has_combined_measurement_reset(moment: stim.Circuit) -> bool:
     Returns:
         `True` if the provided moment has a combined instruction, else `False`.
     """
-    for inst in moment:
+    for inst in iter_circuit(moment):
         if is_virtual_instruction(inst):  # type: ignore
             continue
         if is_combined_measurement_reset(inst):  # type: ignore
@@ -112,7 +119,9 @@ def has_circuit_repeat_block(moment: stim.Circuit) -> bool:
     Returns:
         `True` if the provided moment has a `stim.CircuitRepeatBlock`, else `False`.
     """
-    return any(isinstance(inst, stim.CircuitRepeatBlock) for inst in moment)
+    return any(
+        isinstance(inst, stim.CircuitRepeatBlock) for inst in iter_circuit(moment)
+    )
 
 
 def has_measurement(moment: stim.Circuit) -> bool:
@@ -142,7 +151,7 @@ def has_only_measurement_or_is_virtual(moment: stim.Circuit) -> bool:
         Note that this function returns `True` on a moment that only contains
         annotations and noisy-gates (measurements excluded).
     """
-    for inst in moment:
+    for inst in iter_circuit(moment):
         if is_virtual_instruction(inst):  # type: ignore
             continue
         if not is_measurement(inst):  # type: ignore
@@ -177,7 +186,7 @@ def has_only_reset_or_is_virtual(moment: stim.Circuit) -> bool:
         Note that this function returns `True` on a moment that only contains
         annotations and noisy-gates (measurements excluded).
     """
-    for inst in moment:
+    for inst in iter_circuit(moment):
         if is_virtual_instruction(inst):  # type: ignore
             continue
         if not is_reset(inst):  # type: ignore
@@ -198,7 +207,7 @@ def is_virtual_moment(moment: stim.Circuit) -> bool:
         `True` if the provided circuit is only composed of virtual instructions,
         else `False`.
     """
-    if any(isinstance(inst, stim.CircuitRepeatBlock) for inst in moment):
+    if any(isinstance(inst, stim.CircuitRepeatBlock) for inst in iter_circuit(moment)):
         raise TQECDException(
             "Breaking invariant: you provided a circuit with a stim.CircuitRepeatBlock "
             "instruction to is_virtual_moment. This is not supported."
@@ -211,7 +220,7 @@ def has_computation_instruction(moment: stim.Circuit) -> bool:
         not is_virtual_instruction(inst)  # type: ignore
         and not is_reset(inst)  # type: ignore
         and not is_measurement(inst)  # type: ignore
-        for inst in moment
+        for inst in iter_circuit(moment)
     )
 
 
@@ -288,14 +297,14 @@ def collapse_pauli_strings_at_moment(moment: stim.Circuit) -> list[PauliString]:
             provided moment, sorted by qubits.
     """
     # Pre-condition check
-    if any(isinstance(inst, stim.CircuitRepeatBlock) for inst in moment):
+    if any(isinstance(inst, stim.CircuitRepeatBlock) for inst in iter_circuit(moment)):
         raise TQECDException(
             "Breaking pre-condition: collapse_pauli_strings_at_moment is expecting "
             f"moments without repeat blocks. Found:\n{moment}"
         )
 
     pauli_strings: list[PauliString] = []
-    for inst in moment:
+    for inst in iter_circuit(moment):
         assert isinstance(inst, stim.CircuitInstruction)
         if not is_collapsing_instruction(inst):
             continue
@@ -321,7 +330,7 @@ def remove_annotations(
         circuit except annotations that are not TICK instructions.`
     """
     new_circuit = stim.Circuit()
-    for inst in circuit:
+    for inst in iter_circuit(circuit):
         if isinstance(inst, stim.CircuitRepeatBlock):
             new_circuit.append(
                 stim.CircuitRepeatBlock(
@@ -353,7 +362,7 @@ def detector_to_targets_tuple(instruction: stim.CircuitInstruction) -> tuple[int
 def push_all_detectors_to_the_end(circuit: stim.Circuit) -> stim.Circuit:
     new_circuit = stim.Circuit()
     detectors: list[stim.CircuitInstruction] = []
-    for instruction in circuit:
+    for instruction in iter_circuit(circuit):
         if isinstance(instruction, stim.CircuitRepeatBlock):
             new_circuit.append(
                 stim.CircuitRepeatBlock(
@@ -397,7 +406,7 @@ def remove_duplicate_detectors(circuit: stim.Circuit) -> stim.Circuit:
     def remove_impl(circ: stim.Circuit) -> stim.Circuit:
         nonlocal seen_detectors, num_measurements
         new_circuit = stim.Circuit()
-        for inst in circ:
+        for inst in iter_circuit(circ):
             if isinstance(inst, stim.CircuitRepeatBlock):
                 new_circuit.append(
                     stim.CircuitRepeatBlock(
