@@ -35,11 +35,13 @@ classifiers = [
     "Typing :: Typed",
 ]
 dependencies = [
-    "numpy>=1.22,<2.3",                      # Upper bound: https://github.com/tqec/tqec/pull/659
+    "numpy>=1.22",
     "numpy>=1.24; python_version >= '3.11'",
     "numpy>=1.26; python_version >= '3.12'",
     "numpy>=2.1; python_version >= '3.13'",
-    "stim>=1.15.0",
+    # sinter 1.15 is not compatible with numpy>=2.3, see 
+    # https://github.com/tqec/tqec/issues/613#issuecomment-4774805389.
+    "stim>=1.16.0",
 ]
 
 [project.urls]
