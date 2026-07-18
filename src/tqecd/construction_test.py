@@ -22,6 +22,8 @@ _INVALID_TEST_FOLDER = _TEST_FOLDER / "invalid"
 def valid_test_circuits() -> list[tuple[str, stim.Circuit]]:
     valid_circuits: list[tuple[str, stim.Circuit]] = []
     for filepath in _VALID_TEST_FOLDER.iterdir():
+        if not filepath.is_file():
+            continue  # skip subdirectories (e.g. the window/ regression fixtures)
         with open(filepath) as f:
             valid_circuits.append(
                 (
@@ -46,6 +48,8 @@ def parse_invalid_circuit(text: str) -> tuple[stim.Circuit, str]:
 def invalid_test_circuits() -> list[tuple[str, stim.Circuit, str]]:
     invalid_circuits: list[tuple[str, stim.Circuit, str]] = []
     for filepath in _INVALID_TEST_FOLDER.iterdir():
+        if not filepath.is_file():
+            continue  # skip subdirectories
         with open(filepath) as f:
             file_content = f.read()
         circuit, expected_error_message_regex = parse_invalid_circuit(file_content)

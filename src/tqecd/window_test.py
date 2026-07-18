@@ -18,7 +18,7 @@ from tqecd.window import (
 )
 
 _VALID = Path(__file__).parent / "test_files" / "valid"
-_REGRESSION = Path(__file__).parent / "test_files" / "regression"
+_REGRESSION = Path(__file__).parent / "test_files" / "valid" / "window"
 
 
 def _gf2_rank(vectors: list[int]) -> int:
