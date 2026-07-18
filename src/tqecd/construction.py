@@ -214,8 +214,8 @@ def compile_fragments_to_circuit_with_detectors(
 
     # Flow matching is an incomplete heuristic: detectors whose flows only cancel in
     # combination are silently dropped, which is what costs the Y-basis gadgets their
-    # distance. Top up the result from the bounded-window stabilizer nullspace, which is
-    # complete. This is purely additive -- every detector matched above is kept.
+    # distance. Top up the result with detectors from the bounded-window stabilizer nullspace
+    # (see `tqecd.nullspace`). This is purely additive -- every detector matched above is kept.
     #
     # Anything containing a FragmentLoop keeps the matched result untouched here. A detector
     # emitted inside a repeated body has to be loop-translation-invariant, and the nullspace

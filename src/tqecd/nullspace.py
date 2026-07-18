@@ -23,28 +23,37 @@ generators. A generator with trivial input **and** trivial output is a parity th
 deterministic no matter what state entered the window: a detector, valid in the full
 circuit, supported entirely inside the window.
 
-Two properties come for free:
+Two things follow from asking window by window instead of once over the whole circuit:
 
 * **Validity.** stim cannot return a non-deterministic parity, so no invalid detector can
   be emitted. (Assembling the nullspace by hand from :class:`BoundaryStabilizer` flows does
   *not* have this property -- flows from different fragments carry different collapse
   conventions, and mixing them manufactures parities that are not deterministic.)
-* **Locality.** The records lie inside the window by construction, so the detectors stay
-  short-span and the decoding graph stays graphlike.
+* **A redundant set of locally-supported candidate detectors.** Because overlapping windows
+  are each asked for their detectors, the same detector turns up several ways and many nearby
+  detectors turn up directly. That redundancy is the point: the detector we actually want to
+  emit is often the XOR (sum) of two of these candidates, so both have to be present for us
+  to form it. Asking once over the whole circuit instead returns a minimal, non-redundant
+  basis whose detectors may stretch across the entire circuit, with nothing compact left to
+  combine -- and, checked directly, a single global call re-breaks the Y-memory gadget (its
+  logical observable ends up emitted as a detector).
 
-The window is not a performance optimisation -- ``flow_generators`` is roughly linear in
-circuit size, so a width-``W`` sliding window costs about ``W`` times a single global call.
-It is a *correctness* mechanism: it is what generates short-span candidates. A global call
-returns a basis of the same space whose generators are free to span the whole circuit,
-leaving nothing local to choose from -- and a long-span basis turns graphlike edges into
-hyperedges and destroys the very distance we are trying to certify.
+Windowing is therefore not a speed trick -- ``flow_generators`` is roughly linear in circuit
+size, so a width-``W`` sliding window costs about ``W`` single global calls. Its job is to
+produce enough overlapping candidates to build compact detectors out of. (The same windowing
+idea appears in stim-floquet's ``windowed_local_detectors``.)
 
-For the same reason candidates are reduced to physically local representatives and selected
-by spatial diameter: a *valid* basis chosen in discovery order can still yield a circuit in
-which stim finds no graphlike logical error at all. This is the locality-preserving insertion
-of stim-floquet's ``windowed_local_detectors``, and it is the regulariser that picks the good
-solution out of the family that stimflow's ``add_flow(measurements="auto")`` documents as
-non-unique.
+Choosing which candidates to emit is a separate step, in :func:`complete_detectors`. Each
+candidate is first rewritten into its most physically-compact form by XOR-ing it with
+overlapping candidates; then candidates are added smallest-reach-first and any still reaching
+further across the patch than the flow-matched detectors are dropped. Reach matters because a
+detector that spans too much of the patch is harmful in two ways at once. It turns the
+nearest-neighbour links of the decoding graph into many-body links -- ``hyperedges``, which a
+minimum-weight-matching decoder cannot use. And in a small code it can be a logical observable
+in disguise (a logical is a deterministic parity too); emitting it lets the detector set fix
+that logical's value -- ``pinning`` it -- so no single error can flip the logical without also
+flipping a detector, and the decoder concludes the code is stronger than it is. Either one
+collapses the distance the circuit is supposed to have.
 """
 
 from __future__ import annotations
@@ -188,11 +197,23 @@ def complete_detectors(
 ) -> list[list[MatchedDetector]]:
     """Add the detectors that flow matching missed, keeping the ones it found.
 
-    The detectors already matched are seeded into the basis first, so every one of them is
-    kept and this function is purely additive. Only linearly independent detectors are then
-    added from the windowed nullspace: a redundant detector is not merely wasteful, the
-    extra detector an error flips can turn a graphlike edge into a hyperedge and depress
-    the measured distance.
+    Flow matching (:mod:`tqecd.match`) finds some but not all detectors. The ones it found are
+    passed in as ``already_matched`` and are always kept, so this routine only ever adds. The
+    additions come from the windowed nullspace candidates (see the module docstring), put
+    through two steps before being emitted:
+
+    1. **Make each candidate compact.** A candidate is repeatedly XOR-ed with other
+       candidates that share a measurement with it whenever that shrinks how far across the
+       patch it reaches (:func:`_reduce_to_local`). XOR-ing does not change which detectors
+       the set can express -- only how far the individual ones reach.
+    2. **Emit compact-first, drop the ones that reach too far.** Candidates are added in order
+       of increasing physical reach, and any reaching further than the largest flow-matched
+       detector are rejected. The flow-matched detectors set the code's local scale, so a
+       candidate exceeding it is not a genuine extra check: in a small code it is a logical
+       observable (a deterministic parity too) that has leaked into the windowed generators.
+       Emitting it would let the detector set fix that logical's value, leaving the decoder no
+       error that flips the logical undetected and collapsing the distance. Rejecting it needs
+       no knowledge of the observables.
 
     Args:
         fragments: a flat list of fragments. ``FragmentLoop`` is not supported -- a detector
