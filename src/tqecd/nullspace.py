@@ -55,7 +55,7 @@ from typing import TYPE_CHECKING
 import numpy
 import stim
 
-from tqecd.cover import BinaryVectorBasis, int_to_bit_indices
+from tqecd.cover import BinaryVectorBasis, int_to_bit_indices, int_to_bit_indices
 from tqecd.exceptions import TQECDException
 from tqecd.fragment import Fragment
 from tqecd.measurement import RelativeMeasurementLocation
@@ -144,23 +144,38 @@ def _reduce_to_local(
     one is frequently a XOR of two windowed candidates). XORing preserves the span, so the
     reduced set generates exactly the same detector space -- only its representatives get
     local. Two candidates must share a record for their XOR to possibly shrink either, so
-    non-overlapping pairs are skipped.
+    only overlapping pairs are considered -- found through a ``record -> candidates`` index
+    rather than scanning every pair, which keeps the pass near-linear when overlaps are
+    sparse (the common case) instead of quadratic in the number of candidates.
     """
     diameters = [_spatial_diameter(vector, record_coordinates) for vector in vectors]
+    touching: dict[int, set[int]] = {}
+    for index, vector in enumerate(vectors):
+        for record in int_to_bit_indices(vector):
+            touching.setdefault(record, set()).add(index)
+
     improved = True
     while improved:
         improved = False
         for i in range(len(vectors)):
-            for j in range(len(vectors)):
-                if i == j or not (vectors[i] & vectors[j]):
-                    continue
+            neighbours: set[int] = set()
+            for record in int_to_bit_indices(vectors[i]):
+                neighbours |= touching.get(record, set())
+            neighbours.discard(i)
+            for j in sorted(neighbours):
                 combined = vectors[i] ^ vectors[j]
                 if not combined:
                     continue
                 combined_diameter = _spatial_diameter(combined, record_coordinates)
                 if combined_diameter < diameters[i]:
+                    changed = vectors[i] ^ combined
                     vectors[i] = combined
                     diameters[i] = combined_diameter
+                    for record in int_to_bit_indices(changed):
+                        if (combined >> record) & 1:
+                            touching.setdefault(record, set()).add(i)
+                        else:
+                            touching.get(record, set()).discard(i)
                     improved = True
     return vectors
 
