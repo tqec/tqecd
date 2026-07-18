@@ -193,4 +193,3 @@ def find_commuting_cover_on_target_qubits(
     if not sources:
         return None
     return _find_cover(target, sources, frozenset(target.qubits), commute_with=target)
-

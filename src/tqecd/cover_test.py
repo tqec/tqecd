@@ -3,11 +3,11 @@ from __future__ import annotations
 import pytest
 import stim
 
+from tqecd.bitops import int_to_bit_indices
 from tqecd.cover import (
     BinaryVectorBasis,
     find_commuting_cover_on_target_qubits,
     find_exact_cover,
-    int_to_bit_indices,
 )
 from tqecd.pauli import PauliString, pauli_product
 

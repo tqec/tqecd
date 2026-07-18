@@ -1,6 +1,7 @@
 """Focused unit tests for the bounded-window detector completion in :mod:`tqecd.window`."""
 
 from pathlib import Path
+from typing import cast
 
 import pytest
 import stim
@@ -9,6 +10,7 @@ from tqecd.bitops import int_to_bit_indices
 from tqecd.construction import annotate_detectors_automatically
 from tqecd.exceptions import TQECDException
 from tqecd.fragment import Fragment, split_stim_circuit_into_fragments
+from tqecd.match import MatchedDetector
 from tqecd.utils import remove_annotations
 from tqecd.window import (
     _records_to_vector,
@@ -147,13 +149,17 @@ def test_remove_annotations_strips_detectors_inside_nested_repeats() -> None:
 # --- complete_detectors: empty already_matched leaves the locality cap at infinity ------
 
 
-def _flat_fragments_and_coords(filename: str):
+def _flat_fragments_and_coords(
+    filename: str,
+) -> tuple[list[Fragment], dict[int, tuple[float, ...]]]:
     circuit = stim.Circuit((_VALID / filename).read_text())
     bare = remove_annotations(
         circuit,
         annotations_to_remove=frozenset({"DETECTOR", "OBSERVABLE_INCLUDE", "SHIFT_COORDS"}),
     )
-    fragments = split_stim_circuit_into_fragments(bare)
+    raw = split_stim_circuit_into_fragments(bare)
+    fragments = [f for f in raw if isinstance(f, Fragment)]
+    assert len(fragments) == len(raw), "fixture must fragment flat (no FragmentLoop)"
     coords = {q: tuple(c) for q, c in circuit.get_final_qubit_coordinates().items()}
     return fragments, coords
 
@@ -162,8 +168,7 @@ def test_complete_detectors_with_empty_matched_emits_an_independent_basis() -> N
     fragments, coords = _flat_fragments_and_coords(
         "surface_code_rotated_memory_z_distance_3_rounds_2.stim"
     )
-    assert all(isinstance(f, Fragment) for f in fragments)
-    empty_matched: list[list[object]] = [[] for _ in fragments]
+    empty_matched: list[list[MatchedDetector]] = [[] for _ in fragments]
 
     completed = complete_detectors(fragments, coords, empty_matched, window=2)
     emitted = [detector for per_fragment in completed for detector in per_fragment]
@@ -188,7 +193,7 @@ def test_complete_detectors_rejects_non_flat_fragments() -> None:
     # complete_detectors only handles flat Fragments; a FragmentLoop (or any non-Fragment)
     # must raise rather than be silently mis-annotated. Exercise the guard directly.
     with pytest.raises(TQECDException):
-        complete_detectors(["not-a-fragment"], {}, [[]], window=2)
+        complete_detectors(cast("list[Fragment]", ["not-a-fragment"]), {}, [[]], window=2)
 
 
 # --- windowing regression: local candidate generation keeps a logical free that a single

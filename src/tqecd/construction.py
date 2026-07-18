@@ -40,7 +40,7 @@ def _shift_time_instruction(number_of_spatial_coordinates: int) -> stim.Circuit:
 
 
 def annotate_detectors_automatically(
-    circuit: stim.Circuit, *, window: int = DEFAULT_MATCHING_WINDOW
+    circuit: stim.Circuit, window: int = DEFAULT_MATCHING_WINDOW
 ) -> stim.Circuit:
     """Insert detectors into the provided circuit instance.
 
@@ -56,8 +56,8 @@ def annotate_detectors_automatically(
         window: width of the sliding window used for *local candidate generation* -- how many
             consecutive fragments a completion detector may span (see :mod:`tqecd.window`).
             The default, ``2``, is the production setting and the only value that is correct
-            on every gadget; wider windows give no benefit. This is a keyword-only knob mainly
-            for experiments and regression tests: a very large window forces a single
+            on every gadget; wider windows give no benefit. This knob is mainly for
+            experiments and regression tests: a very large window forces a single
             whole-circuit ``flow_generators`` call ("global" candidate generation), which is
             known to pin the logical observable on small (k=1) Y-basis gadgets, and ``1``
             forces the historical flow-matching-only path (no completion). Production callers
