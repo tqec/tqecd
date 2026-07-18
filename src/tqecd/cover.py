@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Literal
 
+from tqecd.bitops import int_to_bit_indices
 from tqecd.pauli import PauliString
 
 
@@ -193,14 +194,3 @@ def find_commuting_cover_on_target_qubits(
         return None
     return _find_cover(target, sources, frozenset(target.qubits), commute_with=target)
 
-
-def int_to_bit_indices(x: int) -> list[int]:
-    """Return the positions of the bits that are set in ``x``.
-
-    Args:
-        x: a non-negative integer, interpreted as a bit-vector.
-
-    Returns:
-        The sorted list of indices ``i`` such that bit ``i`` of ``x`` is ``1``.
-    """
-    return [i for i in range(x.bit_length()) if (x >> i) & 1]

@@ -9,7 +9,7 @@ from tqecd.flow import build_flows_from_fragments
 from tqecd.fragment import Fragment, FragmentLoop, split_stim_circuit_into_fragments
 from tqecd.match import MatchedDetector, match_detectors_from_flows_shallow
 from tqecd.predicates import is_valid_input_circuit
-from tqecd.nullspace import DEFAULT_MATCHING_WINDOW, complete_detectors
+from tqecd.window import DEFAULT_MATCHING_WINDOW, complete_detectors
 from tqecd.utils import remove_duplicate_detectors
 
 
@@ -40,7 +40,7 @@ def _shift_time_instruction(number_of_spatial_coordinates: int) -> stim.Circuit:
 
 
 def annotate_detectors_automatically(
-    circuit: stim.Circuit, window: int = DEFAULT_MATCHING_WINDOW
+    circuit: stim.Circuit, *, window: int = DEFAULT_MATCHING_WINDOW
 ) -> stim.Circuit:
     """Insert detectors into the provided circuit instance.
 
@@ -53,10 +53,15 @@ def annotate_detectors_automatically(
 
     Args:
         circuit: circuit to insert detectors in.
-        window: how many consecutive fragments a detector may span. Used only for circuits
-            without ``REPEAT`` blocks, which take the bounded-window stabilizer-nullspace
-            path (see :mod:`tqecd.nullspace`). Set to ``1`` to force the historical
-            flow-matching path for every circuit.
+        window: width of the sliding window used for *local candidate generation* -- how many
+            consecutive fragments a completion detector may span (see :mod:`tqecd.window`).
+            The default, ``2``, is the production setting and the only value that is correct
+            on every gadget; wider windows give no benefit. This is a keyword-only knob mainly
+            for experiments and regression tests: a very large window forces a single
+            whole-circuit ``flow_generators`` call ("global" candidate generation), which is
+            known to pin the logical observable on small (k=1) Y-basis gadgets, and ``1``
+            forces the historical flow-matching-only path (no completion). Production callers
+            should not set it.
 
     Returns:
         A new ``stim.Circuit`` instance with automatically computed detectors.
@@ -215,7 +220,7 @@ def compile_fragments_to_circuit_with_detectors(
     # Flow matching is an incomplete heuristic: detectors whose flows only cancel in
     # combination are silently dropped, which is what costs the Y-basis gadgets their
     # distance. Top up the result with detectors from the bounded-window stabilizer nullspace
-    # (see `tqecd.nullspace`). This is purely additive -- every detector matched above is kept.
+    # (see `tqecd.window`). This is purely additive -- every detector matched above is kept.
     #
     # Anything containing a FragmentLoop keeps the matched result untouched here. A detector
     # emitted inside a repeated body has to be loop-translation-invariant, and the nullspace

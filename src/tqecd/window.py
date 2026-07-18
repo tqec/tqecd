@@ -64,7 +64,8 @@ from typing import TYPE_CHECKING
 import numpy
 import stim
 
-from tqecd.cover import BinaryVectorBasis, int_to_bit_indices, int_to_bit_indices
+from tqecd.bitops import int_to_bit_indices
+from tqecd.cover import BinaryVectorBasis
 from tqecd.exceptions import TQECDException
 from tqecd.fragment import Fragment
 from tqecd.measurement import RelativeMeasurementLocation
@@ -145,7 +146,7 @@ def _spatial_diameter(
 def _reduce_to_local(
     vectors: list[int], record_coordinates: Sequence[tuple[float, ...] | None]
 ) -> list[int]:
-    """Shrink each candidate to its most physically-local XOR-combination of the others.
+    """Shrink each candidate toward a more physically-local XOR-combination of the others.
 
     A windowed flow generator can be short in record order yet span the whole patch
     physically, and the *local* representative of a generator is a combination of
@@ -155,7 +156,8 @@ def _reduce_to_local(
     local. Two candidates must share a record for their XOR to possibly shrink either, so
     only overlapping pairs are considered -- found through a ``record -> candidates`` index
     rather than scanning every pair, which keeps the pass near-linear when overlaps are
-    sparse (the common case) instead of quadratic in the number of candidates.
+    sparse (the common case) instead of quadratic in the number of candidates. The reduction
+    is greedy, so it yields a more local -- not necessarily the globally smallest -- form.
     """
     diameters = [_spatial_diameter(vector, record_coordinates) for vector in vectors]
     touching: dict[int, set[int]] = {}
@@ -208,12 +210,15 @@ def complete_detectors(
        the set can express -- only how far the individual ones reach.
     2. **Emit compact-first, drop the ones that reach too far.** Candidates are added in order
        of increasing physical reach, and any reaching further than the largest flow-matched
-       detector are rejected. The flow-matched detectors set the code's local scale, so a
-       candidate exceeding it is not a genuine extra check: in a small code it is a logical
-       observable (a deterministic parity too) that has leaked into the windowed generators.
-       Emitting it would let the detector set fix that logical's value, leaving the decoder no
-       error that flips the logical undetected and collapsing the distance. Rejecting it needs
-       no knowledge of the observables.
+       detector are rejected. The flow-matched detectors set the code's local scale, and a
+       candidate exceeding it is treated as non-local rather than as a genuine extra check:
+       in a small code such a candidate is typically a logical observable (a deterministic
+       parity too) that has leaked into the windowed generators, and emitting it would let the
+       detector set fix that logical's value, leaving the decoder no error that flips the
+       logical undetected and collapsing the distance. Rejecting it needs no knowledge of the
+       observables. This is a heuristic: it has prevented every logical-pinning case seen so
+       far, but could need revision for a code whose legitimate completion detectors genuinely
+       exceed the matched-detector scale.
 
     Args:
         fragments: a flat list of fragments. ``FragmentLoop`` is not supported -- a detector
@@ -247,7 +252,6 @@ def complete_detectors(
         starts.append(cursor)
         measured_qubits.extend(fragment.measurements_qubits)
         cursor += fragment.num_measurements
-    total_records = cursor
     ends = [start + f.num_measurements for start, f in zip(starts, fragments)]
 
     detectors: list[list[MatchedDetector]] = [list(found) for found in already_matched]
@@ -286,10 +290,11 @@ def complete_detectors(
         if last == len(fragments):
             break
 
-    # Reduce candidates to local representatives, then take the shortest-diameter ones first
-    # and reject any that exceed the matched scale.
+    # Reduce each candidate to a more local representative, then (below) take the
+    # smallest-diameter ones first and reject any that exceed the matched scale. The reduction
+    # is greedy, so the candidates are sorted first for a reproducible result.
     reduced = _reduce_to_local(
-        [_records_to_vector(candidate) for candidate in windowed], record_coordinates
+        sorted(_records_to_vector(candidate) for candidate in windowed), record_coordinates
     )
     diameters = {
         vector: _spatial_diameter(vector, record_coordinates) for vector in reduced
