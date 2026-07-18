@@ -13,9 +13,7 @@ from tqecd.nullspace import DEFAULT_MATCHING_WINDOW, complete_detectors
 from tqecd.utils import remove_duplicate_detectors
 
 
-def _detectors_to_circuit(
-    detectors: list[MatchedDetector], additional_coordinates: list[float] | None = None
-) -> stim.Circuit:
+def _detectors_to_circuit(detectors: list[MatchedDetector]) -> stim.Circuit:
     """Transform a list of detectors into a circuit.
 
     Args:
@@ -24,9 +22,6 @@ def _detectors_to_circuit(
     Returns:
         A ``stim.Circuit`` instance containing all the provided detectors.
     """
-    if additional_coordinates is None:
-        additional_coordinates = []
-
     circuit = stim.Circuit()
 
     for detector in detectors:
@@ -177,7 +172,7 @@ def _annotate_unrolled_if_incomplete(
     unrolled = stim.Circuit()
     for fragment, detectors in zip(flat_fragments, completed):
         unrolled += _insert_before_last_tick_instruction(
-            fragment.circuit, _detectors_to_circuit(detectors, [0.0])
+            fragment.circuit, _detectors_to_circuit(detectors)
         )
     return remove_duplicate_detectors(unrolled)
 
@@ -239,7 +234,7 @@ def compile_fragments_to_circuit_with_detectors(
         next(iter(qubit_coords_map.values()), cast(tuple[float, ...], tuple()))
     )
     for fragment, detectors in zip(fragments, detectors_from_flows):
-        detectors_circuit = _detectors_to_circuit(detectors, [0.0])
+        detectors_circuit = _detectors_to_circuit(detectors)
         if isinstance(fragment, Fragment):
             circuit += _insert_before_last_tick_instruction(
                 fragment.circuit, detectors_circuit

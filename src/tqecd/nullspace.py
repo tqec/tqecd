@@ -39,48 +39,35 @@ returns a basis of the same space whose generators are free to span the whole ci
 leaving nothing local to choose from -- and a long-span basis turns graphlike edges into
 hyperedges and destroys the very distance we are trying to certify.
 
-For the same reason the basis is selected shortest-span-first: a *valid* basis chosen in
-discovery order still yields a circuit in which stim can find no graphlike logical error at
-all. This is the locality-preserving insertion of stim-floquet's
-``windowed_local_detectors``, and it is the regulariser that picks the good solution out of
-the family that stimflow's ``add_flow(measurements="auto")`` documents as non-unique.
+For the same reason candidates are reduced to physically local representatives and selected
+by spatial diameter: a *valid* basis chosen in discovery order can still yield a circuit in
+which stim finds no graphlike logical error at all. This is the locality-preserving insertion
+of stim-floquet's ``windowed_local_detectors``, and it is the regulariser that picks the good
+solution out of the family that stimflow's ``add_flow(measurements="auto")`` documents as
+non-unique.
 """
 
 from __future__ import annotations
 
 from collections.abc import Iterable, Mapping, Sequence
+from typing import TYPE_CHECKING
 
 import numpy
 import stim
 
-from tqecd.cover import BinaryVectorBasis
+from tqecd.cover import BinaryVectorBasis, int_to_bit_indices
 from tqecd.exceptions import TQECDException
 from tqecd.fragment import Fragment
 from tqecd.measurement import RelativeMeasurementLocation
+from tqecd.utils import remove_annotations
+
+if TYPE_CHECKING:
+    from tqecd.match import MatchedDetector
 
 #: How many consecutive fragments a detector may span. Two is enough for every gadget
 #: measured so far; wider windows cost proportionally more and found nothing extra.
 DEFAULT_MATCHING_WINDOW: int = 2
-
-
-def _without_annotations(circuit: stim.Circuit) -> stim.Circuit:
-    """Drop DETECTOR and OBSERVABLE_INCLUDE.
-
-    Both must go before asking for flow generators. An OBSERVABLE_INCLUDE left in the
-    sub-circuit would be interpreted as an observable and pollute the flows.
-    """
-    out = stim.Circuit()
-    for instruction in circuit:
-        if isinstance(instruction, stim.CircuitRepeatBlock):
-            out.append(
-                stim.CircuitRepeatBlock(
-                    instruction.repeat_count,
-                    _without_annotations(instruction.body_copy()),
-                )
-            )
-        elif instruction.name not in ("DETECTOR", "OBSERVABLE_INCLUDE"):
-            out.append(instruction)
-    return out
+_FLOW_ANNOTATIONS = frozenset({"DETECTOR", "OBSERVABLE_INCLUDE"})
 
 
 def _window_detectors(
@@ -89,7 +76,7 @@ def _window_detectors(
     """Detectors supported entirely within ``fragments[first:last]``, in absolute records."""
     sub = stim.Circuit()
     for fragment in fragments[first:last]:
-        sub += _without_annotations(fragment.circuit)
+        sub += remove_annotations(fragment.circuit, _FLOW_ANNOTATIONS)
 
     base = starts[first]
     found: list[frozenset[int]] = []
@@ -110,17 +97,6 @@ def _records_to_vector(records: Iterable[int]) -> int:
     return vector
 
 
-def _vector_to_records(vector: int) -> list[int]:
-    """Ascending measurement-record indices whose bit is set in ``vector``."""
-    records: list[int] = []
-    bits = vector
-    while bits:
-        low = bits & -bits
-        records.append(low.bit_length() - 1)
-        bits ^= low
-    return records
-
-
 def _spatial_diameter(
     vector: int, record_coordinates: Sequence[tuple[float, ...] | None]
 ) -> float:
@@ -131,7 +107,7 @@ def _spatial_diameter(
     without coordinates are ignored; if none has coordinates the record-index span is used.
     """
     mins: list[float] | None = None
-    maxs: list[float] | None = None
+    maxs: list[float] = []
     lowest = -1
     highest = -1
     bits = vector
@@ -192,9 +168,9 @@ def _reduce_to_local(
 def complete_detectors(
     fragments: Sequence[Fragment],
     qubit_coordinates: Mapping[int, tuple[float, ...]],
-    already_matched: Sequence[Sequence[object]],
+    already_matched: Sequence[Sequence[MatchedDetector]],
     window: int = DEFAULT_MATCHING_WINDOW,
-) -> list[list[object]]:
+) -> list[list[MatchedDetector]]:
     """Add the detectors that flow matching missed, keeping the ones it found.
 
     The detectors already matched are seeded into the basis first, so every one of them is
@@ -238,18 +214,20 @@ def complete_detectors(
     total_records = cursor
     ends = [start + f.num_measurements for start, f in zip(starts, fragments)]
 
-    detectors: list[list[object]] = [list(found) for found in already_matched]
+    detectors: list[list[MatchedDetector]] = [list(found) for found in already_matched]
 
     # Seed with what flow matching already found, so those detectors are preserved and only
     # genuinely new ones are added.
     basis = BinaryVectorBasis()
+    matched_vectors: list[int] = []
     for index, found in enumerate(already_matched):
         for detector in found:
-            basis.add(
-                _records_to_vector(
-                    ends[index] + m.offset for m in detector.measurements  # type: ignore[attr-defined]
-                )
+            vector = _records_to_vector(
+                ends[index] + measurement.offset
+                for measurement in detector.measurements
             )
+            matched_vectors.append(vector)
+            basis.add(vector)
 
     record_coordinates = [qubit_coordinates.get(qubit) for qubit in measured_qubits]
 
@@ -260,11 +238,6 @@ def complete_detectors(
     # no graphlike logical error. Capping at the matched scale rejects exactly that, without
     # ever needing to know the observables -- the effect native tqec gets by only emitting
     # local stabilizer checks. Empty match set (nothing to scale against) => no cap.
-    matched_vectors = [
-        _records_to_vector(ends[index] + m.offset for m in detector.measurements)  # type: ignore[attr-defined]
-        for index, found in enumerate(already_matched)
-        for detector in found
-    ]
     locality_cap = max(
         (_spatial_diameter(vector, record_coordinates) for vector in matched_vectors),
         default=float("inf"),
@@ -285,14 +258,17 @@ def complete_detectors(
     diameters = {
         vector: _spatial_diameter(vector, record_coordinates) for vector in reduced
     }
-    ordered = sorted(diameters, key=lambda vector: (diameters[vector], vector.bit_count(), vector))
+    ordered = sorted(
+        diameters,
+        key=lambda vector: (diameters[vector], vector.bit_count(), vector),
+    )
 
     for vector in ordered:
         if diameters[vector] > locality_cap:
             continue
         if not basis.add(vector):
             continue
-        records = _vector_to_records(vector)
+        records = int_to_bit_indices(vector)
         # A detector is valid at the end of the fragment holding its LAST measurement.
         anchor = next(i for i, end in enumerate(ends) if records[-1] < end)
         end = ends[anchor]

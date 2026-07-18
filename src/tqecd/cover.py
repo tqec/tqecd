@@ -103,11 +103,11 @@ def _find_cover(
         if not basis.add(vector, 1 << i) and commute_with is not None:
             result = basis.decompose(vector)
             assert result is not None
-            return _int_to_bit_indices(result ^ (1 << i))
+            return int_to_bit_indices(result ^ (1 << i))
     if commute_with is not None:
         return None
     result = basis.decompose(target._to_int_mask(qubit_mask, commute_with))
-    return None if result is None else _int_to_bit_indices(result)
+    return None if result is None else int_to_bit_indices(result)
 
 
 def find_exact_cover(
@@ -194,7 +194,7 @@ def find_commuting_cover_on_target_qubits(
     return _find_cover(target, sources, frozenset(target.qubits), commute_with=target)
 
 
-def _int_to_bit_indices(x: int) -> list[int]:
+def int_to_bit_indices(x: int) -> list[int]:
     """Return the positions of the bits that are set in ``x``.
 
     Args:
