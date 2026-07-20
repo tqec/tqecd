@@ -85,3 +85,27 @@ def test_invalid_circuits(name: str, circuit: stim.Circuit, error_message: str) 
     )
     with pytest.raises(TQECDException, match=rf"^{error_message}$"):
         annotate_detectors_automatically(circuit_without_detectors)
+
+
+def test_reuse_flows_for_anticommuting_cover() -> None:
+    circuit = stim.Circuit("""
+QUBIT_COORDS(0, 0) 0
+QUBIT_COORDS(1, 0) 1
+QUBIT_COORDS(2, 0) 2
+R 0 1 2
+TICK
+CX 1 0
+TICK
+CX 1 2
+TICK
+MX 1
+TICK
+M 0 2
+""")
+    assert annotate_detectors_automatically(circuit).num_detectors == 1
+    assert (
+        annotate_detectors_automatically(
+            circuit, reuse_flows_for_anticommuting_cover=True
+        ).num_detectors
+        == 2
+    )
