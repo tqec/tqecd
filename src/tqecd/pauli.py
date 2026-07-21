@@ -8,11 +8,12 @@ API.
 
 from __future__ import annotations
 
-from typing import Iterable, Iterator, Literal
+from typing import Iterable, Literal
 
 import numpy
 import stim
 
+from tqecd.bitops import int_to_bit_indices
 from tqecd.exceptions import TQECDException
 
 PAULI_STRING_TYPE = Literal["I", "X", "Y", "Z"]
@@ -74,7 +75,7 @@ class PauliString:
 
     @property
     def qubits(self) -> Iterable[int]:
-        return _bit_indices(self._support)
+        return int_to_bit_indices(self._support)
 
     @property
     def qubit(self) -> int:
@@ -308,12 +309,6 @@ class PauliString:
     def _as_dict(self) -> dict[int, PAULI_STRING_TYPE]:
         return {q: self[q] for q in self.qubits}
 
-
-def _bit_indices(bits: int) -> Iterator[int]:
-    while bits:
-        least_significant_bit = bits & -bits
-        yield least_significant_bit.bit_length() - 1
-        bits ^= least_significant_bit
 
 
 def pauli_literal_to_bools(
