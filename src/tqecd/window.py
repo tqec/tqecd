@@ -218,8 +218,7 @@ def complete_detectors(
 
     record_coordinates = [qubit_coordinates.get(qubit) for qubit in measured_qubits]
 
-    # The flow matcher's own detectors set the local scale of the code. A completion detector
-    # physically larger than any matched one is a non-local parity. Capping at the matched scale rejects logical observable annotations from leaking into the windowed flow generators and getting emmitted as a detector. This would cause a ``no graphlike logical error`` error.
+    # The flow matcher's own detectors set the local scale of the code. A completion candidate detector is rejected with the bounding-box of the detecting region covering the qubits supplying th emeasurements exceeds the maximum such detecting region among ``tqecd``'s shallow-flow-matched detectors.
     locality_cap = max(
         (_spatial_diameter(vector, record_coordinates) for vector in matched_vectors),
         default=float("inf"),

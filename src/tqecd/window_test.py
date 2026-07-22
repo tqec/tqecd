@@ -21,6 +21,10 @@ from tqecd.window import (
 
 _VALID = Path(__file__).parent / "test_files" / "valid"
 _REGRESSION = Path(__file__).parent / "test_files" / "valid" / "window"
+_FIXED_BULK_Y_FIXTURES = (
+    "ymem_y_init_y_meas_k1_fixed_bulk.stim",
+    "s_gate_z_k1_fixed_bulk.stim",
+)
 
 
 def _gf2_rank(vectors: list[int]) -> int:
@@ -229,7 +233,37 @@ def _record_sets(circuit: stim.Circuit, name: str) -> list[frozenset[int]]:
     return sets
 
 
-def _pinned_observable_count(circuit: stim.Circuit) -> int:
+def _observable_vectors(circuit: stim.Circuit) -> list[int]:
+    """XOR-aggregate absolute record sets by observable index."""
+    vectors: dict[int, int] = {}
+    running = 0
+    for inst in circuit.flattened():
+        if inst.name == "OBSERVABLE_INCLUDE":
+            index = int(inst.gate_args_copy()[0])
+            for target in inst.targets_copy():
+                if target.is_measurement_record_target:
+                    vectors[index] = vectors.get(index, 0) ^ (
+                        1 << (running + target.value)
+                    )
+            continue
+        if stim.gate_data(inst.name).produces_measurements:
+            running += sum(
+                1 for target in inst.targets_copy() if not target.is_combiner
+            )
+    return list(vectors.values())
+
+
+def _bare_circuit_and_observables(
+    circuit: stim.Circuit,
+) -> tuple[stim.Circuit, list[int]]:
+    observables = _observable_vectors(circuit)
+    bare = remove_annotations(
+        circuit, annotations_to_remove=frozenset({"DETECTOR", "OBSERVABLE_INCLUDE"})
+    )
+    return bare, observables
+
+
+def _pinned_observable_count(circuit: stim.Circuit, observables: list[int]) -> int:
     """How many logical observables lie in the span of the emitted detectors."""
     detectors = [_records_to_vector(s) for s in _record_sets(circuit, "DETECTOR")]
     observables = [
@@ -239,13 +273,35 @@ def _pinned_observable_count(circuit: stim.Circuit) -> int:
     return sum(1 for obs in observables if _gf2_rank(detectors + [obs]) == base)
 
 
-@pytest.mark.parametrize(
-    "fixture", ["ymem_y_init_y_meas_k1_fixed_bulk.stim", "s_gate_z_k1_fixed_bulk.stim"]
-)
+def _detector_rank(circuit: stim.Circuit) -> int:
+    return _gf2_rank(
+        [_records_to_vector(s) for s in _record_sets(circuit, "DETECTOR")]
+    )
+
+
+@pytest.mark.parametrize("fixture", _FIXED_BULK_Y_FIXTURES)
+def test_window_completion_improves_on_historical_fixed_bulk_annotation(
+    fixture: str,
+) -> None:
+    circuit = stim.Circuit((_REGRESSION / fixture).read_text())
+    bare, observables = _bare_circuit_and_observables(circuit)
+    historical = annotate_detectors_automatically(bare, window=1)
+    completed = annotate_detectors_automatically(bare)
+
+    assert _detector_rank(completed) == _detector_rank(historical) + 2
+    assert _pinned_observable_count(completed, observables) == _pinned_observable_count(
+        historical, observables
+    )
+
+
+@pytest.mark.parametrize("fixture", _FIXED_BULK_Y_FIXTURES)
 def test_local_candidate_generation_keeps_a_logical_that_global_pins(
     fixture: str,
 ) -> None:
     circuit = stim.Circuit((_REGRESSION / fixture).read_text())
-    local = annotate_detectors_automatically(circuit, window=2)
-    global_ = annotate_detectors_automatically(circuit, window=10**9)
-    assert _pinned_observable_count(global_) > _pinned_observable_count(local)
+    bare, observables = _bare_circuit_and_observables(circuit)
+    local = annotate_detectors_automatically(bare, window=2)
+    global_ = annotate_detectors_automatically(bare, window=10**9)
+    assert _pinned_observable_count(global_, observables) > _pinned_observable_count(
+        local, observables
+    )
