@@ -109,8 +109,7 @@ def _unrolled(circuit: stim.Circuit) -> stim.Circuit:
                 separate(body[0].name)
                 for item in body:
                     out.append(item)
-            # The instruction that follows the loop meets the body's trailing measurements
-            # and needs the same separation.
+            # The instruction that follows the loop meets the body's trailing detecting region
             at_boundary = True
         else:
             separate(instruction.name)
@@ -126,7 +125,7 @@ def _annotate_unrolled_if_incomplete(
     """Annotate the unrolled circuit, but only adopt it if the looped form is incomplete.
 
     A detector emitted inside a ``REPEAT`` body must have relative offsets that are valid
-    for *every* iteration. The only way to place detectors constructed from windowed local
+    for *every* iteration of the loop. The only way to place detectors constructed from windowed local
     candidate generation and GF(2) locality-reducing row operations is to unroll the loop.
 
     The cost of unrolling in the emitted circuit grows with the number of repetitions, so it's only done when the completion pass finds that the flow matcher missed something.
@@ -137,7 +136,7 @@ def _annotate_unrolled_if_incomplete(
     try:
         fragments = split_stim_circuit_into_fragments(_unrolled(circuit))
     except TQECDException:
-        # If the unrolled circuit does not satisfy ``tqecd``'s structural preconditions, then we keep the looped path rather than fail: it is what we would have done anyway.
+        # If the unrolled circuit does not satisfy ``tqecd``'s structural preconditions, then we keep the looped path rather than fail
         return None
     if not all(isinstance(fragment, Fragment) for fragment in fragments):
         return None
