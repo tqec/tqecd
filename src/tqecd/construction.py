@@ -9,8 +9,8 @@ from tqecd.flow import build_flows_from_fragments
 from tqecd.fragment import Fragment, FragmentLoop, split_stim_circuit_into_fragments
 from tqecd.match import MatchedDetector, match_detectors_from_flows_shallow
 from tqecd.predicates import is_valid_input_circuit
-from tqecd.window import DEFAULT_MATCHING_WINDOW, complete_detectors
 from tqecd.utils import remove_duplicate_detectors
+from tqecd.window import DEFAULT_MATCHING_WINDOW, complete_detectors
 
 
 def _detectors_to_circuit(detectors: list[MatchedDetector]) -> stim.Circuit:
@@ -54,7 +54,7 @@ def annotate_detectors_automatically(
     Args:
         circuit: circuit to insert detectors in.
         window: width of the sliding window used for *local candidate generation*--how many consecutive fragments a completion detector may span (see :mod:`tqecd.window`). The default is ``2`` and should be sufficient for most surface code gadgets.
-            
+
     Returns:
         A new ``stim.Circuit`` instance with automatically computed detectors.
     """
@@ -78,17 +78,16 @@ def annotate_detectors_automatically(
 
 
 def _unrolled(circuit: stim.Circuit) -> stim.Circuit:
-    """Expand every ``REPEAT`` block, keeping the moment structure tqecd requires.
+    """Expand every ``REPEAT`` block. This changes the circuit's fragmentation,
+    but keeps the moment structure required by ``tqecd``.
 
-    ``stim.Circuit.flattened`` is not usable here. A ``REPEAT`` body that does not end in a
-    ``TICK`` puts iteration *i*'s measurements and iteration *i+1*'s resets in the same
-    moment once concatenated, and tqecd rejects any circuit with a moment holding both
-    (``is_valid_input_circuit``). The looped form survives only because tqecd recurses into
-    the body and splits at the boundary.
+    ``stim.Circuit.flattened`` is not usable here because a ``REPEAT`` body that
+    does not end in a ``TICK`` puts iteration *i*'s measurements and iteration *
+    +1*'s resets in the same moment once appended together, and ``tqecd`` rejects
+    any circuit with a moment holding both (see :func:``is_valid_input_circuit``).
 
-    A ``TICK`` is therefore inserted between consecutive body copies where one is missing.
-    ``TICK`` only delimits moments -- instructions still execute in listed order -- so this
-    changes the circuit's fragmentation, not its semantics.
+    A ``TICK`` is therefore inserted between consecutive body copies where one is
+     missing. ``TICK`` only delimits moments.
     """
     out = stim.Circuit()
     at_boundary = False
@@ -96,12 +95,7 @@ def _unrolled(circuit: stim.Circuit) -> stim.Circuit:
     def separate(next_name: str) -> None:
         """Close the current moment if we are crossing a loop boundary into ``next_name``."""
         nonlocal at_boundary
-        if (
-            at_boundary
-            and len(out)
-            and out[-1].name != "TICK"
-            and next_name != "TICK"
-        ):
+        if at_boundary and len(out) and out[-1].name != "TICK" and next_name != "TICK":
             out.append("TICK", [], [])
         at_boundary = False
 
@@ -132,26 +126,18 @@ def _annotate_unrolled_if_incomplete(
     """Annotate the unrolled circuit, but only adopt it if the looped form is incomplete.
 
     A detector emitted inside a ``REPEAT`` body must have relative offsets that are valid
-    for *every* iteration. The bounded-window nullspace makes no such guarantee -- it finds
-    whichever parities are deterministic, and a parity that only holds at one particular
-    iteration cannot be folded back into the body. The only way to place such a detector is
+    for *every* iteration. The only way to place detectors constructed from windowed local candidate generation and Gaussian elimination is
     to unroll the loop.
 
-    Unrolling has a real cost: the ``REPEAT`` compression is lost and the emitted circuit
-    grows with the repetition count. So it is done only when it buys something. If the
-    completion pass finds nothing the flow matcher missed -- the case for a plain QEC memory
-    loop, where every stabilizer is measured every round and matching is already complete --
-    ``None`` is returned and the caller keeps the looped circuit exactly as it was.
+    The cost of unrolling in the emitted circuit grows with the number of repetitions, so it's only done when the completion pass finds that the flow matcher missed something.
 
     Returns:
-        The annotated *unrolled* circuit when the nullspace found detectors flow matching
-        misses; ``None`` when the looped annotation is already complete.
+        The annotated *unrolled* circuit when missing detectors within a fragment window were found; ``None`` when the looped annotation is already complete.
     """
     try:
         fragments = split_stim_circuit_into_fragments(_unrolled(circuit))
     except TQECDException:
-        # The unrolled circuit does not satisfy tqecd's structural preconditions. Keep the
-        # looped path rather than fail: it is what we would have done anyway.
+        # If the unrolled circuit does not satisfy ``tqecd``'s structural preconditions, then we keep the looped path rather than fail: it is what we would have done anyway.
         return None
     if not all(isinstance(fragment, Fragment) for fragment in fragments):
         return None
@@ -209,13 +195,9 @@ def compile_fragments_to_circuit_with_detectors(
     flows = build_flows_from_fragments(fragments)
     detectors_from_flows = match_detectors_from_flows_shallow(flows, qubit_coords_map)
 
-    # Flow matching is an incomplete heuristic: detectors whose flows only cancel in
-    # combination are silently dropped, which is what costs the Y-basis gadgets their
-    # distance. Top up the result with detectors from the bounded-window stabilizer nullspace
-    # (see `tqecd.window`). This is purely additive -- every detector matched above is kept.
-    #
+    # Add detectors missing from the existing flow matching heuristic.
     # Anything containing a FragmentLoop keeps the matched result untouched here. A detector
-    # emitted inside a repeated body has to be loop-translation-invariant, and the nullspace
+    # emitted inside a repeated body has to have indices which are loop-translation-invariant, and the Gaussian elimination
     # routine makes no attempt to guess that. Looped circuits that genuinely need the
     # completion are handled by unrolling, in `_annotate_unrolled_if_incomplete`.
     if window >= 2 and all(isinstance(f, Fragment) for f in fragments):
