@@ -2,7 +2,78 @@
 
 from __future__ import annotations
 
+from typing import Literal
+
+from tqecd.bitops import int_to_bit_indices
 from tqecd.pauli import PauliString
+
+PivotDirection = Literal["lowest", "highest"]
+
+
+class BinaryVectorBasis:
+    """Helper for vector addition over GF(2).
+
+    We use Python's arbitrary-precision integer data structure to specify a
+    bit-vector form of detector measurement records. Since the only operation are the XORs in GF(2) reduction, this is more efficient that an array element for each coordinate.
+
+    A vector is independent precisely when reduction leaves a non-zero remainder.
+    Optional ``combination`` masks track which source vectors XOR to a
+    dependent vector, which is needed by the Pauli-cover routines below.
+
+    ``pivot_direction`` chooses the set bit used as each row's pivot. For example, vector
+    ``0b1010`` pivots at bit 3 with ``"highest"`` and bit 1 with ``"lowest"``. Direction
+    changes the echelon representation and which end of the integer is scanned, but not
+    independence or the decomposition relative to a fixed independent source basis. The
+    default is ``"highest"`` to preserve tqecd's historical cover-solving behavior.
+
+    Args:
+        pivot_direction: whether reduction pivots on the lowest or highest set bit.
+
+    Raises:
+        ValueError: if ``pivot_direction`` is not ``"lowest"`` or ``"highest"``.
+    """
+
+    def __init__(self, pivot_direction: PivotDirection = "highest") -> None:
+        if pivot_direction not in ("lowest", "highest"):
+            raise ValueError(
+                "pivot_direction must be either 'lowest' or 'highest', got "
+                f"{pivot_direction!r}."
+            )
+        self._pivot_direction = pivot_direction
+        self._basis: dict[int, tuple[int, int]] = {}
+
+    def _pivot(self, vector: int) -> int:
+        if self._pivot_direction == "highest":
+            return vector.bit_length() - 1
+        return (vector & -vector).bit_length() - 1
+
+    def reduce(self, vector: int, combination: int = 0) -> tuple[int, int]:
+        """Reduce a vector and its source-combination mask against the basis."""
+        if vector < 0 or combination < 0:
+            raise ValueError(
+                "GF(2) vectors and combination masks must be non-negative."
+            )
+        while vector:
+            pivot = self._pivot(vector)
+            if pivot not in self._basis:
+                break
+            basis_vector, basis_combination = self._basis[pivot]
+            vector ^= basis_vector
+            combination ^= basis_combination
+        return vector, combination
+
+    def add(self, vector: int, combination: int = 0) -> bool:
+        """Add ``vector`` and return whether it is independent of the current basis."""
+        remainder, reduced_combination = self.reduce(vector, combination)
+        if remainder == 0:
+            return False
+        self._basis[self._pivot(remainder)] = (remainder, reduced_combination)
+        return True
+
+    def decompose(self, vector: int) -> int | None:
+        """Return a source mask whose vectors XOR to ``vector``, or ``None``."""
+        remainder, combination = self.reduce(vector)
+        return combination if remainder == 0 else None
 
 
 def _find_cover(
@@ -30,21 +101,17 @@ def _find_cover(
         ``None`` if no such cover could be found.
     """
     qubit_mask = sum(1 << q for q in on_qubits)
-    basis: dict[int, tuple[int, int]] = {}
+    basis = BinaryVectorBasis()
     for i, source in enumerate(sources):
-        result = _solve_linear_system(
-            basis, source._to_int_mask(qubit_mask, commute_with), 1 << i
-        )
-        if result is not None and commute_with is not None:
-            return _int_to_bit_indices(result)
+        vector = source._to_int_mask(qubit_mask, commute_with)
+        if not basis.add(vector, 1 << i) and commute_with is not None:
+            result = basis.decompose(vector)
+            assert result is not None
+            return int_to_bit_indices(result ^ (1 << i))
     if commute_with is not None:
         return None
-    result = _solve_linear_system(
-        basis,
-        target._to_int_mask(qubit_mask, commute_with),
-        update_basis=False,
-    )
-    return None if result is None else _int_to_bit_indices(result)
+    result = basis.decompose(target._to_int_mask(qubit_mask, commute_with))
+    return None if result is None else int_to_bit_indices(result)
 
 
 def find_exact_cover(
@@ -129,63 +196,3 @@ def find_commuting_cover_on_target_qubits(
     if not sources:
         return None
     return _find_cover(target, sources, frozenset(target.qubits), commute_with=target)
-
-
-def _solve_linear_system(
-    basis: dict[int, tuple[int, int]],
-    x: int,
-    mask: int = 0,
-    update_basis: bool = True,
-) -> int | None:
-    """Gaussian elimination over GF(2) to decompose ``x`` in terms of ``basis``.
-
-    Each basis element is stored as a tuple ``(vector, mask)``, keyed by the
-    position of its highest set bit (the pivot). ``vector`` is the basis
-    element itself (an integer treated as a bit-vector over GF(2)) and
-    ``mask`` tracks which source items combine to produce ``vector`` — every
-    bit set in ``mask`` corresponds to one source's index.
-
-    The input ``x`` is reduced by repeatedly XOR-ing in the basis element
-    whose pivot matches the current highest bit of ``x``. While doing so,
-    the bookkeeping ``mask`` accumulates which source indices have been
-    combined.
-
-    Args:
-        basis: the current basis, mapping each pivot bit position to a
-            ``(vector, mask)`` pair. Modified in place when ``update_basis``
-            is ``True`` and ``x`` turns out to be linearly independent.
-        x: the bit-vector to reduce against ``basis``.
-        mask: initial mask of source indices already associated with ``x``.
-            Pass ``1 << i`` when reducing the ``i``-th source while building
-            the basis, or ``0`` when reducing an external target.
-        update_basis: if ``True`` (default), ``x`` is added to ``basis`` as
-            a new basis element whenever it is found to be linearly
-            independent of the current basis.
-
-    Returns:
-        The final ``mask`` (a bit-set of source indices whose encoded
-        vectors XOR to the original ``x``) when ``x`` is fully reduced, or
-        ``None`` when ``x`` is linearly independent of the current basis.
-    """
-    while x:
-        highest_bit = x.bit_length() - 1
-        if highest_bit not in basis:
-            if update_basis:
-                basis[highest_bit] = (x, mask)
-            return None
-        pivot, pivot_mask = basis[highest_bit]
-        x ^= pivot
-        mask ^= pivot_mask
-    return mask
-
-
-def _int_to_bit_indices(x: int) -> list[int]:
-    """Return the positions of the bits that are set in ``x``.
-
-    Args:
-        x: a non-negative integer, interpreted as a bit-vector.
-
-    Returns:
-        The sorted list of indices ``i`` such that bit ``i`` of ``x`` is ``1``.
-    """
-    return [i for i in range(x.bit_length()) if (x >> i) & 1]
