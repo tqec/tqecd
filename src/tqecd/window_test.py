@@ -266,9 +266,6 @@ def _bare_circuit_and_observables(
 def _pinned_observable_count(circuit: stim.Circuit, observables: list[int]) -> int:
     """How many logical observables lie in the span of the emitted detectors."""
     detectors = [_records_to_vector(s) for s in _record_sets(circuit, "DETECTOR")]
-    observables = [
-        _records_to_vector(s) for s in _record_sets(circuit, "OBSERVABLE_INCLUDE")
-    ]
     base = _gf2_rank(detectors)
     return sum(1 for obs in observables if _gf2_rank(detectors + [obs]) == base)
 
