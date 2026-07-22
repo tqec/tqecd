@@ -15,7 +15,7 @@ local redundancy.
 
 The process starts with regular ``tqecd`` flow matching. The local detectors that are found are passed in as ``already_matched`` and are always kept, so the entire routine has at worst additive complexity to `tqecd`. The computation in ``flow_generators`` is linear in circuit size, so a width ``W`` window costs about ``W`` single global calls.
 
-Note: ordering windowed candidates by detecting-region size and inserting them incrementally into a running basis is adapted from ``windowed_local_detectors`` in stim-floquet, Lu, B. (2026), MIT licence, https://github.com/jerrylvx/stim-floquet; no code from that package is used here.
+Note: ordering windowed candidates by detecting-region size and inserting them incrementally into a running basis is adapted from ``windowed_local_detectors`` in stim-floquet, Lu, B. (2026), MIT license, https://github.com/jerrylvx/stim-floquet; no code from that package is used here.
 """
 
 from __future__ import annotations
@@ -254,7 +254,12 @@ def complete_detectors(
             continue
         records = int_to_bit_indices(vector)
         # A detector is valid at the end of the fragment holding its LAST measurement.
-        anchor = next(i for i, end in enumerate(ends) if records[-1] < end)
+        anchor = next((i for i, end in enumerate(ends) if records[-1] < end), None)
+        if anchor is None:
+            raise TQECDException(
+                f"Detector candidate references measurement record {records[-1]}, but the "
+                f"provided fragments only span {ends[-1] if ends else 0} records."
+            )
         end = ends[anchor]
         locations = frozenset(
             RelativeMeasurementLocation(
