@@ -310,7 +310,6 @@ class PauliString:
         return {q: self[q] for q in self.qubits}
 
 
-
 def pauli_literal_to_bools(
     literal: PAULI_STRING_TYPE,
 ) -> tuple[bool, bool]:

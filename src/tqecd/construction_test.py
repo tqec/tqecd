@@ -48,7 +48,9 @@ def invalid_test_circuits() -> list[tuple[str, stim.Circuit, str]]:
         path for path in _INVALID_TEST_FOLDER.rglob("*") if path.is_file()
     )
     for filepath in invalid_files:
-        circuit, expected_error_message_regex = parse_invalid_circuit(filepath.read_text())
+        circuit, expected_error_message_regex = parse_invalid_circuit(
+            filepath.read_text()
+        )
         invalid_circuits.append(
             (
                 str(filepath.relative_to(_INVALID_TEST_FOLDER)),

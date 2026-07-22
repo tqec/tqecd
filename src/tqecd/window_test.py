@@ -199,7 +199,7 @@ def test_complete_detectors_with_empty_matched_emits_an_independent_basis() -> N
 
 def test_complete_detectors_rejects_non_flat_fragments() -> None:
     # complete_detectors only handles flat Fragments; a FragmentLoop (or any non-Fragment)
-    # must raise rather than be silently mis-annotated. Exercise the guard directly.
+    # must raise rather than be silently annotated incorrectly.
     with pytest.raises(TQECDException):
         complete_detectors(
             cast("list[Fragment]", ["not-a-fragment"]), {}, [[]], window=2
@@ -271,9 +271,7 @@ def _pinned_observable_count(circuit: stim.Circuit, observables: list[int]) -> i
 
 
 def _detector_rank(circuit: stim.Circuit) -> int:
-    return _gf2_rank(
-        [_records_to_vector(s) for s in _record_sets(circuit, "DETECTOR")]
-    )
+    return _gf2_rank([_records_to_vector(s) for s in _record_sets(circuit, "DETECTOR")])
 
 
 @pytest.mark.parametrize("fixture", _FIXED_BULK_Y_FIXTURES)
