@@ -126,8 +126,8 @@ def _annotate_unrolled_if_incomplete(
     """Annotate the unrolled circuit, but only adopt it if the looped form is incomplete.
 
     A detector emitted inside a ``REPEAT`` body must have relative offsets that are valid
-    for *every* iteration. The only way to place detectors constructed from windowed local candidate generation and Gaussian elimination is
-    to unroll the loop.
+    for *every* iteration. The only way to place detectors constructed from windowed local
+    candidate generation and GF(2) locality-reducing row operations is to unroll the loop.
 
     The cost of unrolling in the emitted circuit grows with the number of repetitions, so it's only done when the completion pass finds that the flow matcher missed something.
 
@@ -197,9 +197,10 @@ def compile_fragments_to_circuit_with_detectors(
 
     # Add detectors missing from the existing flow matching heuristic.
     # Anything containing a FragmentLoop keeps the matched result untouched here. A detector
-    # emitted inside a repeated body has to have indices which are loop-translation-invariant, and the Gaussian elimination
-    # routine makes no attempt to guess that. Looped circuits that genuinely need the
-    # completion are handled by unrolling, in `_annotate_unrolled_if_incomplete`.
+    # emitted inside a repeated body has to have indices which are loop-translation-invariant,
+    # and the windowed completion routine makes no attempt to guess that. Looped circuits that
+    # need the completion are handled by unrolling, in
+    # `_annotate_unrolled_if_incomplete`.
     if window >= 2 and all(isinstance(f, Fragment) for f in fragments):
         detectors_from_flows = complete_detectors(
             cast(list[Fragment], fragments),

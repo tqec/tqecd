@@ -1,10 +1,17 @@
-"""Find detectors within a small temporal window by calculating kernel.
+"""Find detectors within a small temporal window using Stim flows and GF(2) elimination.
 
 For each window of consecutive fragments, build the sub-circuit and ask ``Stim`` for its flow generators. A generator with trivial input and trivial output is a parity that is deterministic no matter what state entered the window and is therefore a detector.
 
 ``Stim`` cannot return a non-deterministic parity, so all detectors emitted over each window are guaranteed to be valid.
 
-Detectors independently found from :func:``match_detectors_from_flows_shallow`` finds some but not all detectors.  Overlapping windows can give a redundant set of locally-supported candidate detectors, so we can take the XOR of two of the candidates and get more options for detectors. A global window would return a minimal but non-redundant generating set. The candidate detectors are chosen in :func:`complete_detectors`. They are XOR'd with every candidate they overlap with. Then, in the order of increasing size of detecting region (smallest detecting region first), they are added. Small detecting regions are prioritized to avoid unmatchable hyperedges in the decoding graph.
+Detectors independently found by :func:`tqecd.match.match_detectors_from_flows_shallow`
+include some but not all detectors. Overlapping windows provide a redundant set of locally
+supported candidates. Locality-reducing GF(2) row operations combine overlapping candidates,
+and incremental Gaussian elimination retains only candidates independent of the detectors
+already accepted. Candidates are considered in increasing order of detecting-region size so
+local checks are preferred over unmatchable hyperedges in the decoding graph. A global window
+instead returns a minimal, non-redundant generating set that does not provide the same
+local redundancy.
 
 The process starts with regular ``tqecd`` flow matching. The local detectors that are found are passed in as ``already_matched`` and are always kept, so the entire routine has at worst additive complexity to `tqecd`. The computation in ``flow_generators`` is linear in circuit size, so a width ``W`` window costs about ``W`` single global calls.
 """
@@ -101,14 +108,18 @@ def _spatial_diameter(
 def _reduce_to_local(
     vectors: list[int], record_coordinates: Sequence[tuple[float, ...] | None]
 ) -> list[int]:
-    """Shrink each candidate toward a more spatially-local XOR-combination of the others.
+    """Shrink candidates with locality-reducing GF(2) row operations.
 
     A windowed flow generator can be short in record order yet span the whole
     patch spatially, and the local representative of a generator is a
-    combination of generators, not a generator itself. XORing preserves the
-    span, so the reduced set generates exactly the same detector space--only
-    its representatives get localized. Two candidates must share a record for
-    their XOR to possibly shrink either, so only overlapping pairs are considered. Rather than scan every pair, we index each candidate by their record. This keep the pass near-linear when overlaps are sparse. The reduction is greedy, so it yields a more local, rather than most-globally-localized form.
+    combination of generators, not a generator itself. Adding one row to another over GF(2)
+    is implemented by XOR and preserves the span, so the reduced set generates exactly the
+    same detector space--only its representatives get localized. Two candidates must share a
+    record for their XOR to possibly shrink either, so only overlapping pairs are considered.
+    This is a
+    greedy basis transformation toward local representatives and does not a guarantee of globally minimal diameter. Rather than scan every
+    pair, the implementation indexes candidates by record, keeping the pass near-linear when
+    overlaps are sparse.
     """
     diameters = [_spatial_diameter(vector, record_coordinates) for vector in vectors]
     touching: dict[int, set[int]] = {}
