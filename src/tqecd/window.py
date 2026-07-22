@@ -118,8 +118,7 @@ def _reduce_to_local(
     is implemented by XOR and preserves the span, so the reduced set generates exactly the
     same detector space--only its representatives get localized. Two candidates must share a
     record for their XOR to possibly shrink either, so only overlapping pairs are considered.
-    This is a
-    greedy basis transformation toward local representatives and does not a guarantee of globally minimal diameter. Rather than scan every
+    This is a greedy basis transformation toward local representatives and does not guarantee a globally minimal diameter. Rather than scan every
     pair, the implementation indexes candidates by record, keeping the pass near-linear when
     overlaps are sparse.
     """
@@ -218,7 +217,10 @@ def complete_detectors(
 
     record_coordinates = [qubit_coordinates.get(qubit) for qubit in measured_qubits]
 
-    # The flow matcher's own detectors set the local scale of the code. A completion candidate detector is rejected with the bounding-box of the detecting region covering the qubits supplying th emeasurements exceeds the maximum such detecting region among ``tqecd``'s shallow-flow-matched detectors.
+    # The flow matcher's own detectors set the local scale of the code. A completion candidate
+    # detector is rejected when the bounding-box of the detecting region covering the qubits
+    # supplying the measurements exceeds the maximum such detecting region among ``tqecd``'s
+    # shallow-flow-matched detectors.
     locality_cap = max(
         (_spatial_diameter(vector, record_coordinates) for vector in matched_vectors),
         default=float("inf"),

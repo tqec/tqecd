@@ -14,7 +14,7 @@ class BinaryVectorBasis:
     """Helper for vector addition over GF(2).
 
     We use Python's arbitrary-precision integer data structure to specify a
-    bit-vector form of detector measurement records. Since the only operation are the XORs in GF(2) reduction, this is more efficient that an array element for each coordinate.
+    bit-vector form of detector measurement records. Since the only operation are the XORs in GF(2) reduction, this is more efficient than an array element for each coordinate.
 
     A vector is independent precisely when reduction leaves a non-zero remainder.
     Optional ``combination`` masks track which source vectors XOR to a
