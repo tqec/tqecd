@@ -21,14 +21,13 @@ _INVALID_TEST_FOLDER = _TEST_FOLDER / "invalid"
 
 def valid_test_circuits() -> list[tuple[str, stim.Circuit]]:
     valid_circuits: list[tuple[str, stim.Circuit]] = []
-    for filepath in _VALID_TEST_FOLDER.iterdir():
-        with open(filepath) as f:
-            valid_circuits.append(
-                (
-                    filepath.name,
-                    push_all_detectors_to_the_end(stim.Circuit(f.read())),
-                )
+    for filepath in sorted(_VALID_TEST_FOLDER.rglob("*.stim")):
+        valid_circuits.append(
+            (
+                str(filepath.relative_to(_VALID_TEST_FOLDER)),
+                push_all_detectors_to_the_end(stim.Circuit(filepath.read_text())),
             )
+        )
     return valid_circuits
 
 
@@ -45,11 +44,20 @@ def parse_invalid_circuit(text: str) -> tuple[stim.Circuit, str]:
 
 def invalid_test_circuits() -> list[tuple[str, stim.Circuit, str]]:
     invalid_circuits: list[tuple[str, stim.Circuit, str]] = []
-    for filepath in _INVALID_TEST_FOLDER.iterdir():
-        with open(filepath) as f:
-            file_content = f.read()
-        circuit, expected_error_message_regex = parse_invalid_circuit(file_content)
-        invalid_circuits.append((filepath.name, circuit, expected_error_message_regex))
+    invalid_files = sorted(
+        path for path in _INVALID_TEST_FOLDER.rglob("*") if path.is_file()
+    )
+    for filepath in invalid_files:
+        circuit, expected_error_message_regex = parse_invalid_circuit(
+            filepath.read_text()
+        )
+        invalid_circuits.append(
+            (
+                str(filepath.relative_to(_INVALID_TEST_FOLDER)),
+                circuit,
+                expected_error_message_regex,
+            )
+        )
     return invalid_circuits
 
 
