@@ -44,11 +44,13 @@ class PauliString:
         for qubit, pauli in pauli_by_qubit.items():
             if qubit < 0:
                 raise TQECDException(
-                    f"Invalid negative qubit index {qubit}, expected a non-negative integer."
+                    f"Invalid negative qubit index {qubit}, expected a"
+                    f" non-negative integer."
                 )
             if pauli not in _IXYZ:
                 raise TQECDException(
-                    f"Invalid Pauli operator {pauli} for qubit {qubit}, expected I, X, Y, or Z."
+                    f"Invalid Pauli operator {pauli} for qubit {qubit}, expected"
+                    f" I, X, Y, or Z."
                 )
             bit = 1 << qubit
             if pauli in ("X", "Y"):
@@ -101,14 +103,15 @@ class PauliString:
         """Convert a `PauliString` to a `stim.PauliString` instance.
 
         Args:
-            length: The length of the `stim.PauliString`. If `None`, the length is set to the
-                maximum qubit index in the `PauliString` plus one.
+            length: The length of the `stim.PauliString`. If `None`, the length
+                is set to the maximum qubit index in the `PauliString` plus one.
         """
         max_qubit_index = self._support.bit_length() - 1
         length = length if length is not None else max_qubit_index + 1
         if length <= max_qubit_index:
             raise TQECDException(
-                f"The length specified {length} <= the maximum qubit index {max_qubit_index} in the pauli string."
+                f"The length specified {length} <= the maximum qubit index"
+                f" {max_qubit_index} in the pauli string."
             )
         byte_length = (length + 7) // 8
         xs = numpy.frombuffer(

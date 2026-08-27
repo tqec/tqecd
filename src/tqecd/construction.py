@@ -53,7 +53,10 @@ def annotate_detectors_automatically(
 
     Args:
         circuit: circuit to insert detectors in.
-        window: width of the sliding window used for *local candidate generation*--how many consecutive fragments a completion detector may span (see :mod:`tqecd.window`). The default is ``2`` and should be sufficient for most surface code gadgets.
+        window: width of the sliding window used for *local candidate
+            generation*--how many consecutive fragments a completion detector may
+            span (see :mod:`tqecd.window`). The default is ``2`` and should be
+            sufficient for most surface code gadgets.
 
     Returns:
         A new ``stim.Circuit`` instance with automatically computed detectors.
@@ -78,10 +81,11 @@ def annotate_detectors_automatically(
             fragments, qubit_coords_map, window=window
         )
     except TQECDException:
-        # Matching inside a ``REPEAT`` body requires the detector set to be identical between
-        # every pair of consecutive iterations. Some gadgets -- notably the fixed-bulk Y half
-        # cube, whose transition round makes the first and last iterations differ from the bulk
-        # ones -- do not satisfy that, so the loop-body matcher gives up. Unrolling removes the
+        # Matching inside a ``REPEAT`` body requires the detector set to be
+        # identical between every pair of consecutive iterations. Some gadgets --
+        # notably the fixed-bulk Y half cube, whose transition round makes the
+        # first and last iterations differ from the bulk ones -- do not satisfy
+        # that, so the loop-body matcher gives up. Unrolling removes the
         # constraint entirely, so retry there before propagating the failure.
         if not has_loop:
             raise
@@ -98,18 +102,21 @@ def _unrolled(circuit: stim.Circuit) -> stim.Circuit:
     but keeps the moment structure required by ``tqecd``.
 
     ``stim.Circuit.flattened`` is not usable here because a ``REPEAT`` body that
-    does not end in a ``TICK`` puts iteration *i*'s measurements and iteration *
-    +1*'s resets in the same moment once appended together, and ``tqecd`` rejects
-    any circuit with a moment holding both (see :func:``is_valid_input_circuit``).
+    does not end in a ``TICK`` puts iteration *i*'s measurements and iteration
+    *i+1*'s resets in the same moment once appended together, and ``tqecd``
+    rejects any circuit with a moment holding both (see
+    :func:``is_valid_input_circuit``).
 
     A ``TICK`` is therefore inserted between consecutive body copies where one is
-     missing. ``TICK`` only delimits moments.
+    missing. ``TICK`` only delimits moments.
     """
     out = stim.Circuit()
     at_boundary = False
 
     def separate(next_name: str) -> None:
-        """Close the current moment if we are crossing a loop boundary into ``next_name``."""
+        """Close the current moment if we are crossing a loop boundary into
+        ``next_name``.
+        """
         nonlocal at_boundary
         if at_boundary and len(out) and out[-1].name != "TICK" and next_name != "TICK":
             out.append("TICK", [], [])
@@ -125,7 +132,8 @@ def _unrolled(circuit: stim.Circuit) -> stim.Circuit:
                 separate(body[0].name)
                 for item in body:
                     out.append(item)
-            # The instruction that follows the loop meets the body's trailing detecting region
+            # The instruction that follows the loop meets the body's trailing
+            # detecting region
             at_boundary = True
         else:
             separate(instruction.name)
@@ -141,32 +149,37 @@ def _annotate_unrolled(
 ) -> stim.Circuit | None:
     """Annotate the unrolled circuit.
 
-    A detector emitted inside a ``REPEAT`` body must have relative offsets that are valid
-    for *every* iteration of the loop. The only way to place detectors constructed from windowed local
-    candidate generation and GF(2) locality-reducing row operations is to unroll the loop.
+    A detector emitted inside a ``REPEAT`` body must have relative offsets that
+    are valid for *every* iteration of the loop. The only way to place detectors
+    constructed from windowed local candidate generation and GF(2)
+    locality-reducing row operations is to unroll the loop.
 
-    The cost of unrolling in the emitted circuit grows with the number of repetitions, so by default
-    the result is only adopted when the completion pass finds that the flow matcher missed
-    something. Pass ``only_if_incomplete=False`` to take the unrolled annotation regardless -- used
-    as a fallback when matching the looped form failed outright, where a larger circuit is better
-    than no annotation at all.
+    The cost of unrolling in the emitted circuit grows with the number of
+    repetitions, so by default the result is only adopted when the completion
+    pass finds that the flow matcher missed something. Pass
+    ``only_if_incomplete=False`` to take the unrolled annotation regardless --
+    used as a fallback when matching the looped form failed outright, where a
+    larger circuit is better than no annotation at all.
 
     Args:
         circuit: the (looped) circuit to annotate.
         qubit_coords_map: qubit index to coordinates, as for the looped path.
         window: sliding-window width, as in :func:`annotate_detectors_automatically`.
-        only_if_incomplete: when ``True`` (the default), return ``None`` if the looped annotation
-            is already complete; when ``False``, always return the unrolled annotation.
+        only_if_incomplete: when ``True`` (the default), return ``None`` if the
+            looped annotation is already complete; when ``False``, always return
+            the unrolled annotation.
 
     Returns:
-        The annotated *unrolled* circuit, or ``None`` when it is not usable (the unrolled circuit
-        breaks ``tqecd``'s structural preconditions) or not needed (``only_if_incomplete`` and the
-        looped annotation is already complete).
+        The annotated *unrolled* circuit, or ``None`` when it is not usable (the
+        unrolled circuit breaks ``tqecd``'s structural preconditions) or not
+        needed (``only_if_incomplete`` and the looped annotation is already
+        complete).
     """
     try:
         fragments = split_stim_circuit_into_fragments(_unrolled(circuit))
     except TQECDException:
-        # If the unrolled circuit does not satisfy ``tqecd``'s structural preconditions, then we keep the looped path rather than fail
+        # If the unrolled circuit does not satisfy ``tqecd``'s structural
+        # preconditions, then we keep the looped path rather than fail
         return None
     if not all(isinstance(fragment, Fragment) for fragment in fragments):
         return None
@@ -227,11 +240,11 @@ def compile_fragments_to_circuit_with_detectors(
     detectors_from_flows = match_detectors_from_flows_shallow(flows, qubit_coords_map)
 
     # Add detectors missing from the existing flow matching heuristic.
-    # Anything containing a FragmentLoop keeps the matched result untouched here. A detector
-    # emitted inside a repeated body has to have indices which are loop-translation-invariant,
-    # and the windowed completion routine makes no attempt to guess that. Looped circuits that
-    # need the completion are handled by unrolling, in
-    # `_annotate_unrolled`.
+    # Anything containing a FragmentLoop keeps the matched result untouched here.
+    # A detector emitted inside a repeated body has to have indices which are
+    # loop-translation-invariant, and the windowed completion routine makes no
+    # attempt to guess that. Looped circuits that need the completion are
+    # handled by unrolling, in `_annotate_unrolled`.
     if window >= 2 and all(isinstance(f, Fragment) for f in fragments):
         detectors_from_flows = complete_detectors(
             cast(list[Fragment], fragments),

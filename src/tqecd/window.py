@@ -1,21 +1,34 @@
 """Find detectors within a small temporal window using Stim flows and GF(2) elimination.
 
-For each window of consecutive fragments, build the sub-circuit and ask ``Stim`` for its flow generators. A generator with trivial input and trivial output is a parity that is deterministic no matter what state entered the window and is therefore a detector.
+For each window of consecutive fragments, build the sub-circuit and ask ``Stim``
+for its flow generators. A generator with trivial input and trivial output is a
+parity that is deterministic no matter what state entered the window and is
+therefore a detector.
 
-``Stim`` cannot return a non-deterministic parity, so all detectors emitted over each window are guaranteed to be valid.
+``Stim`` cannot return a non-deterministic parity, so all detectors emitted
+over each window are guaranteed to be valid.
 
 Detectors independently found by :func:`tqecd.match.match_detectors_from_flows_shallow`
-include some but not all detectors. Overlapping windows provide a redundant set of locally
-supported candidates. Locality-reducing GF(2) row operations combine overlapping candidates,
-and incremental Gaussian elimination retains only candidates independent of the detectors
-already accepted. Candidates are considered in increasing order of detecting-region size so
-local checks are preferred over unmatchable hyperedges in the decoding graph. A global window
-instead returns a minimal, non-redundant generating set that does not provide the same
-local redundancy.
+include some but not all detectors. Overlapping windows provide a redundant set of
+locally supported candidates. Locality-reducing GF(2) row operations combine
+overlapping candidates, and incremental Gaussian elimination retains only
+candidates independent of the detectors already accepted. Candidates are
+considered in increasing order of detecting-region size so local checks are
+preferred over unmatchable hyperedges in the decoding graph. A global window
+instead returns a minimal, non-redundant generating set that does not provide the
+same local redundancy.
 
-The process starts with regular ``tqecd`` flow matching. The local detectors that are found are passed in as ``already_matched`` and are always kept, so the entire routine has at worst additive complexity to `tqecd`. The computation in ``flow_generators`` is linear in circuit size, so a width ``W`` window costs about ``W`` single global calls.
+The process starts with regular ``tqecd`` flow matching. The local detectors that
+are found are passed in as ``already_matched`` and are always kept, so the entire
+routine has at worst additive complexity to `tqecd`. The computation in
+``flow_generators`` is linear in circuit size, so a width ``W`` window costs about
+``W`` single global calls.
 
-Note: ordering windowed candidates by detecting-region size and inserting them incrementally into a running basis is adapted from ``windowed_local_detectors`` in stim-floquet, Lu, B. (2026), MIT license, https://github.com/jerrylvx/stim-floquet; no code from that package is used here.
+Note: ordering windowed candidates by detecting-region size and inserting them
+incrementally into a running basis is adapted from ``windowed_local_detectors``
+in stim-floquet, Lu, B. (2026), MIT license,
+https://github.com/jerrylvx/stim-floquet; no code from that package is used
+here.
 """
 
 from __future__ import annotations
@@ -36,7 +49,9 @@ from tqecd.utils import remove_annotations
 if TYPE_CHECKING:
     from tqecd.match import MatchedDetector
 
-# A matching window should be set to how many consecutive fragments a detector may span. Two is enough for gadgets including the Y basis initialization and measurement; wider windows cost proportionally more and found nothing extra.
+# A matching window should be set to how many consecutive fragments a detector
+# may span. Two is enough for gadgets including the Y basis initialization and
+# measurement; wider windows cost proportionally more and found nothing extra.
 DEFAULT_MATCHING_WINDOW: int = 2
 _FLOW_ANNOTATIONS = frozenset({"DETECTOR", "OBSERVABLE_INCLUDE"})
 
@@ -44,7 +59,9 @@ _FLOW_ANNOTATIONS = frozenset({"DETECTOR", "OBSERVABLE_INCLUDE"})
 def _window_detectors(
     fragments: Sequence[Fragment], starts: Sequence[int], first: int, last: int
 ) -> list[frozenset[int]]:
-    """Detectors supported entirely within ``fragments[first:last]``, in absolute record units."""
+    """Detectors supported entirely within ``fragments[first:last]``, in
+    absolute record units.
+    """
     sub = stim.Circuit()
     for fragment in fragments[first:last]:
         sub += remove_annotations(fragment.circuit, _FLOW_ANNOTATIONS)
@@ -76,9 +93,13 @@ def _spatial_diameter(
 ) -> float:
     """Sum of per-axis extents of the qubit coordinates a record set touches.
 
-    Spatial diameter is a range of microscopic physical space necessary to track for the Y basis initialization and measurement because the transition round contains detectors with short record index range but a long detecting region stretching to the corner of patch.
+    Spatial diameter is a range of microscopic physical space necessary to track
+    for the Y basis initialization and measurement because the transition round
+    contains detectors with short record index range but a long detecting region
+    stretching to the corner of patch.
 
-    Records without coordinates are ignored; if none has coordinates the record-index span is used.
+    Records without coordinates are ignored; if none has coordinates the
+    record-index span is used.
     """
     mins: list[float] | None = None
     maxs: list[float] = []
@@ -114,13 +135,15 @@ def _reduce_to_local(
 
     A windowed flow generator can be short in record order yet span the whole
     patch spatially, and the local representative of a generator is a
-    combination of generators, not a generator itself. Adding one row to another over GF(2)
-    is implemented by XOR and preserves the span, so the reduced set generates exactly the
-    same detector space--only its representatives get localized. Two candidates must share a
-    record for their XOR to possibly shrink either, so only overlapping pairs are considered.
-    This is a greedy basis transformation toward local representatives and does not guarantee a globally minimal diameter. Rather than scan every
-    pair, the implementation indexes candidates by record, keeping the pass near-linear when
-    overlaps are sparse.
+    combination of generators, not a generator itself. Adding one row to another
+    over GF(2) is implemented by XOR and preserves the span, so the reduced set
+    generates exactly the same detector space--only its representatives get
+    localized. Two candidates must share a record for their XOR to possibly
+    shrink either, so only overlapping pairs are considered. This is a greedy
+    basis transformation toward local representatives and does not guarantee a
+    globally minimal diameter. Rather than scan every pair, the implementation
+    indexes candidates by record, keeping the pass near-linear when overlaps are
+    sparse.
     """
     diameters = [_spatial_diameter(vector, record_coordinates) for vector in vectors]
     touching: dict[int, set[int]] = {}
@@ -161,23 +184,30 @@ def complete_detectors(
 ) -> list[list[MatchedDetector]]:
     """Add the detectors that flow matching missed, keeping the ones it found.
 
-    Flow matching (:mod:`tqecd.match`) finds some but not all detectors. The ones it found are
-    passed in as ``already_matched`` and are always kept, so this routine only ever adds. This function expects to receive flow-matched detectors from its callers. The
-    additions come from windowed flow generators filtered repeated XORs with other candidates and the smallness of their detecting region.
+    Flow matching (:mod:`tqecd.match`) finds some but not all detectors. The ones
+    it found are passed in as ``already_matched`` and are always kept, so this
+    routine only ever adds. This function expects to receive flow-matched
+    detectors from its callers. The additions come from windowed flow generators
+    filtered repeated XORs with other candidates and the smallness of their
+    detecting region.
 
-    The second step is a heuristic that won't work for a circuit whose legitimate completion detectors genuinely exceed the matched-detector detecting region size.
+    The second step is a heuristic that won't work for a circuit whose legitimate
+    completion detectors genuinely exceed the matched-detector detecting region
+    size.
 
     Args:
         fragments: a flat list of fragments. ``FragmentLoop``s must be passed
         as unrolled.
         qubit_coordinates: mapping from qubit index to coordinates, used to place the
             emitted detectors.
-        already_matched: detectors found by flow matching, aligned with ``fragments``, with
-            offsets relative to the end of the fragment they are indexed under.
+        already_matched: detectors found by flow matching, aligned with
+            ``fragments``, with offsets relative to the end of the fragment they
+            are indexed under.
         window: how many consecutive fragments a new detector may span.
 
     Returns:
-        A list aligned with ``fragments``, holding ``already_matched`` plus the additions.
+        A list aligned with ``fragments``, holding ``already_matched`` plus the
+        additions.
 
     Raises:
         TQECDException: if any entry of ``fragments`` is not a :class:`Fragment`.
@@ -202,8 +232,8 @@ def complete_detectors(
 
     detectors: list[list[MatchedDetector]] = [list(found) for found in already_matched]
 
-    # Seed with what flow matching already found, so those detectors are preserved and only
-    # genuinely new ones are added.
+    # Seed with what flow matching already found, so those detectors are
+    # preserved and only genuinely new ones are added.
     basis = BinaryVectorBasis()
     matched_vectors: list[int] = []
     for index, found in enumerate(already_matched):
@@ -217,10 +247,11 @@ def complete_detectors(
 
     record_coordinates = [qubit_coordinates.get(qubit) for qubit in measured_qubits]
 
-    # The flow matcher's own detectors set the local scale of the code. A completion candidate
-    # detector is rejected when the bounding-box of the detecting region covering the qubits
-    # supplying the measurements exceeds the maximum such detecting region among ``tqecd``'s
-    # shallow-flow-matched detectors.
+    # The flow matcher's own detectors set the local scale of the code. A
+    # completion candidate detector is rejected when the bounding-box of the
+    # detecting region covering the qubits supplying the measurements exceeds the
+    # maximum such detecting region among ``tqecd``'s shallow-flow-matched
+    # detectors.
     locality_cap = max(
         (_spatial_diameter(vector, record_coordinates) for vector in matched_vectors),
         default=float("inf"),
@@ -257,8 +288,9 @@ def complete_detectors(
         anchor = next((i for i, end in enumerate(ends) if records[-1] < end), None)
         if anchor is None:
             raise TQECDException(
-                f"Detector candidate references measurement record {records[-1]}, but the "
-                f"provided fragments only span {ends[-1] if ends else 0} records."
+                f"Detector candidate references measurement record {records[-1]},"
+                f" but the provided fragments only span"
+                f" {ends[-1] if ends else 0} records."
             )
         end = ends[anchor]
         locations = frozenset(
@@ -279,7 +311,8 @@ def complete_detectors(
                 f"Qubit index {exc.args[0]} required for detector assignment, but it "
                 "does not have a valid QUBIT_COORDS statement."
             ) from exc
-        # `already_matched` arrives with a time coordinate appended at the time index of the fragment where the detector is valid.
+        # `already_matched` arrives with a time coordinate appended at the time
+        # index of the fragment where the detector is valid.
         detectors[anchor].append(
             MatchedDetector(
                 coords=coords, measurements=locations, resets=()

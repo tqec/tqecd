@@ -14,17 +14,20 @@ class BinaryVectorBasis:
     """Helper for vector addition over GF(2).
 
     We use Python's arbitrary-precision integer data structure to specify a
-    bit-vector form of detector measurement records. Since the only operation are the XORs in GF(2) reduction, this is more efficient than an array element for each coordinate.
+    bit-vector form of detector measurement records. Since the only operation are
+    the XORs in GF(2) reduction, this is more efficient than an array element for
+    each coordinate.
 
     A vector is independent precisely when reduction leaves a non-zero remainder.
     Optional ``combination`` masks track which source vectors XOR to a
     dependent vector, which is needed by the Pauli-cover routines below.
 
-    ``pivot_direction`` chooses the set bit used as each row's pivot. For example, vector
-    ``0b1010`` pivots at bit 3 with ``"highest"`` and bit 1 with ``"lowest"``. Direction
-    changes the echelon representation and which end of the integer is scanned, but not
-    independence or the decomposition relative to a fixed independent source basis. The
-    default is ``"highest"`` to preserve tqecd's historical cover-solving behavior.
+    ``pivot_direction`` chooses the set bit used as each row's pivot. For
+    example, vector ``0b1010`` pivots at bit 3 with ``"highest"`` and bit 1 with
+    ``"lowest"``. Direction changes the echelon representation and which end of
+    the integer is scanned, but not independence or the decomposition relative to
+    a fixed independent source basis. The default is ``"highest"`` to preserve
+    tqecd's historical cover-solving behavior.
 
     Args:
         pivot_direction: whether reduction pivots on the lowest or highest set bit.

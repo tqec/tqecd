@@ -43,7 +43,8 @@ def _gf2_rank(vectors: list[int]) -> int:
     return rank
 
 
-# --- sparse integer record conversion ---------------------------------------------------
+# --- sparse integer record conversion
+# ---
 
 
 def test_records_to_vector_roundtrips_only_over_set_bits() -> None:
@@ -56,7 +57,8 @@ def test_records_to_vector_roundtrips_only_over_set_bits() -> None:
     assert _records_to_vector([5, 5]) == 0
 
 
-# --- spatial diameter with full, partial, and missing coordinates -----------------------
+# --- spatial diameter with full, partial, and missing coordinates
+# ---
 
 
 def test_spatial_diameter_full_partial_and_missing_coordinates() -> None:
@@ -77,7 +79,8 @@ def test_spatial_diameter_full_partial_and_missing_coordinates() -> None:
     assert _spatial_diameter(_records_to_vector([3, 4]), coords) == 1.0
 
 
-# --- locality reduction: preserves span, is deterministic, and updates its index --------
+# --- locality reduction: preserves span, is deterministic, and updates its
+# --- index
 
 _LINE_COORDS: list[tuple[float, ...] | None] = [
     (0.0, 0.0),
@@ -111,8 +114,9 @@ def test_reduce_to_local_is_deterministic_once_input_is_sorted() -> None:
 
 
 def test_reduce_to_local_multistep_reduction_needs_index_update() -> None:
-    # A={0,20} --via B={10,20}--> {0,10} --via C={1,10}--> {0,1}. The second step is only
-    # found if the record->candidate index is updated to reflect A's new records.
+    # A={0,20} --via B={10,20}--> {0,10} --via C={1,10}--> {0,1}. The second
+    # step is only found if the record->candidate index is updated to reflect
+    # A's new records.
     coords: list[tuple[float, ...] | None] = [None] * 21
     coords[0] = (0.0, 0.0)
     coords[1] = (1.0, 1.0)
@@ -127,7 +131,8 @@ def test_reduce_to_local_multistep_reduction_needs_index_update() -> None:
     )  # A fully reduced to {0,1}
 
 
-# --- annotation removal (used when a window's sub-circuit is built) ----------------------
+# --- annotation removal (used when a window's sub-circuit is built)
+# ---
 
 
 def test_remove_annotations_strips_detectors_inside_nested_repeats() -> None:
@@ -152,7 +157,8 @@ def test_remove_annotations_strips_detectors_inside_nested_repeats() -> None:
     assert "M" in names  # measurements are untouched
 
 
-# --- complete_detectors: empty already_matched leaves the locality cap at infinity ------
+# --- complete_detectors: empty already_matched leaves the locality cap at
+# --- infinity
 
 
 def _flat_fragments_and_coords(
@@ -198,16 +204,16 @@ def test_complete_detectors_with_empty_matched_emits_an_independent_basis() -> N
 
 
 def test_complete_detectors_rejects_non_flat_fragments() -> None:
-    # complete_detectors only handles flat Fragments; a FragmentLoop (or any non-Fragment)
-    # must raise rather than be silently annotated incorrectly.
+    # complete_detectors only handles flat Fragments; a FragmentLoop (or any
+    # non-Fragment) must raise rather than be silently annotated incorrectly.
     with pytest.raises(TQECDException):
         complete_detectors(
             cast("list[Fragment]", ["not-a-fragment"]), {}, [[]], window=2
         )
 
 
-# --- locality cap use case: local candidate generation keeps a free detector that a single
-#     global flow_generators() call pins as a logical observable  ------------
+# --- locality cap use case: local candidate generation keeps a free detector
+# --- that a single global flow_generators() call pins as a logical observable
 
 
 def _record_sets(circuit: stim.Circuit, name: str) -> list[frozenset[int]]:
