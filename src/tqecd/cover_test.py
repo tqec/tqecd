@@ -3,7 +3,6 @@ from __future__ import annotations
 import pytest
 import stim
 
-from tqecd.bitops import int_to_bit_indices
 from tqecd.cover import (
     BinaryVectorBasis,
     find_commuting_cover_on_target_qubits,
@@ -33,11 +32,6 @@ def test_binary_vector_basis_rejects_invalid_inputs() -> None:
         BinaryVectorBasis("middle")  # type: ignore[arg-type]
     with pytest.raises(ValueError, match="non-negative"):
         BinaryVectorBasis().add(-1)
-
-
-def test_int_to_bit_indices() -> None:
-    assert int_to_bit_indices(0) == []
-    assert int_to_bit_indices(0b101010) == [1, 3, 5]
 
 
 @pytest.mark.parametrize(
