@@ -175,6 +175,10 @@ will differentiate creation and destruction flows: ``FragmentFlow`` (or ``Fragme
 Example
 ~~~~~~~
 
+The flow-matching procedure built on these concepts finds most, but not all,
+detectors; the additive pass recovering the rest is described in
+:doc:`detector_windowing`.
+
 See the accompanying notebook for an example of how to perform automatic detector computation:
 
 .. toctree::
