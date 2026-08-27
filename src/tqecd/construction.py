@@ -67,14 +67,30 @@ def annotate_detectors_automatically(
         q: tuple(coords) for q, coords in circuit.get_final_qubit_coordinates().items()
     }
 
-    if window >= 2 and any(isinstance(f, FragmentLoop) for f in fragments):
-        unrolled = _annotate_unrolled_if_incomplete(circuit, qubit_coords_map, window)
+    has_loop = any(isinstance(f, FragmentLoop) for f in fragments)
+    if window >= 2 and has_loop:
+        unrolled = _annotate_unrolled(circuit, qubit_coords_map, window)
         if unrolled is not None:
             return unrolled
 
-    return compile_fragments_to_circuit_with_detectors(
-        fragments, qubit_coords_map, window=window
-    )
+    try:
+        return compile_fragments_to_circuit_with_detectors(
+            fragments, qubit_coords_map, window=window
+        )
+    except TQECDException:
+        # Matching inside a ``REPEAT`` body requires the detector set to be identical between
+        # every pair of consecutive iterations. Some gadgets -- notably the fixed-bulk Y half
+        # cube, whose transition round makes the first and last iterations differ from the bulk
+        # ones -- do not satisfy that, so the loop-body matcher gives up. Unrolling removes the
+        # constraint entirely, so retry there before propagating the failure.
+        if not has_loop:
+            raise
+        unrolled = _annotate_unrolled(
+            circuit, qubit_coords_map, window, only_if_incomplete=False
+        )
+        if unrolled is None:
+            raise
+        return unrolled
 
 
 def _unrolled(circuit: stim.Circuit) -> stim.Circuit:
@@ -117,21 +133,35 @@ def _unrolled(circuit: stim.Circuit) -> stim.Circuit:
     return out
 
 
-def _annotate_unrolled_if_incomplete(
+def _annotate_unrolled(
     circuit: stim.Circuit,
     qubit_coords_map: dict[int, tuple[float, ...]],
     window: int,
+    only_if_incomplete: bool = True,
 ) -> stim.Circuit | None:
-    """Annotate the unrolled circuit, but only adopt it if the looped form is incomplete.
+    """Annotate the unrolled circuit.
 
     A detector emitted inside a ``REPEAT`` body must have relative offsets that are valid
     for *every* iteration of the loop. The only way to place detectors constructed from windowed local
     candidate generation and GF(2) locality-reducing row operations is to unroll the loop.
 
-    The cost of unrolling in the emitted circuit grows with the number of repetitions, so it's only done when the completion pass finds that the flow matcher missed something.
+    The cost of unrolling in the emitted circuit grows with the number of repetitions, so by default
+    the result is only adopted when the completion pass finds that the flow matcher missed
+    something. Pass ``only_if_incomplete=False`` to take the unrolled annotation regardless -- used
+    as a fallback when matching the looped form failed outright, where a larger circuit is better
+    than no annotation at all.
+
+    Args:
+        circuit: the (looped) circuit to annotate.
+        qubit_coords_map: qubit index to coordinates, as for the looped path.
+        window: sliding-window width, as in :func:`annotate_detectors_automatically`.
+        only_if_incomplete: when ``True`` (the default), return ``None`` if the looped annotation
+            is already complete; when ``False``, always return the unrolled annotation.
 
     Returns:
-        The annotated *unrolled* circuit when missing detectors within a fragment window were found; ``None`` when the looped annotation is already complete.
+        The annotated *unrolled* circuit, or ``None`` when it is not usable (the unrolled circuit
+        breaks ``tqecd``'s structural preconditions) or not needed (``only_if_incomplete`` and the
+        looped annotation is already complete).
     """
     try:
         fragments = split_stim_circuit_into_fragments(_unrolled(circuit))
@@ -148,7 +178,9 @@ def _annotate_unrolled_if_incomplete(
         flat_fragments, qubit_coords_map, matched, window=window
     )
 
-    if sum(len(d) for d in completed) == sum(len(d) for d in matched):
+    if only_if_incomplete and sum(len(d) for d in completed) == sum(
+        len(d) for d in matched
+    ):
         return None
 
     unrolled = stim.Circuit()
@@ -199,7 +231,7 @@ def compile_fragments_to_circuit_with_detectors(
     # emitted inside a repeated body has to have indices which are loop-translation-invariant,
     # and the windowed completion routine makes no attempt to guess that. Looped circuits that
     # need the completion are handled by unrolling, in
-    # `_annotate_unrolled_if_incomplete`.
+    # `_annotate_unrolled`.
     if window >= 2 and all(isinstance(f, Fragment) for f in fragments):
         detectors_from_flows = complete_detectors(
             cast(list[Fragment], fragments),

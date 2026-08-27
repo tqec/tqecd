@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 import stim
 
-from tqecd.construction import annotate_detectors_automatically
+from tqecd.construction import _unrolled, annotate_detectors_automatically
 from tqecd.exceptions import TQECDException
 from tqecd.utils import (
     detector_to_targets_tuple,
@@ -84,6 +84,32 @@ def test_valid_circuits(name: str, circuit: stim.Circuit) -> None:
 
     missing_detectors = initial_detectors.difference(computed_detectors)
     assert not missing_detectors, "Detectors in original circuit are missing."
+
+
+def test_looped_y_circuit_falls_back_to_unrolled() -> None:
+    """A ``REPEAT`` body whose iterations do not share a detector set must still annotate.
+
+    Matching inside a loop body requires the detector set to be identical between every pair of
+    consecutive iterations. The fixed-bulk Y half cube breaks that -- its transition round makes
+    the first and last iterations differ from the bulk ones -- so the loop-body matcher raises.
+    Unrolling removes the constraint, and the annotation must fall back to it rather than fail.
+
+    Regression test: before the fallback existed this raised ``TQECDException``, and only k=1
+    fixtures (which contain no ``REPEAT`` block at all) were covered.
+    """
+    path = _VALID_TEST_FOLDER / "window" / "ymem_y_init_y_meas_k2_fixed_bulk.stim"
+    looped = stim.Circuit(path.read_text())
+    assert any(isinstance(inst, stim.CircuitRepeatBlock) for inst in looped), (
+        "fixture must keep its REPEAT blocks, otherwise it does not exercise the loop path"
+    )
+
+    from_looped = annotate_detectors_automatically(looped)
+    from_unrolled = annotate_detectors_automatically(_unrolled(looped))
+
+    assert from_looped.num_detectors > 0
+    assert set(
+        get_detectors_tuples_shallow(push_all_detectors_to_the_end(from_looped))
+    ) == set(get_detectors_tuples_shallow(push_all_detectors_to_the_end(from_unrolled)))
 
 
 @pytest.mark.parametrize("name,circuit,error_message", invalid_test_circuits())
