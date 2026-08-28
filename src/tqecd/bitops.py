@@ -1,15 +1,21 @@
-"""Leaf module containing shared methods for bit vector operations.
+"""Bit-vector helpers with no intra-package dependencies.
 
-These methods are not in :mod:`tqecd.utils` to avoid circular imports.
-The :mod:`tqecd.utils` module imports the :mod:`tqecd.pauli` module, so
-:mod:`tqecd.pauli` cannot import any utilities from :mod:`tqecd.utils`.
+This is a *leaf* module: it imports nothing from ``tqecd``, so any module -- including
+low-level ones such as :mod:`tqecd.pauli` -- can import from it without creating an import
+cycle. That is why the shared set-bit iterator lives here rather than in :mod:`tqecd.utils`,
+which imports :mod:`tqecd.pauli` and so cannot be imported back by it.
 """
 
 from __future__ import annotations
 
 
 def int_to_bit_indices(x: int) -> list[int]:
-    """Return the ascending positions of the bits set in ``x``."""
+    """Return the ascending positions of the bits set in ``x``.
+
+    Iterates only over the set bits (``x & -x``), so it is O(number of set bits) rather than
+    O(highest set bit) -- which matters for the sparse, high-index record vectors the
+    windowed detector completion in :mod:`tqecd.window` builds.
+    """
     indices: list[int] = []
     while x:
         lowest = x & -x
