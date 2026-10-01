@@ -1,0 +1,349 @@
+"""Detector discovery by bounded-window stabilizer nullspace.
+
+Why this exists
+---------------
+:mod:`tqecd.match` decides what a detector is with three rules: pairwise equality of a
+creation and a destruction stabilizer, a greedy one-target-against-many-covers search, and
+a greedy commuting-cover merge over anticommuting flows. Those are an *incomplete
+heuristic* for the condition that actually defines a detector:
+
+    any subset of flows whose Pauli product is the identity is a detector,
+    and its records are the XOR of their measurement sets.
+
+A detector needing a combination the three rules do not enumerate is dropped silently.
+That is what happens around a Y-basis transition round: its ancillas are measured in
+rotated bases (``ZCY``/``XCY`` feeding ``MY``), so the stabilizers crossing it anticommute
+*individually* with those measurements and only certain products commute. The greedy cover
+search does not find them, the detectors are lost, and the circuit distance collapses.
+
+What this does instead
+----------------------
+For each window of consecutive fragments, build the sub-circuit and ask stim for its flow
+generators. A generator with trivial input **and** trivial output is a parity that is
+deterministic no matter what state entered the window: a detector, valid in the full
+circuit, supported entirely inside the window.
+
+Two things follow from asking window by window instead of once over the whole circuit:
+
+* **Validity.** stim cannot return a non-deterministic parity, so no invalid detector can
+  be emitted. (Assembling the nullspace by hand from :class:`BoundaryStabilizer` flows does
+  *not* have this property -- flows from different fragments carry different collapse
+  conventions, and mixing them manufactures parities that are not deterministic.)
+* **A redundant set of locally-supported candidate detectors.** Because overlapping windows
+  are each asked for their detectors, the same detector turns up several ways and many nearby
+  detectors turn up directly. That redundancy is the point: the detector we actually want to
+  emit is often the XOR (sum) of two of these candidates, so both have to be present for us
+  to form it. Asking once over the whole circuit instead returns a minimal, non-redundant
+  basis whose detectors may stretch across the entire circuit, with nothing compact left to
+  combine -- and, checked directly, a single global call re-breaks the Y-memory gadget (its
+  logical observable ends up emitted as a detector).
+
+Windowing is therefore not a speed trick -- ``flow_generators`` is roughly linear in circuit
+size, so a width-``W`` sliding window costs about ``W`` single global calls. Its job is to
+produce enough overlapping candidates to build compact detectors out of. (The same windowing
+idea appears in stim-floquet's ``windowed_local_detectors``.)
+
+Choosing which candidates to emit is a separate step, in :func:`complete_detectors`. Each
+candidate is first rewritten into its most physically-compact form by XOR-ing it with
+overlapping candidates; then candidates are added smallest-reach-first and any still reaching
+further across the patch than the flow-matched detectors are dropped. Reach matters because a
+detector that spans too much of the patch is harmful in two ways at once. It turns the
+nearest-neighbour links of the decoding graph into many-body links -- ``hyperedges``, which a
+minimum-weight-matching decoder cannot use. And in a small code it can be a logical observable
+in disguise (a logical is a deterministic parity too); emitting it lets the detector set fix
+that logical's value -- ``pinning`` it -- so no single error can flip the logical without also
+flipping a detector, and the decoder concludes the code is stronger than it is. Either one
+collapses the distance the circuit is supposed to have.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Iterable, Mapping, Sequence
+from typing import TYPE_CHECKING
+
+import numpy
+import stim
+
+from tqecd.bitops import int_to_bit_indices
+from tqecd.cover import BinaryVectorBasis
+from tqecd.exceptions import TQECDException
+from tqecd.fragment import Fragment
+from tqecd.measurement import RelativeMeasurementLocation
+from tqecd.utils import remove_annotations
+
+if TYPE_CHECKING:
+    from tqecd.match import MatchedDetector
+
+#: How many consecutive fragments a detector may span. Two is enough for every gadget
+#: measured so far; wider windows cost proportionally more and found nothing extra.
+DEFAULT_MATCHING_WINDOW: int = 2
+_FLOW_ANNOTATIONS = frozenset({"DETECTOR", "OBSERVABLE_INCLUDE"})
+
+
+def _window_detectors(
+    fragments: Sequence[Fragment], starts: Sequence[int], first: int, last: int
+) -> list[frozenset[int]]:
+    """Detectors supported entirely within ``fragments[first:last]``, in absolute records."""
+    sub = stim.Circuit()
+    for fragment in fragments[first:last]:
+        sub += remove_annotations(fragment.circuit, _FLOW_ANNOTATIONS)
+
+    base = starts[first]
+    found: list[frozenset[int]] = []
+    for flow in sub.flow_generators():
+        if flow.input_copy().weight or flow.output_copy().weight:
+            continue
+        records = flow.measurements_copy()
+        if records:
+            found.append(frozenset(base + record for record in records))
+    return found
+
+
+def _records_to_vector(records: Iterable[int]) -> int:
+    """Encode absolute measurement-record indices as a GF(2) integer vector."""
+    vector = 0
+    for record in records:
+        vector ^= 1 << record
+    return vector
+
+
+def _spatial_diameter(
+    vector: int, record_coordinates: Sequence[tuple[float, ...] | None]
+) -> float:
+    """Sum of per-axis extents of the qubit coordinates a record set touches.
+
+    This is *physical* span, not record-index span: a detector can be short in record order
+    yet reach clear across the patch (e.g. all the way to a Y-measurement corner). Records
+    without coordinates are ignored; if none has coordinates the record-index span is used.
+    """
+    mins: list[float] | None = None
+    maxs: list[float] = []
+    lowest = -1
+    highest = -1
+    bits = vector
+    while bits:
+        low = bits & -bits
+        record = low.bit_length() - 1
+        bits ^= low
+        if lowest < 0:
+            lowest = record
+        highest = record
+        coord = record_coordinates[record]
+        if coord is None:
+            continue
+        if mins is None:
+            mins = list(coord)
+            maxs = list(coord)
+        else:
+            for axis, value in enumerate(coord):
+                mins[axis] = min(mins[axis], value)
+                maxs[axis] = max(maxs[axis], value)
+    if mins is None:
+        return float(highest - lowest) if highest >= 0 else 0.0
+    return float(sum(hi - lo for lo, hi in zip(mins, maxs)))
+
+
+def _reduce_to_local(
+    vectors: list[int], record_coordinates: Sequence[tuple[float, ...] | None]
+) -> list[int]:
+    """Shrink each candidate toward a more physically-local XOR-combination of the others.
+
+    A windowed flow generator can be short in record order yet span the whole patch
+    physically, and the *local* representative of a generator is a combination of
+    generators, not a generator itself (native tqec detectors are local plaquettes; the good
+    one is frequently a XOR of two windowed candidates). XORing preserves the span, so the
+    reduced set generates exactly the same detector space -- only its representatives get
+    local. Two candidates must share a record for their XOR to possibly shrink either, so
+    only overlapping pairs are considered -- found through a ``record -> candidates`` index
+    rather than scanning every pair, which keeps the pass near-linear when overlaps are
+    sparse (the common case) instead of quadratic in the number of candidates. The reduction
+    is greedy, so it yields a more local -- not necessarily the globally smallest -- form.
+    """
+    diameters = [_spatial_diameter(vector, record_coordinates) for vector in vectors]
+    touching: dict[int, set[int]] = {}
+    for index, vector in enumerate(vectors):
+        for record in int_to_bit_indices(vector):
+            touching.setdefault(record, set()).add(index)
+
+    improved = True
+    while improved:
+        improved = False
+        for i in range(len(vectors)):
+            neighbours: set[int] = set()
+            for record in int_to_bit_indices(vectors[i]):
+                neighbours |= touching.get(record, set())
+            neighbours.discard(i)
+            for j in sorted(neighbours):
+                combined = vectors[i] ^ vectors[j]
+                if not combined:
+                    continue
+                combined_diameter = _spatial_diameter(combined, record_coordinates)
+                if combined_diameter < diameters[i]:
+                    changed = vectors[i] ^ combined
+                    vectors[i] = combined
+                    diameters[i] = combined_diameter
+                    for record in int_to_bit_indices(changed):
+                        if (combined >> record) & 1:
+                            touching.setdefault(record, set()).add(i)
+                        else:
+                            touching.get(record, set()).discard(i)
+                    improved = True
+    return vectors
+
+
+def complete_detectors(
+    fragments: Sequence[Fragment],
+    qubit_coordinates: Mapping[int, tuple[float, ...]],
+    already_matched: Sequence[Sequence[MatchedDetector]],
+    window: int = DEFAULT_MATCHING_WINDOW,
+) -> list[list[MatchedDetector]]:
+    """Add the detectors that flow matching missed, keeping the ones it found.
+
+    Flow matching (:mod:`tqecd.match`) finds some but not all detectors. The ones it found are
+    passed in as ``already_matched`` and are always kept, so this routine only ever adds. The
+    additions come from the windowed nullspace candidates (see the module docstring), put
+    through two steps before being emitted:
+
+    1. **Make each candidate compact.** A candidate is repeatedly XOR-ed with other
+       candidates that share a measurement with it whenever that shrinks how far across the
+       patch it reaches (:func:`_reduce_to_local`). XOR-ing does not change which detectors
+       the set can express -- only how far the individual ones reach.
+    2. **Emit compact-first, drop the ones that reach too far.** Candidates are added in order
+       of increasing physical reach, and any reaching further than the largest flow-matched
+       detector are rejected. The flow-matched detectors set the code's local scale, and a
+       candidate exceeding it is treated as non-local rather than as a genuine extra check:
+       in a small code such a candidate is typically a logical observable (a deterministic
+       parity too) that has leaked into the windowed generators, and emitting it would let the
+       detector set fix that logical's value, leaving the decoder no error that flips the
+       logical undetected and collapsing the distance. Rejecting it needs no knowledge of the
+       observables. This is a heuristic: it has prevented every logical-pinning case seen so
+       far, but could need revision for a code whose legitimate completion detectors genuinely
+       exceed the matched-detector scale.
+
+    Args:
+        fragments: a flat list of fragments. ``FragmentLoop`` is not supported -- a detector
+            emitted inside a repeated body would have to be loop-translation-invariant, and
+            this routine makes no attempt to guess that.
+        qubit_coordinates: mapping from qubit index to coordinates, used to place the
+            emitted detectors.
+        already_matched: detectors found by flow matching, aligned with ``fragments``, with
+            offsets relative to the end of the fragment they are indexed under.
+        window: how many consecutive fragments a new detector may span.
+
+    Returns:
+        A list aligned with ``fragments``, holding ``already_matched`` plus the additions.
+
+    Raises:
+        TQECDException: if any entry of ``fragments`` is not a :class:`Fragment`.
+    """
+    from tqecd.match import MatchedDetector
+
+    if not all(isinstance(fragment, Fragment) for fragment in fragments):
+        raise TQECDException(
+            "complete_detectors only handles flat fragments; route looped circuits to "
+            "match_detectors_from_flows_shallow."
+        )
+
+    # Absolute record layout, and the qubit each record measures.
+    starts: list[int] = []
+    measured_qubits: list[int] = []
+    cursor = 0
+    for fragment in fragments:
+        starts.append(cursor)
+        measured_qubits.extend(fragment.measurements_qubits)
+        cursor += fragment.num_measurements
+    ends = [start + f.num_measurements for start, f in zip(starts, fragments)]
+
+    detectors: list[list[MatchedDetector]] = [list(found) for found in already_matched]
+
+    # Seed with what flow matching already found, so those detectors are preserved and only
+    # genuinely new ones are added.
+    basis = BinaryVectorBasis()
+    matched_vectors: list[int] = []
+    for index, found in enumerate(already_matched):
+        for detector in found:
+            vector = _records_to_vector(
+                ends[index] + measurement.offset
+                for measurement in detector.measurements
+            )
+            matched_vectors.append(vector)
+            basis.add(vector)
+
+    record_coordinates = [qubit_coordinates.get(qubit) for qubit in measured_qubits]
+
+    # The flow matcher's own detectors set the local scale of the code. A completion detector
+    # physically larger than any matched one is a non-local parity: in a small code that is
+    # how a logical observable -- deterministic too -- leaks into the windowed flow
+    # generators and gets emitted as a detector, pinning the logical and leaving the decoder
+    # no graphlike logical error. Capping at the matched scale rejects exactly that, without
+    # ever needing to know the observables -- the effect native tqec gets by only emitting
+    # local stabilizer checks. Empty match set (nothing to scale against) => no cap.
+    locality_cap = max(
+        (_spatial_diameter(vector, record_coordinates) for vector in matched_vectors),
+        default=float("inf"),
+    )
+
+    windowed: set[frozenset[int]] = set()
+    for first in range(len(fragments)):
+        last = min(first + window, len(fragments))
+        windowed.update(_window_detectors(fragments, starts, first, last))
+        if last == len(fragments):
+            break
+
+    # Reduce each candidate to a more local representative, then (below) take the
+    # smallest-diameter ones first and reject any that exceed the matched scale. The reduction
+    # is greedy, so the candidates are sorted first for a reproducible result.
+    reduced = _reduce_to_local(
+        sorted(_records_to_vector(candidate) for candidate in windowed),
+        record_coordinates,
+    )
+    diameters = {
+        vector: _spatial_diameter(vector, record_coordinates) for vector in reduced
+    }
+    ordered = sorted(
+        diameters,
+        key=lambda vector: (diameters[vector], vector.bit_count(), vector),
+    )
+
+    for vector in ordered:
+        if diameters[vector] > locality_cap:
+            continue
+        if not basis.add(vector):
+            continue
+        records = int_to_bit_indices(vector)
+        # A detector is valid at the end of the fragment holding its LAST measurement.
+        anchor = next((i for i, end in enumerate(ends) if records[-1] < end), None)
+        if anchor is None:
+            raise TQECDException(
+                f"Detector candidate references measurement record {records[-1]},"
+                f" but the provided fragments only span"
+                f" {ends[-1] if ends else 0} records."
+            )
+        end = ends[anchor]
+        locations = frozenset(
+            RelativeMeasurementLocation(
+                offset=record - end, qubit_index=measured_qubits[record]
+            )
+            for record in records
+        )
+        try:
+            coords = tuple(
+                float(c)
+                for c in numpy.mean(
+                    [qubit_coordinates[measured_qubits[r]] for r in records], axis=0
+                )
+            )
+        except KeyError as exc:
+            raise TQECDException(
+                f"Qubit index {exc.args[0]} required for detector assignment, but it "
+                "does not have a valid QUBIT_COORDS statement."
+            ) from exc
+        # `already_matched` arrives with a time coordinate appended (the index of the
+        # fragment the detector is valid at). Match that convention.
+        detectors[anchor].append(
+            MatchedDetector(
+                coords=coords, measurements=locations, resets=()
+            ).with_time_coordinate(float(anchor))
+        )
+
+    return detectors
