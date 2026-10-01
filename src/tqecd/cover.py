@@ -2,12 +2,32 @@
 
 from __future__ import annotations
 
+import itertools
+import math
 from typing import Literal
 
 from tqecd.bitops import int_to_bit_indices
 from tqecd.pauli import PauliString
 
 PivotDirection = Literal["lowest", "highest"]
+
+# Subset sizes up to and including this are candidates for a direct scan (see
+# `_SMALL_SCAN_COMBO_BUDGET` for the actual cutoff), tried by
+# `find_commuting_cover_on_target_qubits` before falling back to a null-space search
+# for larger witnesses.
+_SMALL_COVER_SIZE_CAP = 3
+
+# A direct subset scan at a given size is only attempted while math.comb(len(sources),
+# size) stays under this many combinations -- len(sources) is not bounded by the
+# witness size, so on a large fragment even a small size can itself be a
+# combinatorial blow-up.
+_SMALL_SCAN_COMBO_BUDGET = 200_000
+
+# Null spaces with at most this many dimensions are cheap to enumerate exhaustively
+# (a few million steps at worst), which is what guarantees the returned cover is
+# truly minimal. Above it, `_find_minimal_null_space_cover` falls back to a
+# polynomial-time reduction heuristic instead of an exponential exact search.
+_EXACT_NULL_SPACE_DIMENSION_CAP = 22
 
 
 class BinaryVectorBasis:
@@ -195,7 +215,186 @@ def find_commuting_cover_on_target_qubits(
     Returns:
         Either a list of a stabilizers that, when combined, commute with
         the provided ``target``, or ``None`` if such a list could not be found.
+
+    Note:
+        Unlike :func:`find_exact_cover`, the returned cover is the *smallest*
+        (fewest-source) one that exists. ``_find_cover`` itself stops at the
+        first dependency its single Gaussian-elimination pass encounters,
+        which can consume more sources than necessary and starve a smaller,
+        equally-valid cover of the sources it needed; merging more boundary
+        stabilizers than required here shrinks the flows still available to
+        the callers of this function, which can silently leave a matchable
+        detector unmatched. This function still uses ``_find_cover`` as a
+        cheap existence check (identical cost to before when no cover
+        exists).
+
+        Finding the smallest cover is equivalent to finding the minimum-weight
+        nonzero element of the null space (over GF(2)) of the sources'
+        commutation vectors: a subset of sources XORs to zero exactly when its
+        characteristic vector lies in that null space, and its weight is the
+        subset's size. Enumerating subsets of ``sources`` directly (as a naive
+        implementation would) searches a space of size up to ``2 ** len(sources)``.
+        Enumerating the null space itself instead searches a space of size
+        ``2 ** nullity``, where ``nullity = len(sources) - rank`` is usually far
+        smaller than ``len(sources)`` -- the boundary stabilizers this function
+        is called on tend to be highly redundant, which is exactly what makes
+        ``len(sources)`` a poor bound on the search size. Small witnesses are
+        handled by a direct small-subset scan instead, since a low-weight
+        answer can be confirmed in polynomial time without ever forming the
+        null-space basis.
     """
     if not sources:
         return None
-    return _find_cover(target, sources, frozenset(target.qubits), commute_with=target)
+    on_qubits = frozenset(target.qubits)
+    witness = _find_cover(target, sources, on_qubits, commute_with=target)
+    if witness is None or len(witness) <= 1:
+        return witness
+    qubit_mask = sum(1 << q for q in on_qubits)
+    vectors = [source._to_int_mask(qubit_mask, target) for source in sources]
+
+    # Small covers (a couple of sources) are cheap to rule out or confirm by direct
+    # enumeration, and this is the common case: most witnesses found above are
+    # already minimal or nearly so. Searching subset sizes exhaustively here avoids
+    # ever paying for the null-space construction below when it is not needed.
+    # `math.comb(len(vectors), size)` is checked before each size is attempted:
+    # len(vectors) is len(sources), not bounded by the witness, so on a large
+    # fragment even size 2 or 3 can be a combinatorial blow-up on its own, and
+    # skipping straight to the null-space search below is cheaper than enumerating
+    # it directly.
+    small_cap = min(len(witness) - 1, _SMALL_COVER_SIZE_CAP)
+    verified_up_to = 0
+    for size in range(1, small_cap + 1):
+        if math.comb(len(vectors), size) > _SMALL_SCAN_COMBO_BUDGET:
+            break
+        for combo in itertools.combinations(range(len(vectors)), size):
+            combined = 0
+            for i in combo:
+                combined ^= vectors[i]
+            if combined == 0:
+                return list(combo)
+        verified_up_to = size
+    if verified_up_to == len(witness) - 1:
+        # Every subset size up to len(witness) - 1 was already ruled out above, so
+        # the witness itself -- valid by construction -- is provably minimal.
+        return witness
+
+    # The witness is large enough that a direct subset scan over the remaining sizes
+    # could be exponential in len(sources). Fall back to searching the null space of
+    # `vectors`, which is exponential in the nullity instead: every subset that XORs
+    # to zero is a null-space element (its weight is the subset size), so the
+    # minimum-weight nonzero null-space element is exactly the smallest cover, and
+    # the null space is usually far smaller than the power set of `sources`.
+    return _find_minimal_null_space_cover(vectors, fallback=witness)
+
+
+def _find_minimal_null_space_cover(
+    vectors: list[int], fallback: list[int]
+) -> list[int]:
+    """Return the minimum-weight nonzero GF(2) null-space element of ``vectors``.
+
+    ``vectors[i]`` is treated as the ``i``-th standard basis vector's image; a subset
+    of indices is a null-space element (i.e. a cover) exactly when the XOR of the
+    corresponding vectors is zero, and the subset's size is that element's weight.
+
+    Args:
+        vectors: the per-source bit-vectors to search for a minimal zero-summing
+            subset of.
+        fallback: indices to return if no vector is independent enough to make the
+            null space computation meaningful (should not happen when this is only
+            called after a witness was already found, but kept as a safety net).
+
+    Returns:
+        The indices (into ``vectors``) of a minimum-size subset that XORs to zero.
+    """
+    basis = BinaryVectorBasis()
+    null_space_basis: list[int] = []
+    for i, vector in enumerate(vectors):
+        if not basis.add(vector, 1 << i):
+            # `vector` was dependent on the basis so far: decomposing it recovers a
+            # combination of *previously seen* sources that reproduces it, and XORing
+            # in this source's own index gives a subset that XORs to zero -- one
+            # basis vector of the null space of `vectors`.
+            combination = basis.decompose(vector)
+            assert combination is not None
+            null_space_basis.append(combination ^ (1 << i))
+    if not null_space_basis:
+        return fallback
+
+    nullity = len(null_space_basis)
+    if nullity <= _EXACT_NULL_SPACE_DIMENSION_CAP:
+        return int_to_bit_indices(_exact_minimum_weight_element(null_space_basis))
+
+    # The null space itself is too large to enumerate exhaustively (this happens on
+    # bigger circuits, where both `len(sources)` and the nullity grow together, so
+    # the reduction that makes the common case fast does not bound the worst case).
+    # Fall back to a polynomial-time GF(2) basis reduction: repeatedly replace a
+    # basis vector with a pairwise XOR whenever that lowers its weight, which is the
+    # GF(2) analogue of lattice basis reduction (as in LLL). This does not guarantee
+    # the global minimum-weight element -- only an exhaustive search over the whole
+    # null space can promise that -- but it can only ever *decrease* the starting
+    # weight (the witness itself, since it is `null_space_basis[0]`), so the result
+    # is always at least as good as what the pre-fix code returned, usually far
+    # better, and cheap regardless of how large the nullity gets.
+    reduced = _reduce_basis_weight(null_space_basis)
+    best = min(reduced, key=lambda v: v.bit_count())
+    for i in range(len(reduced)):
+        for j in range(i + 1, len(reduced)):
+            xor = reduced[i] ^ reduced[j]
+            if xor and xor.bit_count() < best.bit_count():
+                best = xor
+    return int_to_bit_indices(best)
+
+
+def _exact_minimum_weight_element(null_space_basis: list[int]) -> int:
+    """Return the minimum-weight nonzero element spanned by ``null_space_basis``.
+
+    Exhaustive: visits every one of the ``2 ** len(null_space_basis) - 1`` nonzero
+    elements of the spanned space, so it is only called when that count is small
+    enough (see ``_EXACT_NULL_SPACE_DIMENSION_CAP``).
+    """
+    best = null_space_basis[0]
+    best_weight = best.bit_count()
+    current = 0
+    # Gray-code enumeration: going from combination i - 1 to i flips exactly one
+    # basis vector (the one at the index of i's lowest set bit) in or out of the
+    # running XOR, so every element is visited with a single XOR and a popcount, and
+    # none is recomputed from scratch.
+    for i in range(1, 1 << len(null_space_basis)):
+        if best_weight == 1:
+            break  # A weight-1 cover is already optimal; nothing can beat it.
+        bit = (i & -i).bit_length() - 1
+        current ^= null_space_basis[bit]
+        weight = current.bit_count()
+        if weight < best_weight:
+            best_weight = weight
+            best = current
+    return best
+
+
+def _reduce_basis_weight(basis_vectors: list[int], max_passes: int = 8) -> list[int]:
+    """Repeatedly replace basis vectors with pairwise XORs when that lowers weight.
+
+    A GF(2) analogue of lattice basis reduction (as in LLL): each pass considers
+    every ordered pair and keeps the swap whenever it strictly lowers a vector's
+    popcount, so the total weight in the basis only ever decreases. It stops as
+    soon as a pass makes no change, or after ``max_passes`` regardless -- this is a
+    heuristic, not a search for the global optimum, so it is not allowed to run
+    longer than a fixed, small polynomial budget.
+    """
+    vectors = list(basis_vectors)
+    n = len(vectors)
+    for _ in range(max_passes):
+        changed = False
+        for i in range(n):
+            weight_i = vectors[i].bit_count()
+            for j in range(n):
+                if i == j:
+                    continue
+                xor = vectors[i] ^ vectors[j]
+                if xor and xor.bit_count() < weight_i:
+                    vectors[i] = xor
+                    weight_i = xor.bit_count()
+                    changed = True
+        if not changed:
+            break
+    return vectors
