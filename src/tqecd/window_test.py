@@ -289,7 +289,13 @@ def test_window_completion_improves_on_historical_fixed_bulk_annotation(
     historical = annotate_detectors_automatically(bare, window=1)
     completed = annotate_detectors_automatically(bare)
 
-    assert _detector_rank(completed) == _detector_rank(historical) + 2
+    # These fixtures used to need the windowed completion pass to find 2
+    # detectors that flow matching (tqecd.match) missed at a fragment
+    # boundary. tqecd.cover.find_commuting_cover_on_target_qubits now prefers
+    # the smallest anticommuting-flow cover instead of the first one a single
+    # Gaussian-elimination pass happens to hit, so flow matching alone finds
+    # the full set and the completion pass has nothing left to add here.
+    assert _detector_rank(completed) == _detector_rank(historical)
     assert _pinned_observable_count(completed, observables) == _pinned_observable_count(
         historical, observables
     )
