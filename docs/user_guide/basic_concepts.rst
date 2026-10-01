@@ -176,8 +176,8 @@ Example
 ~~~~~~~
 
 The flow-matching procedure built on these concepts finds most, but not all,
-detectors; the additive pass recovering the rest is described in
-:doc:`detector_windowing`.
+detectors; the additive pass recovering the rest is demonstrated in
+:doc:`../media/windowing/windowed_detector_completion`.
 
 See the accompanying notebook for an example of how to perform automatic detector computation:
 
