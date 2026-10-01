@@ -10,11 +10,10 @@ from tqecd.fragment import Fragment, FragmentLoop, split_stim_circuit_into_fragm
 from tqecd.match import MatchedDetector, match_detectors_from_flows_shallow
 from tqecd.predicates import is_valid_input_circuit
 from tqecd.utils import remove_duplicate_detectors
+from tqecd.window import DEFAULT_MATCHING_WINDOW, complete_detectors
 
 
-def _detectors_to_circuit(
-    detectors: list[MatchedDetector], additional_coordinates: list[float] | None = None
-) -> stim.Circuit:
+def _detectors_to_circuit(detectors: list[MatchedDetector]) -> stim.Circuit:
     """Transform a list of detectors into a circuit.
 
     Args:
@@ -23,9 +22,6 @@ def _detectors_to_circuit(
     Returns:
         A ``stim.Circuit`` instance containing all the provided detectors.
     """
-    if additional_coordinates is None:
-        additional_coordinates = []
-
     circuit = stim.Circuit()
 
     for detector in detectors:
@@ -43,7 +39,9 @@ def _shift_time_instruction(number_of_spatial_coordinates: int) -> stim.Circuit:
     return circuit
 
 
-def annotate_detectors_automatically(circuit: stim.Circuit) -> stim.Circuit:
+def annotate_detectors_automatically(
+    circuit: stim.Circuit, window: int = DEFAULT_MATCHING_WINDOW
+) -> stim.Circuit:
     """Insert detectors into the provided circuit instance.
 
     This is the main user-facing function to automatically insert detectors into
@@ -55,6 +53,15 @@ def annotate_detectors_automatically(circuit: stim.Circuit) -> stim.Circuit:
 
     Args:
         circuit: circuit to insert detectors in.
+        window: width of the sliding window used for *local candidate generation* -- how many
+            consecutive fragments a completion detector may span (see :mod:`tqecd.window`).
+            The default, ``2``, is the production setting and the only value that is correct
+            on every gadget; wider windows give no benefit. This knob is mainly for
+            experiments and regression tests: a very large window forces a single
+            whole-circuit ``flow_generators`` call ("global" candidate generation), which is
+            known to pin the logical observable on small (k=1) Y-basis gadgets, and ``1``
+            forces the historical flow-matching-only path (no completion). Production callers
+            should not set it.
 
     Returns:
         A new ``stim.Circuit`` instance with automatically computed detectors.
@@ -67,7 +74,139 @@ def annotate_detectors_automatically(circuit: stim.Circuit) -> stim.Circuit:
     qubit_coords_map: dict[int, tuple[float, ...]] = {
         q: tuple(coords) for q, coords in circuit.get_final_qubit_coordinates().items()
     }
-    return compile_fragments_to_circuit_with_detectors(fragments, qubit_coords_map)
+
+    has_loop = any(isinstance(f, FragmentLoop) for f in fragments)
+    if window >= 2 and has_loop:
+        unrolled = _annotate_unrolled(circuit, qubit_coords_map, window)
+        if unrolled is not None:
+            return unrolled
+
+    try:
+        return compile_fragments_to_circuit_with_detectors(
+            fragments, qubit_coords_map, window=window
+        )
+    except TQECDException:
+        # Matching inside a ``REPEAT`` body requires the detector set to be
+        # identical between every pair of consecutive iterations. Some gadgets --
+        # notably the fixed-bulk Y half cube, whose transition round makes the
+        # first and last iterations differ from the bulk ones -- do not satisfy
+        # that, so the loop-body matcher gives up. Unrolling removes the
+        # constraint entirely, so retry there before propagating the failure.
+        if not has_loop:
+            raise
+        unrolled = _annotate_unrolled(
+            circuit, qubit_coords_map, window, only_if_incomplete=False
+        )
+        if unrolled is None:
+            raise
+        return unrolled
+
+
+def _unrolled(circuit: stim.Circuit) -> stim.Circuit:
+    """Expand every ``REPEAT`` block. This changes the circuit's fragmentation,
+    but keeps the moment structure required by ``tqecd``.
+
+    ``stim.Circuit.flattened`` is not usable here because a ``REPEAT`` body that
+    does not end in a ``TICK`` puts iteration *i*'s measurements and iteration
+    *i+1*'s resets in the same moment once appended together, and ``tqecd``
+    rejects any circuit with a moment holding both (see
+    :func:``is_valid_input_circuit``).
+
+    A ``TICK`` is therefore inserted between consecutive body copies where one is
+    missing. ``TICK`` only delimits moments.
+    """
+    out = stim.Circuit()
+    at_boundary = False
+
+    def separate(next_name: str) -> None:
+        """Close the current moment if we are crossing a loop boundary into
+        ``next_name``.
+        """
+        nonlocal at_boundary
+        if at_boundary and len(out) and out[-1].name != "TICK" and next_name != "TICK":
+            out.append("TICK", [], [])
+        at_boundary = False
+
+    for instruction in circuit:
+        if isinstance(instruction, stim.CircuitRepeatBlock):
+            body = _unrolled(instruction.body_copy())
+            if not len(body):
+                continue
+            for _ in range(instruction.repeat_count):
+                at_boundary = True
+                separate(body[0].name)
+                for item in body:
+                    out.append(item)
+            # The instruction that follows the loop meets the body's trailing
+            # detecting region
+            at_boundary = True
+        else:
+            separate(instruction.name)
+            out.append(instruction)
+    return out
+
+
+def _annotate_unrolled(
+    circuit: stim.Circuit,
+    qubit_coords_map: dict[int, tuple[float, ...]],
+    window: int,
+    only_if_incomplete: bool = True,
+) -> stim.Circuit | None:
+    """Annotate the unrolled circuit.
+
+    A detector emitted inside a ``REPEAT`` body must have relative offsets that
+    are valid for *every* iteration of the loop. The only way to place detectors
+    constructed from windowed local candidate generation and GF(2)
+    locality-reducing row operations is to unroll the loop.
+
+    The cost of unrolling in the emitted circuit grows with the number of
+    repetitions, so by default the result is only adopted when the completion
+    pass finds that the flow matcher missed something. Pass
+    ``only_if_incomplete=False`` to take the unrolled annotation regardless --
+    used as a fallback when matching the looped form failed outright, where a
+    larger circuit is better than no annotation at all.
+
+    Args:
+        circuit: the (looped) circuit to annotate.
+        qubit_coords_map: qubit index to coordinates, as for the looped path.
+        window: sliding-window width, as in :func:`annotate_detectors_automatically`.
+        only_if_incomplete: when ``True`` (the default), return ``None`` if the
+            looped annotation is already complete; when ``False``, always return
+            the unrolled annotation.
+
+    Returns:
+        The annotated *unrolled* circuit, or ``None`` when it is not usable (the
+        unrolled circuit breaks ``tqecd``'s structural preconditions) or not
+        needed (``only_if_incomplete`` and the looped annotation is already
+        complete).
+    """
+    try:
+        fragments = split_stim_circuit_into_fragments(_unrolled(circuit))
+    except TQECDException:
+        # If the unrolled circuit does not satisfy ``tqecd``'s structural
+        # preconditions, then we keep the looped path rather than fail
+        return None
+    if not all(isinstance(fragment, Fragment) for fragment in fragments):
+        return None
+    flat_fragments = cast(list[Fragment], fragments)
+
+    flows = build_flows_from_fragments(flat_fragments)
+    matched = match_detectors_from_flows_shallow(flows, qubit_coords_map)
+    completed = complete_detectors(
+        flat_fragments, qubit_coords_map, matched, window=window
+    )
+
+    if only_if_incomplete and sum(len(d) for d in completed) == sum(
+        len(d) for d in matched
+    ):
+        return None
+
+    unrolled = stim.Circuit()
+    for fragment, detectors in zip(flat_fragments, completed):
+        unrolled += _insert_before_last_tick_instruction(
+            fragment.circuit, _detectors_to_circuit(detectors)
+        )
+    return remove_duplicate_detectors(unrolled)
 
 
 def compile_fragments_to_circuit(
@@ -100,16 +239,34 @@ def _insert_before_last_tick_instruction(
 def compile_fragments_to_circuit_with_detectors(
     fragments: list[Fragment | FragmentLoop],
     qubit_coords_map: dict[int, tuple[float, ...]],
+    window: int = DEFAULT_MATCHING_WINDOW,
 ) -> stim.Circuit:
     flows = build_flows_from_fragments(fragments)
     detectors_from_flows = match_detectors_from_flows_shallow(flows, qubit_coords_map)
+
+    # Flow matching is an incomplete heuristic: detectors whose flows only cancel in
+    # combination are silently dropped, which is what costs the Y-basis gadgets their
+    # distance. Top up the result with detectors from the bounded-window stabilizer nullspace
+    # (see `tqecd.window`). This is purely additive -- every detector matched above is kept.
+    #
+    # Anything containing a FragmentLoop keeps the matched result untouched here. A detector
+    # emitted inside a repeated body has to be loop-translation-invariant, and the nullspace
+    # routine makes no attempt to guess that. Looped circuits that genuinely need the
+    # completion are handled by unrolling, in `_annotate_unrolled`.
+    if window >= 2 and all(isinstance(f, Fragment) for f in fragments):
+        detectors_from_flows = complete_detectors(
+            cast(list[Fragment], fragments),
+            qubit_coords_map,
+            detectors_from_flows,
+            window,
+        )
 
     circuit = stim.Circuit()
     number_of_spatial_coordinates = len(
         next(iter(qubit_coords_map.values()), cast(tuple[float, ...], tuple()))
     )
     for fragment, detectors in zip(fragments, detectors_from_flows):
-        detectors_circuit = _detectors_to_circuit(detectors, [0.0])
+        detectors_circuit = _detectors_to_circuit(detectors)
         if isinstance(fragment, Fragment):
             circuit += _insert_before_last_tick_instruction(
                 fragment.circuit, detectors_circuit
@@ -117,7 +274,7 @@ def compile_fragments_to_circuit_with_detectors(
         else:  # isinstance(fragment, FragmentLoop):
             shift_circuit = _shift_time_instruction(number_of_spatial_coordinates)
             loop_body = compile_fragments_to_circuit_with_detectors(
-                fragment.fragments, qubit_coords_map
+                fragment.fragments, qubit_coords_map, window=window
             )
             circuit += (
                 _insert_before_last_tick_instruction(
