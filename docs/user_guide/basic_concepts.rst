@@ -175,35 +175,41 @@ will differentiate creation and destruction flows: ``FragmentFlow`` (or ``Fragme
 How detectors are found
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Detectors are found by *flow matching*, fragment by fragment, in two steps.
+Detectors are found by *flow matching*, in this order.
 
-First, the flows of each fragment are built. Flows whose Pauli string
-anticommutes with the collapsing operations at the fragment boundary cannot be
-used as they are. They are merged into commuting ones using a *minimal commuting
-cover* (``find_commuting_cover_on_target_qubits`` in ``tqecd.cover``): the
-fewest anticommuting boundary stabilizers whose commutation vectors with the
-collapsing operations XOR to zero. Merging as few stabilizers as possible keeps
-more flows available for matching. The search is exact when the null space of
-those vectors is small, and falls back to a heuristic above that size, which may
-return a cover that is not the smallest.
+1. The flows of every fragment are built.
+2. Inside each fragment, flows that are fully collapsed within that fragment and
+   non-trivial give a detector directly, without any cover search.
+3. For each pair of adjacent fragments (``match_boundary_stabilizers``):
 
-Second, detectors are matched. Within each fragment, and between each fragment's
-destruction flows and the creation flows of the previous fragment, a target
-stabilizer is matched when an exact cover of it exists (``find_exact_cover``,
-applied to the stabilizers after the collapsing operations). The measurements
-involved in the cover form a detector.
+   a. Flows that anticommute with their collapsing operations are merged on
+      each side into commuting ones, using a *minimal commuting cover*
+      (``find_commuting_cover_on_target_qubits`` in ``tqecd.cover``): the fewest
+      anticommuting boundary stabilizers whose anticommutation vectors against
+      the collapsing Pauli product XOR to zero. The search is exact when the
+      null space of those vectors is small, and falls back to a heuristic above
+      that size, which may return a cover that is not the smallest.
+   b. A creation flow of the left fragment is matched one-to-one with a
+      destruction flow of the right fragment when they are exactly equal.
+   c. Remaining flows are matched by an exact cover (``find_exact_cover``, on
+      the stabilizers after the collapsing operations), in both directions:
+      left creation flows covered by right destruction flows, then right
+      destruction flows covered by left creation flows. The detector contains
+      the target's measurements together with the cover's measurements, the
+      latter combined by symmetric difference.
 
 ``REPEAT`` blocks need one more step. A detector placed inside a loop body must
-be valid for every iteration, so loop matching requires every pair of
-consecutive iterations to carry the same detectors. When any ``TQECDException``
-is raised on a circuit containing a loop, the circuit is *unrolled* and the same
-flow matching is run on it. Unrolling expands every ``REPEAT`` block and inserts
-a ``TICK`` where one is missing at the boundaries between loop copies and
-between a loop and its neighbouring instructions. The result has no ``REPEAT``
-blocks, so its size grows with the number of repetitions. If the unrolled
-circuit does not satisfy the input requirements, the original exception is
-re-raised. An exception raised while matching the unrolled circuit propagates
-as is.
+be valid for every iteration. When a loop repeats more than once, the matcher
+checks that the detectors between the body's last and first fragments equal
+those between the previous fragment and the loop, and raises
+``TQECDException`` otherwise. When any ``TQECDException`` is raised on a
+circuit containing a loop, the circuit is *unrolled* and the same flow matching
+is run on it. Unrolling expands every ``REPEAT`` block and inserts a ``TICK``
+where one is missing at the boundaries between loop copies and between a loop
+and its neighbouring instructions. The result has no ``REPEAT`` blocks, so its
+size grows with the number of repetitions. If the unrolled circuit does not
+satisfy the input requirements, the original exception is re-raised. An
+exception raised while matching the unrolled circuit propagates as is.
 
 Example
 ~~~~~~~
