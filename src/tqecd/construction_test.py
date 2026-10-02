@@ -100,7 +100,7 @@ def test_looped_y_circuit_falls_back_to_unrolled() -> None:
     and only k=1 fixtures (which contain no ``REPEAT`` block at all) were
     covered.
     """
-    path = _VALID_TEST_FOLDER / "window" / "ymem_y_init_y_meas_k2_fixed_bulk.stim"
+    path = _VALID_TEST_FOLDER / "y_basis" / "ymem_y_init_y_meas_k2_fixed_bulk.stim"
     looped = stim.Circuit(path.read_text())
     assert any(isinstance(inst, stim.CircuitRepeatBlock) for inst in looped), (
         "fixture must keep its REPEAT blocks, otherwise it does not exercise"
