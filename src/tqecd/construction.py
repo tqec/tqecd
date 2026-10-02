@@ -48,11 +48,20 @@ def annotate_detectors_automatically(circuit: stim.Circuit) -> stim.Circuit:
     First and foremost, the provided circuit should check the pre-conditions listed
     in the documentation of :func:`split_stim_circuit_into_fragments`.
 
+    If detectors cannot be found for a ``REPEAT`` block as a loop, every
+    ``REPEAT`` block is expanded and the expanded circuit is annotated instead.
+    The returned circuit then contains no ``REPEAT`` blocks.
+
     Args:
         circuit: circuit to insert detectors in.
 
     Returns:
         A new ``stim.Circuit`` instance with automatically computed detectors.
+
+    Raises:
+        TQECDException: if the circuit does not check the pre-conditions, or if
+            detectors cannot be found for it, also after expanding its
+            ``REPEAT`` blocks.
     """
     potential_error_reason = is_valid_input_circuit(circuit)
     if potential_error_reason is not None:

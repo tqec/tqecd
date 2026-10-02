@@ -218,7 +218,10 @@ def find_commuting_cover_on_target_qubits(
 
     Note:
         Unlike :func:`find_exact_cover`, the returned cover is the *smallest*
-        (fewest-source) one that exists. ``_find_cover`` itself stops at the
+        (fewest-source) one that exists when the null space described below
+        has at most ``_EXACT_NULL_SPACE_DIMENSION_CAP`` dimensions. Above that,
+        a heuristic returns a cover that is no larger than the first one
+        found, but not necessarily the smallest. ``_find_cover`` itself stops at the
         first dependency its single Gaussian-elimination pass encounters,
         which can consume more sources than necessary and starve a smaller,
         equally-valid cover of the sources it needed; merging more boundary
