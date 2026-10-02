@@ -180,7 +180,9 @@ Detectors are found by *flow matching*, in this order.
 1. The flows of every fragment are built.
 2. Inside each fragment, flows that are fully collapsed within that fragment and
    non-trivial give a detector directly, without any cover search.
-3. For each pair of adjacent fragments (``match_boundary_stabilizers``):
+3. For each pair of adjacent fragments (``match_boundary_stabilizers``). A
+   ``REPEAT`` block counts as one unit in the pairing: its destruction flows are
+   those of its first body fragment and its creation flows those of its last:
 
    a. Flows that anticommute with their collapsing operations are merged on
       each side into commuting ones, using a *minimal commuting cover*
@@ -190,13 +192,15 @@ Detectors are found by *flow matching*, in this order.
       null space of those vectors is small, and falls back to a heuristic above
       that size, which may return a cover that is not the smallest.
    b. A creation flow of the left fragment is matched one-to-one with a
-      destruction flow of the right fragment when they are exactly equal.
+      destruction flow of the right fragment when they are equal after the
+      collapsing operations (flows with anticommuting operations are skipped).
    c. Remaining flows are matched by an exact cover (``find_exact_cover``, on
       the stabilizers after the collapsing operations), in both directions:
       left creation flows covered by right destruction flows, then right
-      destruction flows covered by left creation flows. The detector contains
-      the target's measurements together with the cover's measurements, the
-      latter combined by symmetric difference.
+      destruction flows covered by left creation flows. This step is skipped when
+      either side has no flow left, or when both sides have exactly one. The
+      detector's measurements are the union of the target's measurements and the
+      symmetric difference of the cover's measurements.
 
 ``REPEAT`` blocks need one more step. A detector placed inside a loop body must
 be valid for every iteration. When a loop repeats more than once, the matcher
