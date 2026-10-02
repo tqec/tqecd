@@ -13,8 +13,7 @@ def int_to_bit_indices(x: int) -> list[int]:
     """Return the ascending positions of the bits set in ``x``.
 
     Iterates only over the set bits (``x & -x``), so it is O(number of set bits) rather than
-    O(highest set bit) -- which is cheap for sparse
-    bit vectors.
+    O(highest set bit), which is cheap for sparse bit vectors.
     """
     indices: list[int] = []
     while x:

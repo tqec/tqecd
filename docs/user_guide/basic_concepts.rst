@@ -175,29 +175,35 @@ will differentiate creation and destruction flows: ``FragmentFlow`` (or ``Fragme
 How detectors are found
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Detectors are found by *flow matching*, fragment by fragment. For each fragment,
-the creation flows and the destruction flows of the fragments before it are
-compared. A detector is emitted when a target flow can be reproduced by a set
-of boundary stabilizers whose measurements are known, so that the product of
-those measurements is deterministic.
+Detectors are found by *flow matching*, fragment by fragment, in two steps.
 
-To reproduce a target, the matcher looks for a *minimal commuting cover*
-(see ``find_commuting_cover_on_target_qubits`` in ``tqecd.cover``): the fewest
-boundary stabilizers whose commutation vectors with the target XOR to zero.
-Using as few stabilizers as possible leaves the remaining flows available for
-other detectors. The search is exact when the null space of the commutation
-vectors is small, and falls back to a heuristic above that size, which may
+First, the flows of each fragment are built. Flows whose Pauli string
+anticommutes with the collapsing operations at the fragment boundary cannot be
+used as they are. They are merged into commuting ones using a *minimal commuting
+cover* (``find_commuting_cover_on_target_qubits`` in ``tqecd.cover``): the
+fewest anticommuting boundary stabilizers whose commutation vectors with the
+collapsing operations XOR to zero. Merging as few stabilizers as possible keeps
+more flows available for matching. The search is exact when the null space of
+those vectors is small, and falls back to a heuristic above that size, which may
 return a cover that is not the smallest.
+
+Second, detectors are matched. Within each fragment, and between each fragment's
+destruction flows and the creation flows of the previous fragment, a target
+stabilizer is matched when an exact cover of it exists (``find_exact_cover``,
+applied to the stabilizers after the collapsing operations). The measurements
+involved in the cover form a detector.
 
 ``REPEAT`` blocks need one more step. A detector placed inside a loop body must
 be valid for every iteration, so loop matching requires every pair of
-consecutive iterations to carry the same detectors. When that fails
-(``TQECDException``), the circuit is *unrolled*: each ``REPEAT`` block is
-expanded, with a ``TICK`` inserted between copies where one is missing, and the
-same flow matching is run on the unrolled circuit. The result is a circuit
-without ``REPEAT`` blocks, so its size grows with the number of repetitions.
-If the unrolled circuit does not satisfy the input requirements, the original
-exception is raised.
+consecutive iterations to carry the same detectors. When any ``TQECDException``
+is raised on a circuit containing a loop, the circuit is *unrolled* and the same
+flow matching is run on it. Unrolling expands every ``REPEAT`` block and inserts
+a ``TICK`` where one is missing at the boundaries between loop copies and
+between a loop and its neighbouring instructions. The result has no ``REPEAT``
+blocks, so its size grows with the number of repetitions. If the unrolled
+circuit does not satisfy the input requirements, the original exception is
+re-raised. An exception raised while matching the unrolled circuit propagates
+as is.
 
 Example
 ~~~~~~~
