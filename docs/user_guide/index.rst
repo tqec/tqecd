@@ -11,4 +11,3 @@ User Guide
    Quick start <quick_start>
    Basic concepts <basic_concepts>
    Example <../media/detectors/detector_finding_illustration.ipynb>
-   Windowed detector completion <../media/windowing/windowed_detector_completion.ipynb>
