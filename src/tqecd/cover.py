@@ -208,6 +208,29 @@ def find_commuting_cover_on_target_qubits(
        it acts non-trivially, but rather requires the output to commute with
        ``target`` on those qubits.
 
+    The returned cover is the smallest one (fewest sources) when the null space
+    described below has at most ``_EXACT_NULL_SPACE_DIMENSION_CAP`` dimensions.
+    Above that, a heuristic returns a cover that is no larger than the first one
+    found, but not necessarily the smallest. Unlike :func:`find_exact_cover`, this
+    function does not stop at the first dependency found by a single
+    Gaussian-elimination pass, which can use more sources than needed. Merging
+    more boundary stabilizers than required shrinks the flows still available to
+    the callers of this function, and can leave a matchable detector unmatched.
+
+    The smallest cover is the minimum-weight nonzero element of the null space
+    (over GF(2)) of the commutation vectors of ``sources``. A subset of sources
+    XORs to zero exactly when its characteristic vector lies in that null space,
+    and the weight of that vector is the size of the subset. Enumerating the null
+    space searches ``2 ** nullity`` elements, with ``nullity = len(sources) - rank``,
+    instead of the ``2 ** len(sources)`` subsets of ``sources``. Small covers are
+    found by a direct scan of small subsets, without building the null space. The
+    first elimination pass is kept as a cheap check that a cover exists.
+
+    Example:
+        With ``target = Y0*Y1*Y2`` and sources ``X1*Z2``, ``Z0``, ``Z0*Z1*Z2`` and
+        ``Z0*X1*Z2``, the result is ``[2, 3]``, whose product ``Y1`` commutes with
+        ``target``. One elimination pass alone would use three sources.
+
     Args:
         target: the stabilizers to cover with stabilizers from ``sources``.
         sources: stabilizers that can be used to cover ``target``.
@@ -215,36 +238,6 @@ def find_commuting_cover_on_target_qubits(
     Returns:
         Either a list of a stabilizers that, when combined, commute with
         the provided ``target``, or ``None`` if such a list could not be found.
-
-    Note:
-        Unlike :func:`find_exact_cover`, the returned cover is the *smallest*
-        (fewest-source) one that exists when the null space described below
-        has at most ``_EXACT_NULL_SPACE_DIMENSION_CAP`` dimensions. Above that,
-        a heuristic returns a cover that is no larger than the first one
-        found, but not necessarily the smallest. ``_find_cover`` itself stops at the
-        first dependency its single Gaussian-elimination pass encounters,
-        which can consume more sources than necessary and starve a smaller,
-        equally-valid cover of the sources it needed; merging more boundary
-        stabilizers than required here shrinks the flows still available to
-        the callers of this function, which can silently leave a matchable
-        detector unmatched. This function still uses ``_find_cover`` as a
-        cheap existence check (identical cost to before when no cover
-        exists).
-
-        Finding the smallest cover is equivalent to finding the minimum-weight
-        nonzero element of the null space (over GF(2)) of the sources'
-        commutation vectors: a subset of sources XORs to zero exactly when its
-        characteristic vector lies in that null space, and its weight is the
-        subset's size. Enumerating subsets of ``sources`` directly (as a naive
-        implementation would) searches a space of size up to ``2 ** len(sources)``.
-        Enumerating the null space itself instead searches a space of size
-        ``2 ** nullity``, where ``nullity = len(sources) - rank`` is usually far
-        smaller than ``len(sources)`` -- the boundary stabilizers this function
-        is called on tend to be highly redundant, which is exactly what makes
-        ``len(sources)`` a poor bound on the search size. Small witnesses are
-        handled by a direct small-subset scan instead, since a low-weight
-        answer can be confirmed in polynomial time without ever forming the
-        null-space basis.
     """
     if not sources:
         return None
