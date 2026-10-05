@@ -171,7 +171,6 @@ To distinguish between these two ``BoundaryStabilizer`` (one representing a crea
 the other representing a destruction flow), they will be stored in a data-structure that
 will differentiate creation and destruction flows: ``FragmentFlow`` (or ``FragmentLoopFlow``).
 
-
 How detectors are found
 ~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -301,16 +300,6 @@ the boundaries between loop copies and between a loop and its neighbouring instr
 The result has no ``REPEAT`` block, so its size grows with the number of repetitions. If
 the unrolled circuit does not satisfy the input requirements, the original exception is
 re-raised.
-
-Example
-~~~~~~~
-
-See the accompanying notebook for an example of how to perform automatic detector computation:
-
-.. toctree::
-   :maxdepth: 1
-
-   ../media/detectors/detector_finding_illustration.ipynb
 
 .. _crumble-before:
    https://algassert.com/crumble#circuit=Q(0,0)0;Q(0,2)1;Q(0,4)2;Q(0,6)3;Q(1,1)4;Q(1,3)
@@ -512,3 +501,14 @@ See the accompanying notebook for an example of how to perform automatic detecto
    DT(6,4,8)rec[-13]_rec[-37];DT(8,4,8)rec[-20]_rec[-44];DT(10,2,8)rec[-19]_rec[-43];DT
    (10,6,8)rec[-18]_rec[-42];DT(12,4,8)rec[-17]_rec[-41];DT(0,4,8)rec[-4]_rec[-36];DT(2
    ,2,8)rec[-3]_rec[-35];DT(2,6,8)rec[-2]_rec[-34];DT(4,4,8)rec[-1]_rec[-33]_
+
+
+Example
+~~~~~~~
+
+See the accompanying notebook for an example of how to perform automatic detector computation:
+
+.. toctree::
+   :maxdepth: 1
+
+   ../media/detectors/detector_finding_illustration.ipynb
