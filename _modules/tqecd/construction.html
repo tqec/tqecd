@@ -415,14 +415,14 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">_detectors_to_circuit</span><span class="p">(</span>
     <span class="n">detectors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">MatchedDetector</span><span class="p">],</span> <span class="n">additional_coordinates</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">stim</span><span class="o">.</span><span class="n">Circuit</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Transform a list of detectors into a circuit.</span>
+<span class="w">    </span><span class="sd">"""Transform a list of detectors into a circuit.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        detectors: detectors that will be included in the returned circuit.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        A ``stim.Circuit`` instance containing all the provided detectors.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">additional_coordinates</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">additional_coordinates</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -438,7 +438,7 @@
     <span class="n">args</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="mf">0.0</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">number_of_spatial_coordinates</span><span class="p">))</span> <span class="o">+</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,)</span>
     <span class="n">circuit</span> <span class="o">=</span> <span class="n">stim</span><span class="o">.</span><span class="n">Circuit</span><span class="p">()</span>
     <span class="n">circuit</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-        <span class="n">stim</span><span class="o">.</span><span class="n">CircuitInstruction</span><span class="p">(</span><span class="s2">&quot;SHIFT_COORDS&quot;</span><span class="p">,</span> <span class="n">targets</span><span class="o">=</span><span class="p">[],</span> <span class="n">gate_args</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">args</span><span class="p">))</span>
+        <span class="n">stim</span><span class="o">.</span><span class="n">CircuitInstruction</span><span class="p">(</span><span class="s2">"SHIFT_COORDS"</span><span class="p">,</span> <span class="n">targets</span><span class="o">=</span><span class="p">[],</span> <span class="n">gate_args</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">args</span><span class="p">))</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">circuit</span>
 
@@ -446,7 +446,7 @@
 <div class="viewcode-block" id="annotate_detectors_automatically">
 <a class="viewcode-back" href="../../_autosummary/tqecd.construction.annotate_detectors_automatically.html#tqecd.construction.annotate_detectors_automatically">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">annotate_detectors_automatically</span><span class="p">(</span><span class="n">circuit</span><span class="p">:</span> <span class="n">stim</span><span class="o">.</span><span class="n">Circuit</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">stim</span><span class="o">.</span><span class="n">Circuit</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Insert detectors into the provided circuit instance.</span>
+<span class="w">    </span><span class="sd">"""Insert detectors into the provided circuit instance.</span>
 
 <span class="sd">    This is the main user-facing function to automatically insert detectors into</span>
 <span class="sd">    a quantum circuit composed of Clifford operations. The provided circuit should</span>
@@ -460,7 +460,7 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">        A new ``stim.Circuit`` instance with automatically computed detectors.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">potential_error_reason</span> <span class="o">=</span> <span class="n">is_valid_input_circuit</span><span class="p">(</span><span class="n">circuit</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">potential_error_reason</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">TQECDException</span><span class="p">(</span><span class="n">potential_error_reason</span><span class="p">)</span>
@@ -491,13 +491,13 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_tick_circuit</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">stim</span><span class="o">.</span><span class="n">Circuit</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">stim</span><span class="o">.</span><span class="n">Circuit</span><span class="p">(</span><span class="s2">&quot;TICK&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">stim</span><span class="o">.</span><span class="n">Circuit</span><span class="p">(</span><span class="s2">"TICK"</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_insert_before_last_tick_instruction</span><span class="p">(</span>
     <span class="n">circuit</span><span class="p">:</span> <span class="n">stim</span><span class="o">.</span><span class="n">Circuit</span><span class="p">,</span> <span class="n">added_circuit</span><span class="p">:</span> <span class="n">stim</span><span class="o">.</span><span class="n">Circuit</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">stim</span><span class="o">.</span><span class="n">Circuit</span><span class="p">:</span>
-    <span class="k">if</span> <span class="n">circuit</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;TICK&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">circuit</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">"TICK"</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">circuit</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">added_circuit</span> <span class="o">+</span> <span class="n">_tick_circuit</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">circuit</span> <span class="o">+</span> <span class="n">added_circuit</span>

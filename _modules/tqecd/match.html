@@ -418,7 +418,7 @@
 <a class="viewcode-back" href="../../_autosummary/tqecd.match.MatchedDetector.html#tqecd.match.MatchedDetector">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MatchedDetector</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Represents an automatically computed detector.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Represents an automatically computed detector."""</span>
 
     <span class="n">coords</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
     <span class="n">measurements</span><span class="p">:</span> <span class="nb">frozenset</span><span class="p">[</span><span class="n">RelativeMeasurementLocation</span><span class="p">]</span>
@@ -441,7 +441,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">measurements</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">measurement</span><span class="p">:</span> <span class="o">-</span><span class="n">measurement</span><span class="o">.</span><span class="n">offset</span>
             <span class="p">)</span>
         <span class="p">]</span>
-        <span class="k">return</span> <span class="n">stim</span><span class="o">.</span><span class="n">CircuitInstruction</span><span class="p">(</span><span class="s2">&quot;DETECTOR&quot;</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">stim</span><span class="o">.</span><span class="n">CircuitInstruction</span><span class="p">(</span><span class="s2">"DETECTOR"</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="p">))</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">with_time_coordinate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time_coordinate</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MatchedDetector</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">MatchedDetector</span><span class="p">(</span>
@@ -478,7 +478,7 @@
     <span class="n">flows</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">FragmentFlows</span> <span class="o">|</span> <span class="n">FragmentLoopFlows</span><span class="p">],</span>
     <span class="n">qubit_coordinates</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">MatchedDetector</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Match detectors in the provided fragments.</span>
+<span class="w">    </span><span class="sd">"""Match detectors in the provided fragments.</span>
 
 <span class="sd">    This function only performs a shallow search. Read attentively the warning and</span>
 <span class="sd">    return sections of this documentation to understand how to use it correctly.</span>
@@ -509,7 +509,7 @@
 <span class="sd">        parameter `flows`. If the last provided flow is an instance of</span>
 <span class="sd">        :class:`FragmentLoopFlows` then the returned detectors should be inserted at</span>
 <span class="sd">        the end of the loop body.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">detectors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">MatchedDetector</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span>
         <span class="n">match_detectors_within_fragment</span><span class="p">(</span><span class="n">flow</span><span class="p">,</span> <span class="n">qubit_coordinates</span><span class="p">)</span> <span class="k">for</span> <span class="n">flow</span> <span class="ow">in</span> <span class="n">flows</span>
     <span class="p">]</span>
@@ -528,14 +528,14 @@
     <span class="n">flows</span><span class="p">:</span> <span class="n">FragmentFlows</span> <span class="o">|</span> <span class="n">FragmentLoopFlows</span><span class="p">,</span>
     <span class="n">qubit_coordinates</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">MatchedDetector</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Match all the detectors that can be resolved without considering</span>
+<span class="w">    </span><span class="sd">"""Match all the detectors that can be resolved without considering</span>
 <span class="sd">    neighbouring fragments.</span>
 
 <span class="sd">    Some detectors only include measurements from one fragment. This is for example the</span>
 <span class="sd">    case during the initialisation of any code: some measurements from the first round</span>
 <span class="sd">    have a pre-defined value that should be constant in the absence of errors.</span>
 
-<span class="sd">    Note that this function ignores &quot;trivial&quot; flows to avoid trivial detectors to be</span>
+<span class="sd">    Note that this function ignores "trivial" flows to avoid trivial detectors to be</span>
 <span class="sd">    matched on some particular cases (e.g., 1-round repetition code).</span>
 
 <span class="sd">    Args:</span>
@@ -548,7 +548,7 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">        the list of all the detectors found.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">matched_detectors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">MatchedDetector</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">matched_detectors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
         <span class="n">_match_non_propagating_non_trivial_flows_inline</span><span class="p">(</span>
@@ -568,7 +568,7 @@
     <span class="n">boundary_stabilizers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">BoundaryStabilizer</span><span class="p">],</span>
     <span class="n">qubit_coordinates</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">MatchedDetector</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Match all the detectors that can be trivially resolved and remove the</span>
+<span class="w">    </span><span class="sd">"""Match all the detectors that can be trivially resolved and remove the</span>
 <span class="sd">    matched boundary stabilizers from the provided list.</span>
 
 <span class="sd">    This function try to find a trivial match for each of the provided boundary</span>
@@ -606,7 +606,7 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">        all matched detectors.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">matched_detectors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">MatchedDetector</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">non_propagating_flows_indices</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
         <span class="n">_find_non_propagating_non_trivial_flows</span><span class="p">(</span><span class="n">boundary_stabilizers</span><span class="p">)</span>
@@ -634,7 +634,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">_find_non_propagating_non_trivial_flows</span><span class="p">(</span>
     <span class="n">boundary_stabilizers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">BoundaryStabilizer</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Find all the boundary stabilizers that do not have any anti-commuting</span>
+<span class="w">    </span><span class="sd">"""Find all the boundary stabilizers that do not have any anti-commuting</span>
 <span class="sd">    collapsing operations and that are fully collapsed by the commuting</span>
 <span class="sd">    operations.</span>
 
@@ -645,7 +645,7 @@
 <span class="sd">        indices (in ascending order) of boundary stabilizers in the provided</span>
 <span class="sd">        `boundary_stabilizers` list that are non-trivial and fully collapsed</span>
 <span class="sd">        by the commuting operations.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">stabilizer</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">boundary_stabilizers</span><span class="p">):</span>
         <span class="k">if</span> <span class="p">(</span>
             <span class="ow">not</span> <span class="n">stabilizer</span><span class="o">.</span><span class="n">is_trivial</span><span class="p">()</span>
@@ -663,7 +663,7 @@
     <span class="n">qubit_coordinates</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span>
     <span class="n">perform_sanity_check</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">MatchedDetector</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Match detectors using the boundary stabilizers between the two given</span>
+<span class="w">    </span><span class="sd">"""Match detectors using the boundary stabilizers between the two given</span>
 <span class="sd">    flows.</span>
 
 <span class="sd">    This function try to match detectors that will be valid at the end of</span>
@@ -692,7 +692,7 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">        all matched detectors.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">matched_detectors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">MatchedDetector</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="c1"># Sanity check: if the provided right flow is a FragmentLoopFlows, this function</span>
@@ -747,10 +747,10 @@
     <span class="k">if</span> <span class="n">matched_detectors_within_loop</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">matched_detectors_within_loop</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">set</span><span class="p">(</span><span class="n">matched_detectors</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">TQECDException</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;The set of detectors computed from measurements in</span><span class="se">\n</span><span class="si">{</span><span class="n">left_flows</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;and</span><span class="se">\n</span><span class="si">{</span><span class="n">right_flows</span><span class="si">}</span><span class="se">\n</span><span class="s2">is not the same as the set of detectors computed &quot;</span>
-                <span class="s2">&quot;from measurements between two loop body repetitions. Is your QEC &quot;</span>
-                <span class="s2">&quot;circuit valid?&quot;</span>
+                <span class="sa">f</span><span class="s2">"The set of detectors computed from measurements in</span><span class="se">\n</span><span class="si">{</span><span class="n">left_flows</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
+                <span class="sa">f</span><span class="s2">"and</span><span class="se">\n</span><span class="si">{</span><span class="n">right_flows</span><span class="si">}</span><span class="se">\n</span><span class="s2">is not the same as the set of detectors computed "</span>
+                <span class="s2">"from measurements between two loop body repetitions. Is your QEC "</span>
+                <span class="s2">"circuit valid?"</span>
             <span class="p">)</span>
     <span class="k">return</span> <span class="n">matched_detectors</span></div>
 
@@ -761,7 +761,7 @@
     <span class="n">right_flows</span><span class="p">:</span> <span class="n">FragmentFlows</span> <span class="o">|</span> <span class="n">FragmentLoopFlows</span><span class="p">,</span>
     <span class="n">qubit_coordinates</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">MatchedDetector</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Take stabilizers from two contiguous fragments and try to match them.</span>
+<span class="w">    </span><span class="sd">"""Take stabilizers from two contiguous fragments and try to match them.</span>
 
 <span class="sd">    Let use the two fragment instances `f1` and `f2` such that `f1` is just</span>
 <span class="sd">    before `f2`. There is a stabilizer boundary at the interface between `f1`</span>
@@ -771,7 +771,7 @@
 <span class="sd">    of `f2` and commuted with all the resets they encountered, we can try to</span>
 <span class="sd">    match these stabilizers at the interface.</span>
 
-<span class="sd">    This method performs a &quot;dumb&quot; matching between stabilizers, only matching</span>
+<span class="sd">    This method performs a "dumb" matching between stabilizers, only matching</span>
 <span class="sd">    if one stabilizer from `f1` exactly matches with one stabilizer from `f2`.</span>
 
 <span class="sd">    Args:</span>
@@ -783,7 +783,7 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">        the list of all the detectors found.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">detectors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">MatchedDetector</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">left_flows_indices_to_remove</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -835,7 +835,7 @@
     <span class="n">qubit_coordinates</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span>
     <span class="n">target_is_creation</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">MatchedDetector</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Try to match stabilizers by finding a cover.</span>
+<span class="w">    </span><span class="sd">"""Try to match stabilizers by finding a cover.</span>
 
 <span class="sd">    This function will try to match each of the stabilizers found in</span>
 <span class="sd">    `target_stabilizers` with several stabilizers from `covering_stabilizers`.</span>
@@ -856,14 +856,14 @@
 <span class="sd">        the list of all the detectors found as well as the indices of stabilizers</span>
 <span class="sd">        from `target_stabilizers` that have been used and should be removed from</span>
 <span class="sd">        the considered stabilizers.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">detectors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">MatchedDetector</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">targets_to_remove</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="c1"># For each target, try to find a cover.</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">target</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">target_stabilizers</span><span class="p">):</span>
         <span class="c1"># Try to find the cover. If unsuccessful, skip `target` and continue the loop.</span>
         <span class="c1"># Else, a detector is matched, so insert it into the returned list and mark</span>
-        <span class="c1"># `target` as &quot;to remove&quot;.</span>
+        <span class="c1"># `target` as "to remove".</span>
         <span class="n">cover_indices</span> <span class="o">=</span> <span class="n">find_exact_cover</span><span class="p">(</span>
             <span class="n">target</span><span class="o">.</span><span class="n">after_collapse</span><span class="p">,</span> <span class="p">[</span><span class="n">cs</span><span class="o">.</span><span class="n">after_collapse</span> <span class="k">for</span> <span class="n">cs</span> <span class="ow">in</span> <span class="n">covering_stabilizers</span><span class="p">]</span>
         <span class="p">)</span>
@@ -905,7 +905,7 @@
     <span class="n">right_flows</span><span class="p">:</span> <span class="n">FragmentFlows</span> <span class="o">|</span> <span class="n">FragmentLoopFlows</span><span class="p">,</span>
     <span class="n">qubit_coordinates</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">MatchedDetector</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Try to match stabilizers by finding a cover.</span>
+<span class="w">    </span><span class="sd">"""Try to match stabilizers by finding a cover.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        left_flows: flows of the fragment that comes first.</span>
@@ -916,7 +916,7 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">        the list of all the detectors found.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Build the correct stabilizer lists</span>
     <span class="n">left_boundary_stabilizers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">BoundaryStabilizer</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">left_boundary_indices_map</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>

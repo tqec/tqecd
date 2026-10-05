@@ -453,7 +453,7 @@
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">stim</span>
 
-<span class="n">circuit</span> <span class="o">=</span> <span class="n">stim</span><span class="o">.</span><span class="n">Circuit</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="n">circuit</span> <span class="o">=</span> <span class="n">stim</span><span class="o">.</span><span class="n">Circuit</span><span class="p">(</span><span class="s2">"""</span>
 <span class="s2">QUBIT_COORDS(0) 0</span>
 <span class="s2">QUBIT_COORDS(1) 1</span>
 <span class="s2">QUBIT_COORDS(2) 2</span>
@@ -477,8 +477,8 @@
 <span class="s2">    M 1 3</span>
 <span class="s2">    TICK</span>
 <span class="s2">}</span>
-<span class="s2">M 0 2 4&quot;&quot;&quot;</span><span class="p">)</span>
-<span class="n">circuit</span><span class="o">.</span><span class="n">diagram</span><span class="p">(</span><span class="s2">&quot;timeline-svg&quot;</span><span class="p">)</span>
+<span class="s2">M 0 2 4"""</span><span class="p">)</span>
+<span class="n">circuit</span><span class="o">.</span><span class="n">diagram</span><span class="p">(</span><span class="s2">"timeline-svg"</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -512,7 +512,7 @@
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">fragment</span> <span class="ow">in</span> <span class="n">fragments</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">fragment</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -576,18 +576,18 @@ Fragment(circuit=stim.Circuit(&#39;&#39;&#39;
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">flow</span> <span class="ow">in</span> <span class="n">flows</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Flow(&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  creation = [&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Flow("</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"  creation = ["</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">creation</span> <span class="ow">in</span> <span class="n">flow</span><span class="o">.</span><span class="n">creation</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    </span><span class="si">{</span><span class="n">creation</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  ],&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  destruction = [&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    </span><span class="si">{</span><span class="n">creation</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"  ],"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"  destruction = ["</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">destruction</span> <span class="ow">in</span> <span class="n">flow</span><span class="o">.</span><span class="n">destruction</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    </span><span class="si">{</span><span class="n">destruction</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  ],&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;total_number_of_measurements = </span><span class="si">{</span><span class="n">flow</span><span class="o">.</span><span class="n">total_number_of_measurements</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;)&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    </span><span class="si">{</span><span class="n">destruction</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"  ],"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"total_number_of_measurements = </span><span class="si">{</span><span class="n">flow</span><span class="o">.</span><span class="n">total_number_of_measurements</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">")"</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -654,8 +654,8 @@ total_number_of_measurements = 3
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">IFrame</span>
 
 <span class="n">IFrame</span><span class="p">(</span>
-    <span class="s2">&quot;https://algassert.com/crumble#circuit=Q(0,0)0;Q(1,0)1;Q(2,0)2;Q(3,0)3;Q(4,0)4;R_0_1_2_3_4;MARKZ(0)0;TICK;CX_0_1_2_3;TICK;CX_2_1_4_3;TICK;M_1_3&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;100%&quot;</span><span class="p">,</span>
+    <span class="s2">"https://algassert.com/crumble#circuit=Q(0,0)0;Q(1,0)1;Q(2,0)2;Q(3,0)3;Q(4,0)4;R_0_1_2_3_4;MARKZ(0)0;TICK;CX_0_1_2_3;TICK;CX_2_1_4_3;TICK;M_1_3"</span><span class="p">,</span>
+    <span class="s2">"100%"</span><span class="p">,</span>
     <span class="mi">350</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
@@ -692,8 +692,8 @@ total_number_of_measurements = 3
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">IFrame</span>
 
 <span class="n">IFrame</span><span class="p">(</span>
-    <span class="s2">&quot;https://algassert.com/crumble#circuit=Q(0,0)0;Q(1,0)1;Q(2,0)2;Q(3,0)3;Q(4,0)4;R_0_1_2_3_4;MARKZ(0)1;TICK;CX_0_1_2_3;TICK;CX_2_1_4_3;TICK;M_1_3;MARKZ(0)1&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;100%&quot;</span><span class="p">,</span>
+    <span class="s2">"https://algassert.com/crumble#circuit=Q(0,0)0;Q(1,0)1;Q(2,0)2;Q(3,0)3;Q(4,0)4;R_0_1_2_3_4;MARKZ(0)1;TICK;CX_0_1_2_3;TICK;CX_2_1_4_3;TICK;M_1_3;MARKZ(0)1"</span><span class="p">,</span>
+    <span class="s2">"100%"</span><span class="p">,</span>
     <span class="mi">350</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
@@ -731,8 +731,8 @@ total_number_of_measurements = 3
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">IFrame</span>
 
 <span class="n">IFrame</span><span class="p">(</span>
-    <span class="s2">&quot;https://algassert.com/crumble#circuit=Q(0,0)0;Q(1,0)1;Q(2,0)2;Q(3,0)3;Q(4,0)4;R_0_1_2_3_4;MARKZ(0)0_1_2;TICK;CX_0_1_2_3;TICK;CX_2_1_4_3;TICK;M_1_3;MARKZ(0)1&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;100%&quot;</span><span class="p">,</span>
+    <span class="s2">"https://algassert.com/crumble#circuit=Q(0,0)0;Q(1,0)1;Q(2,0)2;Q(3,0)3;Q(4,0)4;R_0_1_2_3_4;MARKZ(0)0_1_2;TICK;CX_0_1_2_3;TICK;CX_2_1_4_3;TICK;M_1_3;MARKZ(0)1"</span><span class="p">,</span>
+    <span class="s2">"100%"</span><span class="p">,</span>
     <span class="mi">350</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
@@ -781,8 +781,8 @@ total_number_of_measurements = 3
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">IFrame</span>
 
 <span class="n">IFrame</span><span class="p">(</span>
-    <span class="s2">&quot;https://algassert.com/crumble#circuit=Q(0,0)0;Q(1,0)1;Q(2,0)2;Q(3,0)3;Q(4,0)4;R_0_1_2_3_4;MARKZ(0)1;TICK;CX_0_1_2_3;TICK;CX_2_1_4_3;TICK;H_1;TICK;M_1_3;MARKZ(0)1&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;100%&quot;</span><span class="p">,</span>
+    <span class="s2">"https://algassert.com/crumble#circuit=Q(0,0)0;Q(1,0)1;Q(2,0)2;Q(3,0)3;Q(4,0)4;R_0_1_2_3_4;MARKZ(0)1;TICK;CX_0_1_2_3;TICK;CX_2_1_4_3;TICK;H_1;TICK;M_1_3;MARKZ(0)1"</span><span class="p">,</span>
+    <span class="s2">"100%"</span><span class="p">,</span>
     <span class="mi">350</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
@@ -833,9 +833,9 @@ total_number_of_measurements = 3
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">detectors</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">matched_detectors</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Detectors found for fragment number </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">:&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Detectors found for fragment number </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">:"</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">detector</span> <span class="ow">in</span> <span class="n">detectors</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  &quot;</span><span class="p">,</span> <span class="n">detector</span><span class="o">.</span><span class="n">to_instruction</span><span class="p">())</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"  "</span><span class="p">,</span> <span class="n">detector</span><span class="o">.</span><span class="n">to_instruction</span><span class="p">())</span>
 </pre></div>
 </div>
 </div>
@@ -868,7 +868,7 @@ Detectors found for fragment number 2:
 <span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">remove_annotations</span>
 
 <span class="n">base_circuit</span> <span class="o">=</span> <span class="n">remove_annotations</span><span class="p">(</span><span class="n">circuit</span><span class="p">)</span>
-<span class="n">base_circuit</span><span class="o">.</span><span class="n">diagram</span><span class="p">(</span><span class="s2">&quot;timeline-svg&quot;</span><span class="p">)</span>
+<span class="n">base_circuit</span><span class="o">.</span><span class="n">diagram</span><span class="p">(</span><span class="s2">"timeline-svg"</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -886,7 +886,7 @@ Detectors found for fragment number 2:
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">annotated_circuit</span> <span class="o">=</span> <span class="n">annotate_detectors_automatically</span><span class="p">(</span><span class="n">remove_annotations</span><span class="p">(</span><span class="n">circuit</span><span class="p">))</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">annotated_circuit</span><span class="p">)</span>
-<span class="n">annotated_circuit</span><span class="o">.</span><span class="n">diagram</span><span class="p">(</span><span class="s2">&quot;timeline-svg&quot;</span><span class="p">)</span>
+<span class="n">annotated_circuit</span><span class="o">.</span><span class="n">diagram</span><span class="p">(</span><span class="s2">"timeline-svg"</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>

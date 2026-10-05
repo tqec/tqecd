@@ -398,13 +398,13 @@
                 <article class="bd-article">
                   
   <h1>Source code for tqecd.pauli</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Introduces a convenience `PauliString` class.</span>
+<span></span><span class="sd">"""Introduces a convenience `PauliString` class.</span>
 
 <span class="sd">This module implements an internal `PauliString` class with methods</span>
 <span class="sd">that are used across the package. This class can easily be converted from</span>
 <span class="sd">and to `stim.PauliString` and implement a subset of the `stim.PauliString`</span>
 <span class="sd">API.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
@@ -415,15 +415,15 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">tqecd.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">TQECDException</span>
 
-<span class="n">PAULI_STRING_TYPE</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;I&quot;</span><span class="p">,</span> <span class="s2">&quot;X&quot;</span><span class="p">,</span> <span class="s2">&quot;Y&quot;</span><span class="p">,</span> <span class="s2">&quot;Z&quot;</span><span class="p">]</span>
-<span class="n">_IXYZ</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">PAULI_STRING_TYPE</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;I&quot;</span><span class="p">,</span> <span class="s2">&quot;X&quot;</span><span class="p">,</span> <span class="s2">&quot;Y&quot;</span><span class="p">,</span> <span class="s2">&quot;Z&quot;</span><span class="p">]</span>
-<span class="n">_IXZY</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">PAULI_STRING_TYPE</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;I&quot;</span><span class="p">,</span> <span class="s2">&quot;X&quot;</span><span class="p">,</span> <span class="s2">&quot;Z&quot;</span><span class="p">,</span> <span class="s2">&quot;Y&quot;</span><span class="p">]</span>
+<span class="n">PAULI_STRING_TYPE</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"I"</span><span class="p">,</span> <span class="s2">"X"</span><span class="p">,</span> <span class="s2">"Y"</span><span class="p">,</span> <span class="s2">"Z"</span><span class="p">]</span>
+<span class="n">_IXYZ</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">PAULI_STRING_TYPE</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"I"</span><span class="p">,</span> <span class="s2">"X"</span><span class="p">,</span> <span class="s2">"Y"</span><span class="p">,</span> <span class="s2">"Z"</span><span class="p">]</span>
+<span class="n">_IXZY</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">PAULI_STRING_TYPE</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"I"</span><span class="p">,</span> <span class="s2">"X"</span><span class="p">,</span> <span class="s2">"Z"</span><span class="p">,</span> <span class="s2">"Y"</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="PauliString">
 <a class="viewcode-back" href="../../_autosummary/tqecd.pauli.PauliString.html#tqecd.pauli.PauliString">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">PauliString</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A mapping from qubits to Pauli operators that represent a Pauli string.</span>
+<span class="w">    </span><span class="sd">"""A mapping from qubits to Pauli operators that represent a Pauli string.</span>
 
 <span class="sd">    Invariant:</span>
 <span class="sd">        This class never stores identity Pauli terms. Any missing Pauli term is</span>
@@ -433,11 +433,11 @@
 <span class="sd">        Instances are treated as immutable after construction. Hashing,</span>
 <span class="sd">        identity-preserving copies, and shared references in flow copies rely</span>
 <span class="sd">        on the private bit fields never being mutated.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="c1"># Avoid a per-instance __dict__ and restrict instances to these fields:</span>
     <span class="c1"># https://docs.python.org/3/reference/datamodel.html#object.__slots__</span>
-    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;_hash&quot;</span><span class="p">,</span> <span class="s2">&quot;_support&quot;</span><span class="p">,</span> <span class="s2">&quot;_x_bits&quot;</span><span class="p">,</span> <span class="s2">&quot;_z_bits&quot;</span><span class="p">)</span>
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"_hash"</span><span class="p">,</span> <span class="s2">"_support"</span><span class="p">,</span> <span class="s2">"_x_bits"</span><span class="p">,</span> <span class="s2">"_z_bits"</span><span class="p">)</span>
 
 <div class="viewcode-block" id="PauliString.__init__">
 <a class="viewcode-back" href="../../_autosummary/tqecd.pauli.PauliString.html#tqecd.pauli.PauliString.__init__">[docs]</a>
@@ -447,16 +447,16 @@
         <span class="k">for</span> <span class="n">qubit</span><span class="p">,</span> <span class="n">pauli</span> <span class="ow">in</span> <span class="n">pauli_by_qubit</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">qubit</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">TQECDException</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Invalid negative qubit index </span><span class="si">{</span><span class="n">qubit</span><span class="si">}</span><span class="s2">, expected a non-negative integer.&quot;</span>
+                    <span class="sa">f</span><span class="s2">"Invalid negative qubit index </span><span class="si">{</span><span class="n">qubit</span><span class="si">}</span><span class="s2">, expected a non-negative integer."</span>
                 <span class="p">)</span>
             <span class="k">if</span> <span class="n">pauli</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_IXYZ</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">TQECDException</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Invalid Pauli operator </span><span class="si">{</span><span class="n">pauli</span><span class="si">}</span><span class="s2"> for qubit </span><span class="si">{</span><span class="n">qubit</span><span class="si">}</span><span class="s2">, expected I, X, Y, or Z.&quot;</span>
+                    <span class="sa">f</span><span class="s2">"Invalid Pauli operator </span><span class="si">{</span><span class="n">pauli</span><span class="si">}</span><span class="s2"> for qubit </span><span class="si">{</span><span class="n">qubit</span><span class="si">}</span><span class="s2">, expected I, X, Y, or Z."</span>
                 <span class="p">)</span>
             <span class="n">bit</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">qubit</span>
-            <span class="k">if</span> <span class="n">pauli</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;X&quot;</span><span class="p">,</span> <span class="s2">&quot;Y&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">pauli</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"X"</span><span class="p">,</span> <span class="s2">"Y"</span><span class="p">):</span>
                 <span class="n">x_bits</span> <span class="o">|=</span> <span class="n">bit</span>
-            <span class="k">if</span> <span class="n">pauli</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;Y&quot;</span><span class="p">,</span> <span class="s2">&quot;Z&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">pauli</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"Y"</span><span class="p">,</span> <span class="s2">"Z"</span><span class="p">):</span>
                 <span class="n">z_bits</span> <span class="o">|=</span> <span class="n">bit</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_x_bits</span> <span class="o">=</span> <span class="n">x_bits</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_z_bits</span> <span class="o">=</span> <span class="n">z_bits</span>
@@ -486,40 +486,40 @@
         <span class="n">non_trivial_pauli_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">non_trivial_pauli_count</span>
         <span class="k">if</span> <span class="n">non_trivial_pauli_count</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">TQECDException</span><span class="p">(</span>
-                <span class="s2">&quot;Cannot retrieve only one qubit from a Pauli string with &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">non_trivial_pauli_count</span><span class="si">}</span><span class="s2"> qubits.&quot;</span>
+                <span class="s2">"Cannot retrieve only one qubit from a Pauli string with "</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">non_trivial_pauli_count</span><span class="si">}</span><span class="s2"> qubits."</span>
             <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_support</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">from_stim_pauli_string</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">stim_pauli_string</span><span class="p">:</span> <span class="n">stim</span><span class="o">.</span><span class="n">PauliString</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PauliString</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert a `stim.PauliString` to a `PauliString` instance, ignoring</span>
-<span class="sd">        the sign.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Convert a `stim.PauliString` to a `PauliString` instance, ignoring</span>
+<span class="sd">        the sign."""</span>
         <span class="n">xs</span><span class="p">,</span> <span class="n">zs</span> <span class="o">=</span> <span class="n">stim_pauli_string</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">bit_packed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_from_bits</span><span class="p">(</span>
-            <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">xs</span><span class="o">.</span><span class="n">tobytes</span><span class="p">(),</span> <span class="n">byteorder</span><span class="o">=</span><span class="s2">&quot;little&quot;</span><span class="p">),</span>
-            <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">zs</span><span class="o">.</span><span class="n">tobytes</span><span class="p">(),</span> <span class="n">byteorder</span><span class="o">=</span><span class="s2">&quot;little&quot;</span><span class="p">),</span>
+            <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">xs</span><span class="o">.</span><span class="n">tobytes</span><span class="p">(),</span> <span class="n">byteorder</span><span class="o">=</span><span class="s2">"little"</span><span class="p">),</span>
+            <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">zs</span><span class="o">.</span><span class="n">tobytes</span><span class="p">(),</span> <span class="n">byteorder</span><span class="o">=</span><span class="s2">"little"</span><span class="p">),</span>
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">to_stim_pauli_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">stim</span><span class="o">.</span><span class="n">PauliString</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert a `PauliString` to a `stim.PauliString` instance.</span>
+<span class="w">        </span><span class="sd">"""Convert a `PauliString` to a `stim.PauliString` instance.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            length: The length of the `stim.PauliString`. If `None`, the length is set to the</span>
 <span class="sd">                maximum qubit index in the `PauliString` plus one.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">max_qubit_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_support</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span>
         <span class="n">length</span> <span class="o">=</span> <span class="n">length</span> <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">max_qubit_index</span> <span class="o">+</span> <span class="mi">1</span>
         <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;=</span> <span class="n">max_qubit_index</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">TQECDException</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;The length specified </span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s2"> &lt;= the maximum qubit index </span><span class="si">{</span><span class="n">max_qubit_index</span><span class="si">}</span><span class="s2"> in the pauli string.&quot;</span>
+                <span class="sa">f</span><span class="s2">"The length specified </span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s2"> &lt;= the maximum qubit index </span><span class="si">{</span><span class="n">max_qubit_index</span><span class="si">}</span><span class="s2"> in the pauli string."</span>
             <span class="p">)</span>
         <span class="n">byte_length</span> <span class="o">=</span> <span class="p">(</span><span class="n">length</span> <span class="o">+</span> <span class="mi">7</span><span class="p">)</span> <span class="o">//</span> <span class="mi">8</span>
         <span class="n">xs</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_x_bits</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="n">byte_length</span><span class="p">,</span> <span class="n">byteorder</span><span class="o">=</span><span class="s2">&quot;little&quot;</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">uint8</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_x_bits</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="n">byte_length</span><span class="p">,</span> <span class="n">byteorder</span><span class="o">=</span><span class="s2">"little"</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">uint8</span>
         <span class="p">)</span>
         <span class="n">zs</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_z_bits</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="n">byte_length</span><span class="p">,</span> <span class="n">byteorder</span><span class="o">=</span><span class="s2">&quot;little&quot;</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">uint8</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_z_bits</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="n">byte_length</span><span class="p">,</span> <span class="n">byteorder</span><span class="o">=</span><span class="s2">"little"</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">uint8</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">stim</span><span class="o">.</span><span class="n">PauliString</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">xs</span><span class="o">=</span><span class="n">xs</span><span class="p">,</span> <span class="n">zs</span><span class="o">=</span><span class="n">zs</span><span class="p">,</span> <span class="n">num_qubits</span><span class="o">=</span><span class="n">length</span><span class="p">)</span>
 
@@ -532,21 +532,21 @@
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;PauliString(qubits=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_as_dict</span><span class="p">()</span><span class="si">!r}</span><span class="s2">)&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"PauliString(qubits=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_as_dict</span><span class="p">()</span><span class="si">!r}</span><span class="s2">)"</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s2">&quot;*&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="p">[</span><span class="n">q</span><span class="p">]</span><span class="si">}{</span><span class="n">q</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">qubits</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s2">"*"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="p">[</span><span class="n">q</span><span class="p">]</span><span class="si">}{</span><span class="n">q</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">qubits</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">non_trivial_pauli_count</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">commutes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">PauliString</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if this Pauli string commutes with another Pauli string.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Check if this Pauli string commutes with another Pauli string."""</span>
         <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">anticommutes</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">anticommutes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">PauliString</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if this Pauli string anticommutes with another Pauli</span>
-<span class="sd">        string.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Check if this Pauli string anticommutes with another Pauli</span>
+<span class="sd">        string."""</span>
         <span class="n">anticommutations</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_x_bits</span> <span class="o">&amp;</span> <span class="n">other</span><span class="o">.</span><span class="n">_z_bits</span><span class="p">)</span> <span class="o">^</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_z_bits</span> <span class="o">&amp;</span> <span class="n">other</span><span class="o">.</span><span class="n">_x_bits</span>
         <span class="p">)</span>
@@ -555,13 +555,13 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_anticommutes_single_qubit_masks</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">x_mask</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">y_mask</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">z_mask</span><span class="p">:</span> <span class="nb">int</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check for anticommutation with any encoded single-qubit operator.</span>
+<span class="w">        </span><span class="sd">"""Check for anticommutation with any encoded single-qubit operator.</span>
 
 <span class="sd">        The three masks identify qubits carrying X, Y, and Z collapsing</span>
 <span class="sd">        operators respectively. Unlike :meth:`anticommutes`, this method</span>
 <span class="sd">        checks each single-qubit operator independently and returns ``True``</span>
 <span class="sd">        when at least one of them anticommutes with this Pauli string.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">x_terms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x_bits</span> <span class="o">&amp;</span> <span class="o">~</span><span class="bp">self</span><span class="o">.</span><span class="n">_z_bits</span>
         <span class="n">y_terms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x_bits</span> <span class="o">&amp;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_z_bits</span>
         <span class="n">z_terms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_z_bits</span> <span class="o">&amp;</span> <span class="o">~</span><span class="bp">self</span><span class="o">.</span><span class="n">_x_bits</span>
@@ -577,7 +577,7 @@
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">collapse_by</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">collapse_operators</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">PauliString</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">PauliString</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Collapse the provided Pauli string by the provided operators.</span>
+<span class="w">        </span><span class="sd">"""Collapse the provided Pauli string by the provided operators.</span>
 
 <span class="sd">        Here, collapsing means that we are removing from the Pauli string represented</span>
 <span class="sd">        by self all the commuting Pauli terms from all the provided operators.</span>
@@ -596,16 +596,16 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            a copy of self, collapsed by the provided operators.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">x_bits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x_bits</span>
         <span class="n">z_bits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_z_bits</span>
         <span class="k">for</span> <span class="n">op</span> <span class="ow">in</span> <span class="n">collapse_operators</span><span class="p">:</span>
             <span class="n">anticommutations</span> <span class="o">=</span> <span class="p">(</span><span class="n">x_bits</span> <span class="o">&amp;</span> <span class="n">op</span><span class="o">.</span><span class="n">_z_bits</span><span class="p">)</span> <span class="o">^</span> <span class="p">(</span><span class="n">z_bits</span> <span class="o">&amp;</span> <span class="n">op</span><span class="o">.</span><span class="n">_x_bits</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">anticommutations</span><span class="o">.</span><span class="n">bit_count</span><span class="p">()</span> <span class="o">&amp;</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">TQECDException</span><span class="p">(</span>
-                    <span class="s2">&quot;Cannot collapse &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">PauliString</span><span class="o">.</span><span class="n">_from_bits</span><span class="p">(</span><span class="n">x_bits</span><span class="p">,</span><span class="w"> </span><span class="n">z_bits</span><span class="p">)</span><span class="si">}</span><span class="s2"> &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;by a non-commuting operator </span><span class="si">{</span><span class="n">op</span><span class="si">}</span><span class="s2">.&quot;</span>
+                    <span class="s2">"Cannot collapse "</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">PauliString</span><span class="o">.</span><span class="n">_from_bits</span><span class="p">(</span><span class="n">x_bits</span><span class="p">,</span><span class="w"> </span><span class="n">z_bits</span><span class="p">)</span><span class="si">}</span><span class="s2"> "</span>
+                    <span class="sa">f</span><span class="s2">"by a non-commuting operator </span><span class="si">{</span><span class="n">op</span><span class="si">}</span><span class="s2">."</span>
                 <span class="p">)</span>
             <span class="n">keep_mask</span> <span class="o">=</span> <span class="o">~</span><span class="n">op</span><span class="o">.</span><span class="n">_support</span>
             <span class="n">x_bits</span> <span class="o">&amp;=</span> <span class="n">keep_mask</span>
@@ -622,7 +622,7 @@
         <span class="k">return</span> <span class="n">PauliString</span><span class="o">.</span><span class="n">from_stim_pauli_string</span><span class="p">(</span><span class="n">stim_pauli_string_after</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">contains</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">PauliString</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check whether all non-identity terms in ``other`` match this string.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Check whether all non-identity terms in ``other`` match this string."""</span>
         <span class="n">differences</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_x_bits</span> <span class="o">^</span> <span class="n">other</span><span class="o">.</span><span class="n">_x_bits</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_z_bits</span> <span class="o">^</span> <span class="n">other</span><span class="o">.</span><span class="n">_z_bits</span><span class="p">)</span>
         <span class="k">return</span> <span class="ow">not</span> <span class="p">(</span><span class="n">differences</span> <span class="o">&amp;</span> <span class="n">other</span><span class="o">.</span><span class="n">_support</span><span class="p">)</span>
 
@@ -630,14 +630,14 @@
         <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_support</span> <span class="o">&amp;</span> <span class="n">other</span><span class="o">.</span><span class="n">_support</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if two PauliString are equal.</span>
+<span class="w">        </span><span class="sd">"""Check if two PauliString are equal.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            other: the instance to compare to.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            `True` if the two `PauliString` instances are equal, else False.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="p">(</span>
             <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">PauliString</span><span class="p">)</span>
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x_bits</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">_x_bits</span>
@@ -657,22 +657,22 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PAULI_STRING_TYPE</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s2">&quot;I&quot;</span>
+            <span class="k">return</span> <span class="s2">"I"</span>
         <span class="n">bit</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">index</span>
         <span class="k">return</span> <span class="n">_IXZY</span><span class="p">[</span><span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_x_bits</span> <span class="o">&amp;</span> <span class="n">bit</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_z_bits</span> <span class="o">&amp;</span> <span class="n">bit</span><span class="p">)]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">to_int</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">qubits</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">reference</span><span class="p">:</span> <span class="n">PauliString</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert the Pauli string to an integer representation on the provided qubits.</span>
+<span class="w">        </span><span class="sd">"""Convert the Pauli string to an integer representation on the provided qubits.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            qubits: the qubits over which to encode.</span>
 <span class="sd">            reference: if ``None``, each qubit contributes 2 bits encoding the</span>
 <span class="sd">                Pauli at that qubit. If a reference Pauli string is provided,</span>
 <span class="sd">                each qubit contributes 1 bit indicating whether the Pauli at</span>
-<span class="sd">                that qubit anti-commutes with the reference&#39;s Pauli at the same qubit.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">                that qubit anti-commutes with the reference's Pauli at the same qubit.</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">reference</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">result</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">qubits</span><span class="p">:</span>
@@ -695,12 +695,12 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_to_int_mask</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">qubit_mask</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">reference</span><span class="p">:</span> <span class="n">PauliString</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Encode selected qubits while preserving their original bit positions.</span>
+<span class="w">        </span><span class="sd">"""Encode selected qubits while preserving their original bit positions.</span>
 
 <span class="sd">        Without a reference, X bits occupy their original positions and Z bits</span>
 <span class="sd">        are shifted above the width of ``qubit_mask``. With a reference, each</span>
 <span class="sd">        selected position records whether the two local Pauli terms anticommute.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">reference</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">z_shift</span> <span class="o">=</span> <span class="n">qubit_mask</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span>
             <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_x_bits</span> <span class="o">&amp;</span> <span class="n">qubit_mask</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span>
@@ -727,13 +727,13 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">pauli_literal_to_bools</span><span class="p">(</span>
     <span class="n">literal</span><span class="p">:</span> <span class="n">PAULI_STRING_TYPE</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
-    <span class="k">if</span> <span class="n">literal</span> <span class="o">==</span> <span class="s2">&quot;I&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">literal</span> <span class="o">==</span> <span class="s2">"I"</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">literal</span> <span class="o">==</span> <span class="s2">&quot;X&quot;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">literal</span> <span class="o">==</span> <span class="s2">"X"</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">literal</span> <span class="o">==</span> <span class="s2">&quot;Y&quot;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">literal</span> <span class="o">==</span> <span class="s2">"Y"</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">literal</span> <span class="o">==</span> <span class="s2">&quot;Z&quot;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">literal</span> <span class="o">==</span> <span class="s2">"Z"</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span></div>
 
 

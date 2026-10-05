@@ -415,13 +415,13 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">_single_qubit_pauli_masks</span><span class="p">(</span>
     <span class="n">paulis</span><span class="p">:</span> <span class="nb">frozenset</span><span class="p">[</span><span class="n">PauliString</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Encode disjoint single-qubit Pauli operators into X, Y, and Z masks.</span>
+<span class="w">    </span><span class="sd">"""Encode disjoint single-qubit Pauli operators into X, Y, and Z masks.</span>
 
 <span class="sd">    Each set bit identifies the qubit targeted by an operator of the</span>
 <span class="sd">    corresponding type. ``None`` is returned when an operator spans several</span>
 <span class="sd">    qubits or when different operators target the same qubit, because those</span>
 <span class="sd">    inputs cannot use the single-qubit collapse fast path.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">x_mask</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">y_mask</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">z_mask</span> <span class="o">=</span> <span class="mi">0</span>
@@ -435,9 +435,9 @@
             <span class="k">return</span> <span class="kc">None</span>
         <span class="n">support</span> <span class="o">|=</span> <span class="n">bit</span>
         <span class="n">literal</span> <span class="o">=</span> <span class="n">pauli</span><span class="p">[</span><span class="n">qubit</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">literal</span> <span class="o">==</span> <span class="s2">&quot;X&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">literal</span> <span class="o">==</span> <span class="s2">"X"</span><span class="p">:</span>
             <span class="n">x_mask</span> <span class="o">|=</span> <span class="n">bit</span>
-        <span class="k">elif</span> <span class="n">literal</span> <span class="o">==</span> <span class="s2">&quot;Y&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">literal</span> <span class="o">==</span> <span class="s2">"Y"</span><span class="p">:</span>
             <span class="n">y_mask</span> <span class="o">|=</span> <span class="n">bit</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">z_mask</span> <span class="o">|=</span> <span class="n">bit</span>
@@ -449,7 +449,7 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_try_merge_anticommuting_flows_inplace</span><span class="p">(</span><span class="n">flows</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">BoundaryStabilizer</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Merge as much anti-commuting flows as possible from the provided flows.</span>
+<span class="w">    </span><span class="sd">"""Merge as much anti-commuting flows as possible from the provided flows.</span>
 
 <span class="sd">    This function try to merge together several :class:`BoundaryStabilizer`</span>
 <span class="sd">    instances that anti-commute with their collapsing operations and provided</span>
@@ -465,7 +465,7 @@
 <span class="sd">        TQECDException: if the provided flows have different collapsing</span>
 <span class="sd">            operations, hinting that they are not part of the same boundary,</span>
 <span class="sd">            in which case it makes no sense to try to merge them together.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Filtering out commuting operations as they cannot make anti-commuting</span>
     <span class="c1"># operations commuting.</span>
     <span class="n">anti_commuting_index_to_flows_index</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
@@ -485,13 +485,13 @@
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">collapsing_operations</span><span class="p">)):</span>
         <span class="k">if</span> <span class="n">collapsing_operations</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">collapsing_operations</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
             <span class="k">raise</span> <span class="n">TQECDException</span><span class="p">(</span>
-                <span class="s2">&quot;Cannot merge anti-commuting flows defined on different collapsing &quot;</span>
-                <span class="s2">&quot;operations. Found the following difference:</span><span class="se">\n</span><span class="s2">Flow 0 has the &quot;</span>
-                <span class="s2">&quot;collapsing operations:</span><span class="se">\n\t</span><span class="s2">&quot;</span>
-                <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\t</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- </span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">collapsing_operations</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Flow </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> has the collapsing operations:</span><span class="se">\n\t</span><span class="s2">&quot;</span>
-                <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\t</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- </span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">collapsing_operations</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-                <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="s2">"Cannot merge anti-commuting flows defined on different collapsing "</span>
+                <span class="s2">"operations. Found the following difference:</span><span class="se">\n</span><span class="s2">Flow 0 has the "</span>
+                <span class="s2">"collapsing operations:</span><span class="se">\n\t</span><span class="s2">"</span>
+                <span class="o">+</span> <span class="s2">"</span><span class="se">\n\t</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">"- </span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">collapsing_operations</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="o">+</span> <span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Flow </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> has the collapsing operations:</span><span class="se">\n\t</span><span class="s2">"</span>
+                <span class="o">+</span> <span class="s2">"</span><span class="se">\n\t</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">"- </span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">collapsing_operations</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="o">+</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span>
             <span class="p">)</span>
 
     <span class="c1"># Computation of the Pauli string representing all the collapsing operations.</span>
@@ -547,7 +547,7 @@
 <a class="viewcode-back" href="../../_autosummary/tqecd.flow.FragmentFlows.html#tqecd.flow.FragmentFlows">[docs]</a>
 <span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">FragmentFlows</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Stores stabilizer flows for a :class:`Fragment` instance.</span>
+<span class="w">    </span><span class="sd">"""Stores stabilizer flows for a :class:`Fragment` instance.</span>
 
 <span class="sd">    Attributes:</span>
 <span class="sd">        creation: stabilizer flows that are created by the :class:`Fragment`.</span>
@@ -560,7 +560,7 @@
 <span class="sd">            in the represented :class:`Fragment`. Might be used to offset measurement</span>
 <span class="sd">            offsets by this amount when the measurement is located on a :class:`Fragment`</span>
 <span class="sd">            instance before the one represented by self.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">creation</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">BoundaryStabilizer</span><span class="p">]</span>
     <span class="n">destruction</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">BoundaryStabilizer</span><span class="p">]</span>
@@ -572,7 +572,7 @@
         <span class="k">yield from</span> <span class="bp">self</span><span class="o">.</span><span class="n">destruction</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__copy__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FragmentFlows</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Copy the flow lists without duplicating their stabilizer entries.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Copy the flow lists without duplicating their stabilizer entries."""</span>
         <span class="k">return</span> <span class="n">FragmentFlows</span><span class="p">(</span>
             <span class="n">creation</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">creation</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
             <span class="n">destruction</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">destruction</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
@@ -610,13 +610,13 @@
 <a class="viewcode-back" href="../../_autosummary/tqecd.flow.FragmentLoopFlows.html#tqecd.flow.FragmentLoopFlows">[docs]</a>
 <span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">FragmentLoopFlows</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Store stabilizer flows for a FragmentLoop instance.</span>
+<span class="w">    </span><span class="sd">"""Store stabilizer flows for a FragmentLoop instance.</span>
 
 <span class="sd">    This class is currently quite dumb and does not provide a sufficient</span>
 <span class="sd">    API for generic stabilizer matching, but is enough for detectors</span>
 <span class="sd">    that only include measurements from the current round and from the</span>
 <span class="sd">    previous round.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">fragment_flows</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">FragmentFlows</span> <span class="o">|</span> <span class="n">FragmentLoopFlows</span><span class="p">]</span>
     <span class="n">repeat</span><span class="p">:</span> <span class="nb">int</span>
@@ -635,7 +635,7 @@
         <span class="k">yield from</span> <span class="bp">self</span><span class="o">.</span><span class="n">destruction</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__copy__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FragmentLoopFlows</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Recursively copy flow containers without duplicating stabilizers.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Recursively copy flow containers without duplicating stabilizers."""</span>
         <span class="k">return</span> <span class="n">FragmentLoopFlows</span><span class="p">(</span>
             <span class="n">fragment_flows</span><span class="o">=</span><span class="p">[</span><span class="n">copy</span><span class="p">(</span><span class="n">flow</span><span class="p">)</span> <span class="k">for</span> <span class="n">flow</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fragment_flows</span><span class="p">],</span>
             <span class="n">repeat</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">repeat</span><span class="p">,</span>
@@ -670,9 +670,9 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">build_flows_from_fragments</span><span class="p">(</span>
     <span class="n">fragments</span><span class="p">:</span> <span class="n">ty</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">Fragment</span> <span class="o">|</span> <span class="n">FragmentLoop</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">FragmentFlows</span> <span class="o">|</span> <span class="n">FragmentLoopFlows</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute and return the stabilizer flows of the provided fragments.</span>
+<span class="w">    </span><span class="sd">"""Compute and return the stabilizer flows of the provided fragments.</span>
 
-<span class="sd">    This function ensures that the returned list will have the same &quot;shape&quot;</span>
+<span class="sd">    This function ensures that the returned list will have the same "shape"</span>
 <span class="sd">    as the input one. In more details, that means that the following property</span>
 <span class="sd">    should be checked (recursively if there is any FragmentLoop instance in</span>
 <span class="sd">    the provided fragments):</span>
@@ -692,7 +692,7 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">        the computed flows for each of the provided fragments.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="p">[</span>
         <span class="n">_build_flows_from_fragment</span><span class="p">(</span><span class="n">fragment</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fragment</span><span class="p">,</span> <span class="n">Fragment</span><span class="p">)</span>
@@ -756,14 +756,14 @@
 
     <span class="c1"># Then, compute the flows destructed by the Fragment (i.e., if that flow is</span>
     <span class="c1"># given as input, a set of measurements from the Fragment will commute with</span>
-    <span class="c1"># the entire flow and collapse it to &quot;no flow&quot;).</span>
+    <span class="c1"># the entire flow and collapse it to "no flow").</span>
     <span class="n">tableau_inv</span> <span class="o">=</span> <span class="n">tableau</span><span class="o">.</span><span class="n">inverse</span><span class="p">()</span>
     <span class="n">destruction_flows</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">BoundaryStabilizer</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">measurement</span> <span class="ow">in</span> <span class="n">fragment</span><span class="o">.</span><span class="n">measurements</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">measurement</span><span class="o">.</span><span class="n">non_trivial_pauli_count</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">TQECDException</span><span class="p">(</span>
-                <span class="s2">&quot;Found a measurement applied on several qubits. &quot;</span>
-                <span class="s2">&quot;This is not implemented (yet?).&quot;</span>
+                <span class="s2">"Found a measurement applied on several qubits. "</span>
+                <span class="s2">"This is not implemented (yet?)."</span>
             <span class="p">)</span>
         <span class="n">initial_stabilizer</span> <span class="o">=</span> <span class="n">measurement</span><span class="o">.</span><span class="n">after</span><span class="p">(</span><span class="n">tableau_inv</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
         <span class="n">involved_measurements_offsets</span> <span class="o">=</span> <span class="p">[</span>
