@@ -1,6 +1,0 @@
-tqecd.utils.has\_measurement
-============================
-
-.. currentmodule:: tqecd.utils
-
-.. autofunction:: has_measurement

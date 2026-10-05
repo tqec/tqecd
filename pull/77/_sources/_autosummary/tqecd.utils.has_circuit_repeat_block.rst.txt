@@ -1,6 +1,0 @@
-tqecd.utils.has\_circuit\_repeat\_block
-=======================================
-
-.. currentmodule:: tqecd.utils
-
-.. autofunction:: has_circuit_repeat_block

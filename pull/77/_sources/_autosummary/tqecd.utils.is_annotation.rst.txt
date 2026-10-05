@@ -1,6 +1,0 @@
-tqecd.utils.is\_annotation
-==========================
-
-.. currentmodule:: tqecd.utils
-
-.. autofunction:: is_annotation

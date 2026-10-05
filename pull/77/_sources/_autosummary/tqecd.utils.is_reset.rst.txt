@@ -1,6 +1,0 @@
-tqecd.utils.is\_reset
-=====================
-
-.. currentmodule:: tqecd.utils
-
-.. autofunction:: is_reset

@@ -1,6 +1,0 @@
-tqecd.cover.find\_exact\_cover
-==============================
-
-.. currentmodule:: tqecd.cover
-
-.. autofunction:: find_exact_cover

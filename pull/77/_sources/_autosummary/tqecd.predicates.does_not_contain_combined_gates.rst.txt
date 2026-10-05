@@ -1,6 +1,0 @@
-tqecd.predicates.does\_not\_contain\_combined\_gates
-====================================================
-
-.. currentmodule:: tqecd.predicates
-
-.. autofunction:: does_not_contain_combined_gates

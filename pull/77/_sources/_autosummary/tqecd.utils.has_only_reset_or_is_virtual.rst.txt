@@ -1,6 +1,0 @@
-tqecd.utils.has\_only\_reset\_or\_is\_virtual
-=============================================
-
-.. currentmodule:: tqecd.utils
-
-.. autofunction:: has_only_reset_or_is_virtual

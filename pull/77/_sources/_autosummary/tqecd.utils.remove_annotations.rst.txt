@@ -1,6 +1,0 @@
-tqecd.utils.remove\_annotations
-===============================
-
-.. currentmodule:: tqecd.utils
-
-.. autofunction:: remove_annotations
