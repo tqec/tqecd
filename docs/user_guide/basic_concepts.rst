@@ -253,7 +253,7 @@ circuit of a ``k=1`` Y half cube joined to an XZO pipe (the ``s_gate_x`` gadget 
     import stim
     from tqecd import annotate_detectors_automatically
 
-    circuit = stim.Circuit.from_file("s_gate_x_k1_no_detectors.stim")
+    circuit = stim.Circuit.from_file("docs/media/detectors/s_gate_x_k1_no_detectors.stim")
     annotated = annotate_detectors_automatically(circuit)
     print(annotated.num_detectors, len(annotated.shortest_graphlike_error()))
 
@@ -270,14 +270,15 @@ circuit of a ``k=1`` Y half cube joined to an XZO pipe (the ``s_gate_x`` gadget 
      - 130
      - 3
 
-The expected distance is ``2k + 1 = 3``. In the S round the unmodified single elimination
-pass returns covers of 5 and 4 stabilizers where 2 are enough, for example for the target
-``X1*X8*X9*X10*X14*X15*X16*X23``. The larger covers remove flows that four detectors
-need, and a single fault then goes undetected. Restoring only the old cover function in
-the current code gives back 126 detectors and distance 1. The two figures
-show the detecting regions of the detectors at the S round (ticks 41 to 49), red for ``X``
-and blue for ``Z``. After the change the four red regions around the ``S`` gates are
-present (Crumble: `before <crumble-before_>`_, `after <crumble-after_>`_).
+The expected distance is ``2k + 1 = 3``. In the S round the unmodified single
+elimination pass returns covers of 5 and 4 stabilizers where 2 are enough. The
+5-stabilizer cover is for the target ``X1*X8*X9*X10*X14*X15*X16*X23``. The larger covers
+remove flows that four detectors need, and a single fault then goes undetected.
+Restoring only the old cover function in the current code gives back 126 detectors and
+distance 1. The two figures show the detecting regions of the detectors at the S round
+(ticks 41 to 49), red for ``X`` and blue for ``Z``. After the change the four red
+regions around the ``S`` gates are present (Crumble: `before <crumble-before_>`_,
+`after <crumble-after_>`_).
 
 .. image:: ../media/detectors/y_switch_detectors_before.svg
    :alt: Detecting regions at the S round with tqecd 0.2.1.
