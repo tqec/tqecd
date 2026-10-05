@@ -1,0 +1,6 @@
+tqecd.construction.compile\_fragments\_to\_circuit\_with\_detectors
+===================================================================
+
+.. currentmodule:: tqecd.construction
+
+.. autofunction:: compile_fragments_to_circuit_with_detectors

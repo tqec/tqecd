@@ -1,0 +1,32 @@
+tqecd.match.MatchedDetector
+===========================
+
+.. currentmodule:: tqecd.match
+
+.. autoclass:: MatchedDetector
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~MatchedDetector.__init__
+      ~MatchedDetector.to_instruction
+      ~MatchedDetector.with_time_coordinate
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~MatchedDetector.coords
+      ~MatchedDetector.measurements
+      ~MatchedDetector.resets
+   
+   

@@ -1,0 +1,6 @@
+tqecd.utils.is\_collapsing\_instruction
+=======================================
+
+.. currentmodule:: tqecd.utils
+
+.. autofunction:: is_collapsing_instruction

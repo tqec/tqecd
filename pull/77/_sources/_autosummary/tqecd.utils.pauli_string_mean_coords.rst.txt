@@ -1,0 +1,6 @@
+tqecd.utils.pauli\_string\_mean\_coords
+=======================================
+
+.. currentmodule:: tqecd.utils
+
+.. autofunction:: pauli_string_mean_coords
