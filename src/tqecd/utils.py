@@ -61,14 +61,11 @@ def is_measurement(instruction: stim.CircuitInstruction) -> bool:
 
 
 def is_reset(instruction: stim.CircuitInstruction) -> bool:
-    return stim.gate_data(instruction.name).is_reset  # type: ignore
+    return stim.gate_data(instruction.name).is_reset
 
 
 def is_noisy_gate(instruction: stim.CircuitInstruction) -> bool:
-    return (
-        not is_measurement(instruction)
-        and stim.gate_data(instruction.name).is_noisy_gate
-    )
+    return not is_measurement(instruction) and stim.gate_data(instruction.name).is_noisy_gate
 
 
 def is_annotation(instruction: stim.CircuitInstruction) -> bool:
@@ -223,7 +220,7 @@ def pauli_string_mean_coords(
     pauli_string: PauliString, qubit_coords_map: dict[int, list[float]]
 ) -> tuple[float, ...]:
     all_coords_items = [qubit_coords_map[i] for i in pauli_string.qubits]
-    return tuple(numpy.mean(numpy.asarray(all_coords_items), axis=0)) + (0.0,)
+    return (*tuple(numpy.mean(numpy.asarray(all_coords_items), axis=0)), 0.0)
 
 
 def _collapsing_inst_to_pauli_strings(
@@ -406,9 +403,7 @@ def remove_duplicate_detectors(circuit: stim.Circuit) -> stim.Circuit:
                     )
                 )
             elif inst.name == "DETECTOR":
-                targets = frozenset(
-                    t.value + num_measurements for t in inst.targets_copy()
-                )
+                targets = frozenset(t.value + num_measurements for t in inst.targets_copy())
                 if targets in seen_detectors:
                     continue
                 seen_detectors.add(targets)

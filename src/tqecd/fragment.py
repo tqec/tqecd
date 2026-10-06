@@ -58,8 +58,7 @@ class Fragment:
         # any stim.CircuitRepeatBlock instance, and so iter_stim_circuit_by_moments
         # can only return stim.Circuit instances.
         moments = [
-            cast(stim.Circuit, moment).copy()
-            for moment in iter_stim_circuit_by_moments(circuit)
+            cast(stim.Circuit, moment).copy() for moment in iter_stim_circuit_by_moments(circuit)
         ]
 
         self._circuit = circuit
@@ -84,9 +83,7 @@ class Fragment:
             if not has_measurement(moment):
                 break
             # Insert new measurement at the front to keep them correctly ordered.
-            self._measurements = (
-                collapse_pauli_strings_at_moment(moment) + self._measurements
-            )
+            self._measurements = collapse_pauli_strings_at_moment(moment) + self._measurements
 
         if not self._measurements:
             raise TQECDException(
@@ -148,13 +145,10 @@ class FragmentLoop:
 
     def __post_init__(self) -> None:
         if self.repetitions < 1:
-            raise TQECDException(
-                "Cannot have a FragmentLoop with 0 or less repetitions."
-            )
+            raise TQECDException("Cannot have a FragmentLoop with 0 or less repetitions.")
         if not self.fragments:
             raise TQECDException(
-                "Cannot initialise a FragmentLoop instance without any "
-                "fragment for the loop body."
+                "Cannot initialise a FragmentLoop instance without any fragment for the loop body."
             )
 
     def with_repetitions(self, repetitions: int) -> FragmentLoop:

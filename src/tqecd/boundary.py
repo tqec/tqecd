@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Iterable, Mapping
+from collections.abc import Iterable, Mapping
 
 import numpy
 
@@ -54,8 +54,7 @@ class BoundaryStabilizer:
         self._collapsing_pauli_masks = _collapsing_pauli_masks
         if _collapsing_pauli_masks is None:
             self._has_anticommuting_collapsing_operations = any(
-                operation.anticommutes(stabilizer)
-                for operation in self._collapsing_operations
+                operation.anticommutes(stabilizer) for operation in self._collapsing_operations
             )
         else:
             self._has_anticommuting_collapsing_operations = (
@@ -69,9 +68,7 @@ class BoundaryStabilizer:
             self._after_collapse = stabilizer.collapse_by(self._collapsing_operations)
         else:
             self._after_collapse = stabilizer._without_qubits(
-                _collapsing_pauli_masks[0]
-                | _collapsing_pauli_masks[1]
-                | _collapsing_pauli_masks[2]
+                _collapsing_pauli_masks[0] | _collapsing_pauli_masks[1] | _collapsing_pauli_masks[2]
             )
         self._reset_qubits: frozenset[int] = reset_qubits
         self._is_forward = forward
@@ -102,8 +99,7 @@ class BoundaryStabilizer:
         """
         if self._after_collapse is None:
             raise TQECDException(
-                "Cannot collapse a BoundaryStabilizer if it has "
-                "anticommuting operations."
+                "Cannot collapse a BoundaryStabilizer if it has anticommuting operations."
             )
         return self._after_collapse
 
@@ -162,9 +158,7 @@ class BoundaryStabilizer:
                 f"{other._collapsing_operations}.\n"
             )
         if self._is_forward != other._is_forward:
-            raise TQECDException(
-                "Cannot merge a forward boundary stabilizer with a backward one."
-            )
+            raise TQECDException("Cannot merge a forward boundary stabilizer with a backward one.")
         is_forward_merge = self._is_forward
         stabilizer = self._stabilizer * other._stabilizer
         non_trivial_stabilizer_qubits = frozenset(stabilizer.qubits)
@@ -189,15 +183,11 @@ class BoundaryStabilizer:
             reset_qubits = self.resets_qubits | other.resets_qubits
             candidate_measurements = set(self.measurements) | set(other.measurements)
             measurements = [
-                m
-                for m in candidate_measurements
-                if m.qubit_index in non_trivial_stabilizer_qubits
+                m for m in candidate_measurements if m.qubit_index in non_trivial_stabilizer_qubits
             ]
 
         else:
-            measurements = list(
-                frozenset(self.measurements) | frozenset(other.measurements)
-            )
+            measurements = list(frozenset(self.measurements) | frozenset(other.measurements))
             candidate_resets = self.resets_qubits | other.resets_qubits
             reset_qubits = frozenset(
                 r for r in candidate_resets if r in non_trivial_stabilizer_qubits
@@ -219,9 +209,7 @@ class BoundaryStabilizer:
         ret += f", resets={set(self._reset_qubits)}, is_forward={self._is_forward})"
         return ret
 
-    def coordinates(
-        self, qubit_coordinates: Mapping[int, tuple[float, ...]]
-    ) -> tuple[float, ...]:
+    def coordinates(self, qubit_coordinates: Mapping[int, tuple[float, ...]]) -> tuple[float, ...]:
         """Compute and return the coordinates of the boundary stabilizer.
 
         The coordinates of a given boundary stabilizer is defined as the average
@@ -238,9 +226,7 @@ class BoundaryStabilizer:
             the boundary stabilizer coordinates.
         """
         try:
-            measurement_coordinates = [
-                qubit_coordinates[source] for source in self.source_qubits
-            ]
+            measurement_coordinates = [qubit_coordinates[source] for source in self.source_qubits]
         except KeyError as exc:
             raise TQECDException(
                 f"Qubit index {exc.args[0]} required for detector assignment, "

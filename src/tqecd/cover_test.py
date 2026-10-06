@@ -29,14 +29,12 @@ def _pss(pauli_string: str) -> PauliString:
         ),
         (
             _pss("YYYZZZ"),
-            [PauliString({i: "Z"}) for i in range(6)]
-            + [PauliString({i: "X"}) for i in range(6)],
+            [PauliString({i: "Z"}) for i in range(6)] + [PauliString({i: "X"}) for i in range(6)],
             [0, 1, 2, 3, 4, 5, 6, 7, 8],
         ),
         (
             _pss("_XYZ_XYZ"),
-            [PauliString({i: "Z"}) for i in range(8)]
-            + [PauliString({i: "X"}) for i in range(8)],
+            [PauliString({i: "Z"}) for i in range(8)] + [PauliString({i: "X"}) for i in range(8)],
             [2, 3, 6, 7, 9, 10, 13, 14],
         ),
         (
@@ -47,8 +45,7 @@ def _pss(pauli_string: str) -> PauliString:
         ),
         (
             _pss("____"),
-            [PauliString({i: "Z"}) for i in range(4)]
-            + [PauliString({i: "X"}) for i in range(4)],
+            [PauliString({i: "Z"}) for i in range(4)] + [PauliString({i: "X"}) for i in range(4)],
             [],
         ),
         (

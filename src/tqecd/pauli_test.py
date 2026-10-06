@@ -28,9 +28,7 @@ def test_pauli_string_construction() -> None:
 def test_pauli_string_interop_with_stim() -> None:
     stim_pauli_string = stim.PauliString.random(num_qubits=23)
     pauli_string = PauliString.from_stim_pauli_string(stim_pauli_string)
-    assert (
-        pauli_string.to_stim_pauli_string(length=23) * stim_pauli_string
-    ).weight == 0
+    assert (pauli_string.to_stim_pauli_string(length=23) * stim_pauli_string).weight == 0
 
     pauli_string = PauliString.from_stim_pauli_string(stim.PauliString("_XYZ"))
     assert pauli_string.after(
@@ -51,8 +49,7 @@ def test_pauli_string_interop_with_stim() -> None:
 
     multi_byte = PauliString({0: "X", 8: "Y", 22: "Z"})
     assert (
-        PauliString.from_stim_pauli_string(multi_byte.to_stim_pauli_string(length=23))
-        == multi_byte
+        PauliString.from_stim_pauli_string(multi_byte.to_stim_pauli_string(length=23)) == multi_byte
     )
 
 
@@ -64,16 +61,12 @@ def test_pauli_string_mul() -> None:
 
 
 def test_pauli_string_operations_match_stim() -> None:
-    stim_pauli_strings = [
-        stim.PauliString("".join(paulis)) for paulis in product("_XYZ", repeat=3)
-    ]
+    stim_pauli_strings = [stim.PauliString("".join(paulis)) for paulis in product("_XYZ", repeat=3)]
     for stim_left in stim_pauli_strings:
         left = PauliString.from_stim_pauli_string(stim_left)
         for stim_right in stim_pauli_strings:
             right = PauliString.from_stim_pauli_string(stim_right)
-            assert left * right == PauliString.from_stim_pauli_string(
-                stim_left * stim_right
-            )
+            assert left * right == PauliString.from_stim_pauli_string(stim_left * stim_right)
             assert left.commutes(right) == stim_left.commutes(stim_right)
 
 
@@ -155,8 +148,7 @@ def test_pauli_string_integer_encoding() -> None:
         pauli_string._to_int_mask(qubit_mask) ^ other._to_int_mask(qubit_mask)
     )
     assert (pauli_string * other)._to_int_mask(qubit_mask, reference) == (
-        pauli_string._to_int_mask(qubit_mask, reference)
-        ^ other._to_int_mask(qubit_mask, reference)
+        pauli_string._to_int_mask(qubit_mask, reference) ^ other._to_int_mask(qubit_mask, reference)
     )
 
 

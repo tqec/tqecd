@@ -1,5 +1,3 @@
-from typing import Union
-
 import numpy
 import pytest
 
@@ -16,9 +14,7 @@ def test_boundary_stabilizer_construction() -> None:
 
     BoundaryStabilizer(X0Z1, [Z0, Z1], [], frozenset([0]), True)
     BoundaryStabilizer(X0Z1, [Z0, Z1], [], frozenset([0]), False)
-    BoundaryStabilizer(
-        X0Z1, [], [RelativeMeasurementLocation(-1, 0)], frozenset([0]), True
-    )
+    BoundaryStabilizer(X0Z1, [], [RelativeMeasurementLocation(-1, 0)], frozenset([0]), True)
     BoundaryStabilizer(X0Z1, [Z0, Z0], [], frozenset([1, 4, 6]), True)
     BoundaryStabilizer(X0Z1, [Z0, Z0], [], frozenset([]), True)
 
@@ -86,9 +82,7 @@ def test_precomputed_collapsing_pauli_masks_match_regular_path() -> None:
     masks = (1 << 0, 1 << 1, 1 << 2)
 
     commuting = PauliString({0: "X", 1: "Y", 2: "Z", 3: "X"})
-    regular = BoundaryStabilizer(
-        commuting, collapsing_operations, [], frozenset(), True
-    )
+    regular = BoundaryStabilizer(commuting, collapsing_operations, [], frozenset(), True)
     optimized = BoundaryStabilizer(
         commuting,
         collapsing_operations,
@@ -97,15 +91,11 @@ def test_precomputed_collapsing_pauli_masks_match_regular_path() -> None:
         True,
         _collapsing_pauli_masks=masks,
     )
-    assert (
-        optimized.has_anticommuting_operations == regular.has_anticommuting_operations
-    )
+    assert optimized.has_anticommuting_operations == regular.has_anticommuting_operations
     assert optimized.after_collapse == regular.after_collapse == PauliString({3: "X"})
 
     anticommuting = PauliString({0: "Z", 3: "X"})
-    regular = BoundaryStabilizer(
-        anticommuting, collapsing_operations, [], frozenset(), True
-    )
+    regular = BoundaryStabilizer(anticommuting, collapsing_operations, [], frozenset(), True)
     optimized = BoundaryStabilizer(
         anticommuting,
         collapsing_operations,
@@ -114,9 +104,7 @@ def test_precomputed_collapsing_pauli_masks_match_regular_path() -> None:
         True,
         _collapsing_pauli_masks=masks,
     )
-    assert (
-        optimized.has_anticommuting_operations == regular.has_anticommuting_operations
-    )
+    assert optimized.has_anticommuting_operations == regular.has_anticommuting_operations
     with pytest.raises(TQECDException):
         regular.after_collapse
     with pytest.raises(TQECDException):
@@ -199,9 +187,7 @@ def test_coordinates() -> None:
         True,
     )
     qubit_coordinates = (1.0, 2.0)
-    numpy.testing.assert_allclose(
-        a.coordinates({3: qubit_coordinates}), qubit_coordinates
-    )
+    numpy.testing.assert_allclose(a.coordinates({3: qubit_coordinates}), qubit_coordinates)
 
 
 def test_coordinates_raises_error_if_invalid_qubit_mapping() -> None:
@@ -216,7 +202,7 @@ def test_coordinates_raises_error_if_invalid_qubit_mapping() -> None:
         frozenset([3, 5]),
         True,
     )
-    qubit_coordinates: dict[int, tuple[Union[float, int], ...]] = {3: (0, 1)}
+    qubit_coordinates: dict[int, tuple[float | int, ...]] = {3: (0, 1)}
     with pytest.raises(
         TQECDException,
         match=r"^Qubit index 5 required for detector assignment, but it does not have a valid QUBIT_COORDS statement\.$",
@@ -230,9 +216,7 @@ def test_manhattan_distance() -> None:
     X0 = PauliString({0: "X"})
     Z1 = PauliString({1: "Z"})
 
-    qubits_coordinates: dict[int, tuple[float, ...]] = {
-        i: (2.0 * i, i / 2) for i in range(10)
-    }
+    qubits_coordinates: dict[int, tuple[float, ...]] = {i: (2.0 * i, i / 2) for i in range(10)}
     a = BoundaryStabilizer(
         X0Z1,
         [X0, Z1],

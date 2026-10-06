@@ -64,9 +64,7 @@ def get_detectors_tuples_shallow(circuit: stim.Circuit) -> list[tuple[int, ...]]
 
 @pytest.mark.parametrize("name,circuit", valid_test_circuits())
 def test_valid_circuits(name: str, circuit: stim.Circuit) -> None:
-    circuit_without_detectors = remove_annotations(
-        circuit, frozenset(["DETECTOR", "SHIFT_COORDS"])
-    )
+    circuit_without_detectors = remove_annotations(circuit, frozenset(["DETECTOR", "SHIFT_COORDS"]))
     annotated_circuit = push_all_detectors_to_the_end(
         annotate_detectors_automatically(circuit_without_detectors)
     )
@@ -80,8 +78,6 @@ def test_valid_circuits(name: str, circuit: stim.Circuit) -> None:
 
 @pytest.mark.parametrize("name,circuit,error_message", invalid_test_circuits())
 def test_invalid_circuits(name: str, circuit: stim.Circuit, error_message: str) -> None:
-    circuit_without_detectors = remove_annotations(
-        circuit, frozenset(["DETECTOR", "SHIFT_COORDS"])
-    )
+    circuit_without_detectors = remove_annotations(circuit, frozenset(["DETECTOR", "SHIFT_COORDS"]))
     with pytest.raises(TQECDException, match=rf"^{error_message}$"):
         annotate_detectors_automatically(circuit_without_detectors)
