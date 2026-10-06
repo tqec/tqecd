@@ -136,10 +136,10 @@ Take collapsing operations ``Y0*Y1*Y2`` and four anticommuting flows.
     Y1
 
 ``Z0*Z1*Z2`` and ``Z0*X1*Z2`` both anticommute with ``Y0*Y1*Y2`` on all three qubits,
-and their product ``Y1`` commutes with it. With the same input, ``tqecd`` 0.2.1 returns
-``[0, 1, 2]``, a cover of three flows. The search is exact when the null space of the
-anticommutation vectors has at most 22 dimensions. Above that size, a heuristic returns
-a cover that is not always the smallest. See
+and their product ``Y1`` commutes with it. With ``tqecd`` 0.2.1 from PyPI, the same
+code prints ``[0, 1, 2]``, a cover of three flows. The search is exact when the null
+space of the anticommutation vectors has at most 22 dimensions. Above that size, a
+heuristic returns a cover that is not always the smallest. See
 :py:func:`~tqecd.cover.find_commuting_cover_on_target_qubits` for the search steps and
 their limits.
 
@@ -165,21 +165,22 @@ and ``tqecd`` merges them with commuting covers.
 To see how the minimal commuting cover handles the transition round of a Y half cube,
 see `tqecd pull request #74 <https://github.com/tqec/tqecd/pull/74>`_.
 
-The two figures show the detecting regions in the transition round (ticks 41 to 49) of
-the ``s_gate_x`` circuit of ``tqec`` at ``k=1``
-(:download:`circuit <../media/detectors/s_gate_x_k1_no_detectors.stim>`). Red regions
-are ``X`` type and blue regions are ``Z`` type.
+The two figures show the detecting regions of the ``s_gate_x`` circuit of ``tqec`` at
+``k=1`` (:download:`circuit <../media/detectors/s_gate_x_k1_no_detectors.stim>`) in
+ticks 42 to 49, the transition round. ``stim`` draws a region red when it holds only
+``X``, blue when it holds only ``Z``, and gray when it holds more than one Pauli type.
 
 .. figure:: ../media/detectors/y_switch_detectors_before.svg
    :alt: Detecting regions in the transition round with tqecd 0.2.1.
 
-   Annotation by ``tqecd`` 0.2.1.
+   Annotation by ``tqecd`` 0.2.1. It has 126 detectors.
 
 .. figure:: ../media/detectors/y_switch_detectors_after.svg
    :alt: Detecting regions in the transition round with the minimal commuting cover.
 
-   Annotation with the minimal commuting cover. Four more red regions are present
-   around the ``S`` gates.
+   Annotation with the minimal commuting cover. It has 130 detectors. The four new
+   regions are red in ticks 42 to 45 and gray in ticks 46 to 49, where they hold
+   ``X``, ``Y`` and ``Z`` on different qubits.
 
 Unrolled fallback
 ~~~~~~~~~~~~~~~~~
