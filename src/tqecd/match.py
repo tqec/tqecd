@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import Iterator, Mapping
 from copy import copy
 from dataclasses import dataclass
-from typing import Iterator, Mapping
 
 import numpy
 import stim
@@ -35,16 +35,12 @@ class MatchedDetector:
     def to_instruction(self) -> stim.CircuitInstruction:
         targets = [
             stim.target_rec(m.offset)
-            for m in sorted(
-                self.measurements, key=lambda measurement: -measurement.offset
-            )
+            for m in sorted(self.measurements, key=lambda measurement: -measurement.offset)
         ]
         return stim.CircuitInstruction("DETECTOR", targets, list(self.coords))
 
     def with_time_coordinate(self, time_coordinate: float) -> MatchedDetector:
-        return MatchedDetector(
-            self.coords + (time_coordinate,), self.measurements, self.resets
-        )
+        return MatchedDetector((*self.coords, time_coordinate), self.measurements, self.resets)
 
 
 def _get_detectors_with_time_coordinate(
@@ -60,12 +56,8 @@ def _get_detectors_with_time_coordinate(
         else:
             # We insert detectors at the end of the last flow, so we need to compute
             # the number of FragmentFlows instances before it.
-            time_coordinate = (
-                sum(isinstance(f, FragmentFlows) for f in flow.fragment_flows) - 1
-            )
-        updated_detectors.append(
-            [d.with_time_coordinate(time_coordinate) for d in detectors]
-        )
+            time_coordinate = sum(isinstance(f, FragmentFlows) for f in flow.fragment_flows) - 1
+        updated_detectors.append([d.with_time_coordinate(time_coordinate) for d in detectors])
     return updated_detectors
 
 
@@ -109,9 +101,7 @@ def match_detectors_from_flows_shallow(
         match_detectors_within_fragment(flow, qubit_coordinates) for flow in flows
     ]
     for i in range(1, len(flows)):
-        detectors[i].extend(
-            match_boundary_stabilizers(flows[i - 1], flows[i], qubit_coordinates)
-        )
+        detectors[i].extend(match_boundary_stabilizers(flows[i - 1], flows[i], qubit_coordinates))
 
     return _get_detectors_with_time_coordinate(flows, detectors)
 
@@ -143,14 +133,10 @@ def match_detectors_within_fragment(
     """
     matched_detectors: list[MatchedDetector] = []
     matched_detectors.extend(
-        _match_non_propagating_non_trivial_flows_inline(
-            flows.creation, qubit_coordinates
-        )
+        _match_non_propagating_non_trivial_flows_inline(flows.creation, qubit_coordinates)
     )
     matched_detectors.extend(
-        _match_non_propagating_non_trivial_flows_inline(
-            flows.destruction, qubit_coordinates
-        )
+        _match_non_propagating_non_trivial_flows_inline(flows.destruction, qubit_coordinates)
     )
     return matched_detectors
 
@@ -323,15 +309,11 @@ def match_boundary_stabilizers(
     right_flows.try_merge_anticommuting_flows()
 
     # 1. Match stabilizers 1-to-1 without anti-commuting collapses
-    matched_detectors.extend(
-        _match_commute_stabilizers(left_flows, right_flows, qubit_coordinates)
-    )
+    matched_detectors.extend(_match_commute_stabilizers(left_flows, right_flows, qubit_coordinates))
 
     # 2. Try to match remaining stabilizers without any anti-commuting collapses
     #    by trying to find covers.
-    matched_detectors.extend(
-        _match_by_disjoint_cover(left_flows, right_flows, qubit_coordinates)
-    )
+    matched_detectors.extend(_match_by_disjoint_cover(left_flows, right_flows, qubit_coordinates))
     # Perform the sanity check if needed.
     if matched_detectors_within_loop is not None:
         if set(matched_detectors_within_loop) != set(matched_detectors):
@@ -458,9 +440,7 @@ def _match_boundary_stabilizers_by_disjoint_cover(
         if cover_indices is None:
             continue
 
-        measurements_involved_in_cover: frozenset[RelativeMeasurementLocation] = (
-            frozenset()
-        )
+        measurements_involved_in_cover: frozenset[RelativeMeasurementLocation] = frozenset()
         resets_qubits_involved_in_cover: frozenset[int] = frozenset()
         for j in cover_indices:
             # We know for sure that each boundary stabilizer commutes with the collapsing
@@ -511,9 +491,7 @@ def _match_by_disjoint_cover(
     for i, stabilizer in enumerate(left_flows.creation):
         if not stabilizer.has_anticommuting_operations:
             left_boundary_stabilizers.append(
-                stabilizer.with_measurement_offset(
-                    -right_flows.total_number_of_measurements
-                )
+                stabilizer.with_measurement_offset(-right_flows.total_number_of_measurements)
             )
             left_boundary_indices_map.append(i)
 

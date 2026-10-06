@@ -32,9 +32,7 @@ def _find_cover(
     qubit_mask = sum(1 << q for q in on_qubits)
     basis: dict[int, tuple[int, int]] = {}
     for i, source in enumerate(sources):
-        result = _solve_linear_system(
-            basis, source._to_int_mask(qubit_mask, commute_with), 1 << i
-        )
+        result = _solve_linear_system(basis, source._to_int_mask(qubit_mask, commute_with), 1 << i)
         if result is not None and commute_with is not None:
             return _int_to_bit_indices(result)
     if commute_with is not None:
@@ -47,9 +45,7 @@ def _find_cover(
     return None if result is None else _int_to_bit_indices(result)
 
 
-def find_exact_cover(
-    target: PauliString, sources: list[PauliString]
-) -> list[int] | None:
+def find_exact_cover(target: PauliString, sources: list[PauliString]) -> list[int] | None:
     """Try to find a set of Pauli strings from ``sources`` that generate exactly
     ``target``.
 

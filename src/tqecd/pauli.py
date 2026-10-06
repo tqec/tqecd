@@ -8,7 +8,8 @@ API.
 
 from __future__ import annotations
 
-from typing import Iterable, Iterator, Literal
+from collections.abc import Iterable, Iterator
+from typing import Literal
 
 import numpy
 import stim
@@ -122,9 +123,7 @@ class PauliString:
         return bool(self._support)
 
     def __mul__(self, other: PauliString) -> PauliString:
-        return PauliString._from_bits(
-            self._x_bits ^ other._x_bits, self._z_bits ^ other._z_bits
-        )
+        return PauliString._from_bits(self._x_bits ^ other._x_bits, self._z_bits ^ other._z_bits)
 
     def __repr__(self) -> str:
         return f"PauliString(qubits={self._as_dict()!r})"
@@ -142,14 +141,10 @@ class PauliString:
     def anticommutes(self, other: PauliString) -> bool:
         """Check if this Pauli string anticommutes with another Pauli
         string."""
-        anticommutations = (self._x_bits & other._z_bits) ^ (
-            self._z_bits & other._x_bits
-        )
+        anticommutations = (self._x_bits & other._z_bits) ^ (self._z_bits & other._x_bits)
         return bool(anticommutations.bit_count() & 1)
 
-    def _anticommutes_single_qubit_masks(
-        self, x_mask: int, y_mask: int, z_mask: int
-    ) -> bool:
+    def _anticommutes_single_qubit_masks(self, x_mask: int, y_mask: int, z_mask: int) -> bool:
         """Check for anticommutation with any encoded single-qubit operator.
 
         The three masks identify qubits carrying X, Y, and Z collapsing
@@ -167,9 +162,7 @@ class PauliString:
         )
 
     def _without_qubits(self, qubit_mask: int) -> PauliString:
-        return PauliString._from_bits(
-            self._x_bits & ~qubit_mask, self._z_bits & ~qubit_mask
-        )
+        return PauliString._from_bits(self._x_bits & ~qubit_mask, self._z_bits & ~qubit_mask)
 
     def collapse_by(self, collapse_operators: Iterable[PauliString]) -> PauliString:
         """Collapse the provided Pauli string by the provided operators.
@@ -210,8 +203,7 @@ class PauliString:
     def after(self, tableau: stim.Tableau, targets: Iterable[int]) -> PauliString:
         target_tuple = tuple(targets)
         stim_pauli_string = self.to_stim_pauli_string(
-            length=max(max(target_tuple, default=-1), self._support.bit_length() - 1)
-            + 1
+            length=max(max(target_tuple, default=-1), self._support.bit_length() - 1) + 1
         )
         stim_pauli_string_after = stim_pauli_string.after(tableau, targets=target_tuple)
         return PauliString.from_stim_pauli_string(stim_pauli_string_after)
@@ -256,9 +248,7 @@ class PauliString:
         bit = 1 << index
         return _IXZY[bool(self._x_bits & bit) + 2 * bool(self._z_bits & bit)]
 
-    def to_int(
-        self, qubits: Iterable[int], reference: PauliString | None = None
-    ) -> int:
+    def to_int(self, qubits: Iterable[int], reference: PauliString | None = None) -> int:
         """Convert the Pauli string to an integer representation on the provided qubits.
 
         Args:
@@ -273,23 +263,17 @@ class PauliString:
             for q in qubits:
                 bit = 1 << q
                 result = (
-                    result << 2
-                    | int(bool(self._x_bits & bit)) << 1
-                    | int(bool(self._z_bits & bit))
+                    result << 2 | int(bool(self._x_bits & bit)) << 1 | int(bool(self._z_bits & bit))
                 )
             return result
-        anticommutations = (self._x_bits & reference._z_bits) ^ (
-            self._z_bits & reference._x_bits
-        )
+        anticommutations = (self._x_bits & reference._z_bits) ^ (self._z_bits & reference._x_bits)
         result = 0
         for q in qubits:
             bit = 1 << q
             result = (result << 1) | int(bool(anticommutations & bit))
         return result
 
-    def _to_int_mask(
-        self, qubit_mask: int, reference: PauliString | None = None
-    ) -> int:
+    def _to_int_mask(self, qubit_mask: int, reference: PauliString | None = None) -> int:
         """Encode selected qubits while preserving their original bit positions.
 
         Without a reference, X bits occupy their original positions and Z bits
@@ -298,9 +282,7 @@ class PauliString:
         """
         if reference is None:
             z_shift = qubit_mask.bit_length()
-            return (self._x_bits & qubit_mask) | (
-                (self._z_bits & qubit_mask) << z_shift
-            )
+            return (self._x_bits & qubit_mask) | ((self._z_bits & qubit_mask) << z_shift)
         return (
             (self._x_bits & reference._z_bits) ^ (self._z_bits & reference._x_bits)
         ) & qubit_mask

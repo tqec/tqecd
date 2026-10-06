@@ -24,9 +24,7 @@ class RelativeMeasurementLocation:
 
     def __post_init__(self) -> None:
         if self.offset >= 0:
-            raise TQECDException(
-                "Relative measurement offsets should be strictly negative."
-            )
+            raise TQECDException("Relative measurement offsets should be strictly negative.")
 
     def offset_by(self, offset: int) -> RelativeMeasurementLocation:
         return RelativeMeasurementLocation(

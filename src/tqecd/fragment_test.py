@@ -128,9 +128,7 @@ def test_split_stim_circuit_into_fragments_simple() -> None:
     assert len(fragments) == 1
     assert fragments[0] == Fragment(stim.Circuit("M 0 1 2"))
 
-    fragments = split_stim_circuit_into_fragments(
-        stim.Circuit("R 1 2 3\nTICK\nM 1 2 3")
-    )
+    fragments = split_stim_circuit_into_fragments(stim.Circuit("R 1 2 3\nTICK\nM 1 2 3"))
     assert len(fragments) == 1
     assert fragments[0] == Fragment(stim.Circuit("R 1 2 3\nTICK\nM 1 2 3"))
 
@@ -229,14 +227,10 @@ REPEAT 9 {
 }""")
     fragments = split_stim_circuit_into_fragments(circuit)
     assert len(fragments) == 1
-    assert fragments[0] == FragmentLoop(
-        [Fragment(stim.Circuit("R 1 3\nTICK\nM 1 3"))], 9
-    )
+    assert fragments[0] == FragmentLoop([Fragment(stim.Circuit("R 1 3\nTICK\nM 1 3"))], 9)
 
     erroneous_circuit = stim.Circuit("REPEAT 9 {\nR 1 3\nTICK\nH 1 3\n}")
-    with pytest.raises(
-        TQECDException, match=r"^Error when splitting .* REPEAT block.*"
-    ):
+    with pytest.raises(TQECDException, match=r"^Error when splitting .* REPEAT block.*"):
         split_stim_circuit_into_fragments(erroneous_circuit)
 
 

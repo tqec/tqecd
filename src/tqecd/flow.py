@@ -68,9 +68,7 @@ def _try_merge_anticommuting_flows_inplace(flows: list[BoundaryStabilizer]) -> N
     """
     # Filtering out commuting operations as they cannot make anti-commuting
     # operations commuting.
-    anti_commuting_index_to_flows_index: list[int] = (
-        _anti_commuting_stabilizers_indices(flows)
-    )
+    anti_commuting_index_to_flows_index: list[int] = _anti_commuting_stabilizers_indices(flows)
 
     # Early exit if there are no anti-commuting collapsing operations
     if not anti_commuting_index_to_flows_index:
@@ -104,10 +102,8 @@ def _try_merge_anticommuting_flows_inplace(flows: list[BoundaryStabilizer]) -> N
     anticommuting_stabilizers: list[PauliString] = [
         flows[fi].before_collapse for fi in anti_commuting_index_to_flows_index
     ]
-    indices_of_anti_commuting_stabilizers_to_merge = (
-        find_commuting_cover_on_target_qubits(
-            collapsing_pauli, anticommuting_stabilizers
-        )
+    indices_of_anti_commuting_stabilizers_to_merge = find_commuting_cover_on_target_qubits(
+        collapsing_pauli, anticommuting_stabilizers
     )
     # While there are anti-commuting stabilizers that can be merged.
     while indices_of_anti_commuting_stabilizers_to_merge is not None:
@@ -130,16 +126,12 @@ def _try_merge_anticommuting_flows_inplace(flows: list[BoundaryStabilizer]) -> N
         # Compute the resulting commuting stabilizer.
         new_commuting_stabilizer = stabilizers_to_merge[0]
         for removed_stabilizer in stabilizers_to_merge[1:]:
-            new_commuting_stabilizer = new_commuting_stabilizer.merge(
-                removed_stabilizer
-            )
+            new_commuting_stabilizer = new_commuting_stabilizer.merge(removed_stabilizer)
         # 3. Add the resulting commuting stabilizer to the flows.
         flows.append(new_commuting_stabilizer)
         # Update for loop condition
-        indices_of_anti_commuting_stabilizers_to_merge = (
-            find_commuting_cover_on_target_qubits(
-                collapsing_pauli, anticommuting_stabilizers
-            )
+        indices_of_anti_commuting_stabilizers_to_merge = find_commuting_cover_on_target_qubits(
+            collapsing_pauli, anticommuting_stabilizers
         )
 
 
@@ -301,9 +293,7 @@ def _build_flows_from_fragment(fragment: Fragment) -> FragmentFlows:
     resets = frozenset(fragment.resets)
     measurement_masks = _single_qubit_pauli_masks(measurements)
     reset_masks = _single_qubit_pauli_masks(resets)
-    measurement_entries_by_qubit: dict[
-        int, list[tuple[int, RelativeMeasurementLocation]]
-    ] = {}
+    measurement_entries_by_qubit: dict[int, list[tuple[int, RelativeMeasurementLocation]]] = {}
     for index, qubit in enumerate(sorted_qubit_involved_in_measurements):
         entries = measurement_entries_by_qubit.setdefault(qubit, [])
         measurement_location = (
@@ -353,13 +343,10 @@ def _build_flows_from_fragment(fragment: Fragment) -> FragmentFlows:
     for measurement in fragment.measurements:
         if measurement.non_trivial_pauli_count != 1:
             raise TQECDException(
-                "Found a measurement applied on several qubits. "
-                "This is not implemented (yet?)."
+                "Found a measurement applied on several qubits. This is not implemented (yet?)."
             )
         initial_stabilizer = measurement.after(tableau_inv, targets)
-        involved_measurements_offsets = [
-            measurement_entries_by_qubit[measurement.qubit][0][1]
-        ]
+        involved_measurements_offsets = [measurement_entries_by_qubit[measurement.qubit][0][1]]
         involved_resets_qubits = [
             qubit for qubit in initial_stabilizer.qubits if qubit in reset_qubits
         ]

@@ -27,10 +27,7 @@ def test_single_qubit_pauli_masks() -> None:
 
     assert _single_qubit_pauli_masks(frozenset({PauliString({0: "X", 2: "Z"})})) is None
     assert (
-        _single_qubit_pauli_masks(
-            frozenset({PauliString({3: "X"}), PauliString({3: "Z"})})
-        )
-        is None
+        _single_qubit_pauli_masks(frozenset({PauliString({3: "X"}), PauliString({3: "Z"})})) is None
     )
 
 
