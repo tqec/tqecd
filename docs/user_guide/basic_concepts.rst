@@ -166,7 +166,8 @@ as the one described above.
 
 To distinguish between these two ``BoundaryStabilizer`` (one representing a creation flow,
 the other representing a destruction flow), they will be stored in a data-structure that
-will differentiate creation and destruction flows: ``FragmentFlow`` (or ``FragmentLoopFlow``).
+will differentiate creation and destruction flows: ``FragmentFlows`` (or
+``FragmentLoopFlows`` for a repeated block).
 
 
 Example

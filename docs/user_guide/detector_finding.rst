@@ -19,8 +19,9 @@ probability, the detectors that it triggers and the observables that it flips
 - A detector that is not deterministic is not valid. By default, ``stim`` does not build
   a DEM from a circuit that contains one.
 - A missing detector does not stop the DEM build, but a fault whose only detector is
-  missing triggers no detector at all. Such a fault is not detected, and the circuit
-  distance can decrease. :ref:`y-basis-transition-round` shows an example.
+  missing triggers no detector at all. Such a fault is not detected, and the distance
+  of the annotated circuit can decrease. :ref:`y-basis-transition-round` shows an
+  example.
 
 Commuting and anticommuting flows
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -110,8 +111,9 @@ Minimal commuting cover
 
 The merge of step 3a uses
 :py:func:`~tqecd.cover.find_commuting_cover_on_target_qubits`, which returns a commuting
-cover with the fewest sources. A larger cover also merges flows that are not needed.
-Those flows are then not available to other detectors, so detectors can be lost.
+cover with the fewest sources when its search is exact (see below). A larger cover also
+merges flows that are not needed. Those flows are then not available to other
+detectors, so detectors can be lost.
 :ref:`y-basis-transition-round` shows a circuit where the minimal cover restores four
 detectors and the shortest graphlike error grows from length 1 to length 3.
 
@@ -192,7 +194,8 @@ The two figures show the detecting regions of the ``s_gate_x`` circuit of ``tqec
 The circuit file already contains noise with probability 0.001: ``X_ERROR`` or
 ``Z_ERROR`` on each reset and measurement, ``DEPOLARIZE1`` after each single-qubit gate
 and ``DEPOLARIZE2`` after each two-qubit gate. The shortest graphlike error is an upper
-bound on the circuit distance. To reproduce the numbers in the captions:
+bound on the circuit distance. To reproduce the numbers in the captions, run this code
+from the repository root:
 
 .. code-block:: python
 
@@ -201,7 +204,7 @@ bound on the circuit distance. To reproduce the numbers in the captions:
     from tqecd import annotate_detectors_automatically
 
     circuit = annotate_detectors_automatically(
-        stim.Circuit.from_file("s_gate_x_k1_no_detectors.stim")
+        stim.Circuit.from_file("docs/media/detectors/s_gate_x_k1_no_detectors.stim")
     )
     error = circuit.shortest_graphlike_error(ignore_ungraphlike_errors=False)
     print(circuit.num_detectors, len(error))
