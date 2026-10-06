@@ -110,8 +110,10 @@ Minimal commuting cover
 
 The merge of step 3a uses
 :py:func:`~tqecd.cover.find_commuting_cover_on_target_qubits`, which returns a commuting
-cover with the fewest sources. A larger cover merges flows that are not needed, and
-these flows are then not available to other detectors.
+cover with the fewest sources. A larger cover also merges flows that are not needed.
+Those flows are then not available to other detectors, so detectors can be lost.
+:ref:`y-basis-transition-round` shows a circuit where the minimal cover restores four
+detectors and the shortest graphlike error grows from length 1 to length 3.
 
 Take collapsing operations ``Y0*Y1*Y2`` and four anticommuting flows.
 
@@ -166,25 +168,43 @@ contains ``CY`` gates, ``S`` gates and ``MY`` measurements. Near this round, som
 anticommute with their collapsing operations, for example with the ``MY`` measurements,
 and ``tqecd`` merges them with commuting covers.
 
-To see how the minimal commuting cover handles the transition round of a Y half cube,
-see `tqecd pull request #74 <https://github.com/tqec/tqecd/pull/74>`_.
+`tqecd pull request #74 <https://github.com/tqec/tqecd/pull/74>`_ compares the
+detectors of a Y half cube initialization with and without the minimal commuting cover.
 
-The two figures show the detecting regions of the ``s_gate_x`` circuit of ``tqec`` at
-``k=1`` (:download:`circuit <../media/detectors/s_gate_x_k1_no_detectors.stim>`) in
-ticks 42 to 49, the transition round. ``stim`` draws a region red when it holds only
+The two figures show the detecting regions of the ``s_gate_x`` circuit of ``tqec``
+(fixed bulk convention; the ``tqec`` commit is not recorded) at ``k=1``
+(:download:`circuit <../media/detectors/s_gate_x_k1_no_detectors.stim>`) in ticks 42 to
+49, the transition round. ``stim`` draws a region red when it holds only
 ``X``, blue when it holds only ``Z``, and gray when it holds more than one Pauli type.
 
 .. figure:: ../media/detectors/y_switch_detectors_before.svg
    :alt: Detecting regions in the transition round with tqecd 0.2.1.
 
-   Annotation by ``tqecd`` 0.2.1. It has 126 detectors.
+   ``tqecd`` 0.2.1: 126 detectors. The shortest graphlike error has length 1.
 
 .. figure:: ../media/detectors/y_switch_detectors_after.svg
    :alt: Detecting regions in the transition round with the minimal commuting cover.
 
-   Annotation with the minimal commuting cover. It has 130 detectors. The four new
-   regions are red in ticks 42 to 45 and gray in ticks 46 to 49, where they hold
-   ``X``, ``Y`` and ``Z`` on different qubits.
+   ``tqecd`` with the minimal commuting cover: 130 detectors. The shortest graphlike
+   error has length 3. The four new regions are red in ticks 42 to 45 and gray in ticks
+   46 to 49, where they hold ``X``, ``Y`` and ``Z`` on different qubits.
+
+The circuit file already contains noise with probability 0.001: ``X_ERROR`` or
+``Z_ERROR`` on each reset and measurement, ``DEPOLARIZE1`` after each single-qubit gate
+and ``DEPOLARIZE2`` after each two-qubit gate. The shortest graphlike error is an upper
+bound on the circuit distance. To reproduce the numbers in the captions:
+
+.. code-block:: python
+
+    import stim
+
+    from tqecd import annotate_detectors_automatically
+
+    circuit = annotate_detectors_automatically(
+        stim.Circuit.from_file("s_gate_x_k1_no_detectors.stim")
+    )
+    error = circuit.shortest_graphlike_error(ignore_ungraphlike_errors=False)
+    print(circuit.num_detectors, len(error))
 
 Unrolled fallback
 ~~~~~~~~~~~~~~~~~
