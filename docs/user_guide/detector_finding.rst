@@ -153,8 +153,9 @@ Y-basis transition round
 
 A Y half cube uses the in-place Y-basis construction of Gidney [Gidney2024]_. A single
 transition round changes the boundaries of the patch from XZXZ to XXZZ. This maps the Y
-observable to a known product of stabilizers, and the stabilizer rounds after it measure
-that product again and again. The paper states:
+observable to the product of all the X-basis stabilizers of the XXZZ patch
+[Gidney2024]_, and the stabilizer rounds after it measure that product again. The paper
+states:
 
     By repeatedly measuring the stabilizers of the patch, you learn this product to
     arbitrarily high certainty… it's sufficient to measure these stabilizers d/2
