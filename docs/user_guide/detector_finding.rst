@@ -18,9 +18,9 @@ probability, the detectors that it triggers and the observables that it flips
 
 - A detector that is not deterministic is not valid. By default, ``stim`` does not build
   a DEM from a circuit that contains one.
-- A missing detector does not stop the DEM build, but it can remove the only detector
-  that a fault triggers. Then that fault is not detected, and the circuit distance can
-  decrease. :ref:`y-basis-transition-round` shows an example.
+- A missing detector does not stop the DEM build, but a fault whose only detector is
+  missing triggers no detector at all. Such a fault is not detected, and the circuit
+  distance can decrease. :ref:`y-basis-transition-round` shows an example.
 
 Commuting and anticommuting flows
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -48,8 +48,9 @@ Covers
 ~~~~~~
 
 A *cover* of a Pauli string ``target`` by a list of Pauli strings ``sources`` is a list
-of indices into ``sources``. The functions in :py:mod:`tqecd.cover` return two kinds.
-Pauli strings in ``tqecd`` have no sign, so all products below ignore the sign.
+of indices into ``sources``. Pauli strings in ``tqecd`` have no sign, so all products on
+this page ignore the sign. The functions in :py:mod:`tqecd.cover` return two kinds of
+cover.
 
 - An *exact cover* (:py:func:`~tqecd.cover.find_exact_cover`): the product of the
   selected sources equals ``target`` on every qubit.
@@ -58,17 +59,18 @@ Pauli strings in ``tqecd`` have no sign, so all products below ignore the sign.
   sources commutes with the Pauli of ``target`` on that qubit. On the other qubits, the
   product can be any Pauli.
 
-For a commuting cover, ``target`` is the product of the collapsing operations of a
-boundary. These operations act on one qubit each, so the product of a commuting cover
-commutes with every collapsing operation. Both functions encode each source as a bit
-vector and solve a linear system over GF(2). For an exact cover, the vector holds the
-``X`` and ``Z`` bits of each qubit. For a commuting cover, it holds one bit per qubit of
-``target``, set when the source anticommutes with ``target`` on that qubit.
+In flow matching (step 3a below), the ``target`` of a commuting cover is the product of
+the collapsing operations of a boundary. These operations act on one qubit each, so the
+product of a commuting cover commutes with every collapsing operation. Both functions
+encode each source as a bit vector and solve a linear system over GF(2). For an exact
+cover, the vector holds the ``X`` and ``Z`` bits of each qubit. For a commuting cover,
+it holds one bit per qubit of ``target``, set when the source anticommutes with
+``target`` on that qubit.
 
 Flow matching
 ~~~~~~~~~~~~~
 
-The steps below are done in this order.
+Flow matching runs these steps in order.
 
 1. The flows of every fragment are built.
 2. Inside each fragment, a non-trivial commuting flow whose Pauli string is the identity
@@ -83,7 +85,7 @@ The steps below are done in this order.
       two fragments. All anticommuting flows of one list must have the same
       collapsing operations. The merge finds a commuting cover of the product of
       these operations by the Pauli strings of the anticommuting flows of the list
-      (see below). It replaces the flows of the cover by one flow
+      (:ref:`minimal-commuting-cover`). It replaces the flows of the cover by one flow
       (``BoundaryStabilizer.merge``). The Pauli string of this flow is the product of
       their Pauli strings. For creation flows, the merged flow keeps all their resets
       and only the measurements on qubits where the product is not the identity. For
@@ -96,7 +98,8 @@ The steps below are done in this order.
    c. The remaining flows are matched by an exact cover in both directions. Left
       creation flows are covered by right destruction flows, then right destruction
       flows by left creation flows. This step is skipped when either side has no flow
-      left, or when both sides have exactly one. The measurements of the detector are
+      left, or when both sides have exactly one: the code expects no cover in these
+      cases. The measurements of the detector are
       the union of the target's measurements and the symmetric difference of the
       cover's measurements.
 
@@ -186,11 +189,12 @@ Unrolled fallback
 ~~~~~~~~~~~~~~~~~
 
 A detector placed inside a ``REPEAT`` body must be valid for every iteration. When a
-loop repeats more than once, the matcher checks that the detectors between the last and
-the first fragment of the body equal those between the previous fragment and the loop,
-and raises ``TQECDException`` otherwise. When a ``TQECDException`` is raised on a
-circuit that contains a loop, the circuit is unrolled and the same flow matching is run
-on it. Unrolling expands every ``REPEAT`` block and inserts a ``TICK`` where one is
+loop repeats more than once, the matcher checks that the detectors found across the
+loop's back edge (last body fragment to first body fragment) equal those found at the
+loop's entry (the fragment before the loop to the first body fragment). It raises
+``TQECDException`` otherwise. When a ``TQECDException`` is raised on a circuit that
+contains a loop, the circuit is unrolled and the same flow matching is run on it.
+Unrolling expands every ``REPEAT`` block and inserts a ``TICK`` where one is
 missing, at the boundaries between loop copies and between a loop and its neighbouring
 instructions. The result has no ``REPEAT`` block, so its size grows with the number of
 repetitions. If the unrolled circuit does not satisfy the input requirements, the
