@@ -116,10 +116,12 @@ Take collapsing operations ``Y0*Y1*Y2`` and four anticommuting flows.
     Y1
 
 ``Z0*Z1*Z2`` and ``Z0*X1*Z2`` both anticommute with ``Y0*Y1*Y2`` on all three qubits,
-and their product ``Y1`` commutes with it. A single elimination pass would have used the
-first three stabilizers instead. The search is exact when the null space of the
-anticommutation vectors is small and falls back to a heuristic above that size, which may
-return a cover that is not the smallest. The details are in the docstring of the function.
+and their product ``Y1`` commutes with it. With the same input, ``tqecd`` 0.2.1 returns
+``[0, 1, 2]``, a cover of three flows. The search is exact when the null space of the
+anticommutation vectors has at most 22 dimensions. Above that size, a heuristic returns
+a cover that is not always the smallest. See
+:py:func:`~tqecd.cover.find_commuting_cover_on_target_qubits` for the search steps and
+their limits.
 
 Y-basis transition round
 ~~~~~~~~~~~~~~~~~~~~~~~~
