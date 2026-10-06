@@ -4,9 +4,6 @@ Automatic detector finding
 The ``tqecd`` package implements a method to automatically find detectors from a
 given quantum circuit representing a quantum error corrected computation.
 
-The notebook :doc:`../media/detectors/detector_finding_illustration` shows the steps
-to find detectors.
-
 Concepts used through the package
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
