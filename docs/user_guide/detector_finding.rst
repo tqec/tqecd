@@ -78,13 +78,18 @@ The steps below are done in this order.
    unit in the pairing. Its destruction flows are those of its first body fragment and
    its creation flows are those of its last.
 
-   a. On each side, the anticommuting flows are merged into commuting flows. All
-      anticommuting flows of one side must have the same collapsing operations. The
-      merge finds a commuting cover of the product of these operations by the Pauli
-      strings of the anticommuting flows (see below). It replaces the flows of the
-      cover by one flow: the product of their Pauli strings, with their measurements
-      combined (``BoundaryStabilizer.merge``). The merge repeats until no commuting
-      cover is left.
+   a. The anticommuting flows are merged into commuting flows. The merge runs on four
+      lists separately: the creation flows and the destruction flows of each of the
+      two fragments. All anticommuting flows of one list must have the same
+      collapsing operations. The merge finds a commuting cover of the product of
+      these operations by the Pauli strings of the anticommuting flows of the list
+      (see below). It replaces the flows of the cover by one flow
+      (``BoundaryStabilizer.merge``). The Pauli string of this flow is the product of
+      their Pauli strings. For creation flows, the merged flow keeps all their resets
+      and only the measurements on qubits where the product is not the identity. For
+      destruction flows, it keeps all their measurements and only the resets on
+      qubits where the product is not the identity. The merge repeats until no
+      commuting cover is left.
    b. A creation flow of the left fragment is matched one-to-one with a destruction
       flow of the right fragment when they are equal after the collapsing operations.
       The two flows give one detector. Anticommuting flows are skipped.
