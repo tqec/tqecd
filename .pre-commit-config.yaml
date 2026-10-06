@@ -26,3 +26,7 @@ repos:
 
       - id: ruff-format
         types_or: [python, pyi]
+  - repo: https://github.com/pcoelho00/pre-commit-clear-notebooks
+    rev: v1.0.0
+    hooks:
+      - id: clear-notebooks
