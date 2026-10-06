@@ -162,16 +162,16 @@ are ``X`` type and blue regions are ``Z`` type.
 Unrolled fallback
 ~~~~~~~~~~~~~~~~~
 
-A detector placed inside a ``REPEAT`` body must be valid for every iteration. When a loop
-repeats more than once, the matcher checks that the detectors between the last and the
-first fragment of the body equal those between the previous fragment and the loop, and
-raises ``TQECDException`` otherwise. When a ``TQECDException`` is raised on a circuit
-that contains a loop, the circuit is unrolled and the same flow matching is run on it.
-Unrolling expands every ``REPEAT`` block and inserts a ``TICK`` where one is missing, at
-the boundaries between loop copies and between a loop and its neighbouring instructions.
-The result has no ``REPEAT`` block, so its size grows with the number of repetitions. If
-the unrolled circuit does not satisfy the input requirements, the original exception is
-re-raised.
+A detector placed inside a ``REPEAT`` body must be valid for every iteration. When a
+loop repeats more than once, the matcher checks that the detectors between the last and
+the first fragment of the body equal those between the previous fragment and the loop,
+and raises ``TQECDException`` otherwise. When a ``TQECDException`` is raised on a
+circuit that contains a loop, the circuit is unrolled and the same flow matching is run
+on it. Unrolling expands every ``REPEAT`` block and inserts a ``TICK`` where one is
+missing, at the boundaries between loop copies and between a loop and its neighbouring
+instructions. The result has no ``REPEAT`` block, so its size grows with the number of
+repetitions. If the unrolled circuit does not satisfy the input requirements, the
+original exception is re-raised.
 
 References
 ~~~~~~~~~~
