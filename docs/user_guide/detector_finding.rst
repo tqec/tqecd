@@ -20,14 +20,13 @@ of that boundary.
 
 A flow *commutes* when its Pauli string commutes with each of its collapsing operations.
 Then the collapse is defined: the Pauli string without the qubits of the collapsing
-operations (:py:attr:`~tqecd.boundary.BoundaryStabilizer.after_collapse`) is the part
-of the flow that crosses the boundary. A flow *anticommutes* when its Pauli string
-anticommutes with at least one collapsing operation
-(:py:attr:`~tqecd.boundary.BoundaryStabilizer.has_anticommuting_operations`). For
-example, a creation flow ``Z0`` that meets an ``MX 0`` or an ``MY 0`` measurement
-anticommutes. That measurement removes ``Z0`` from the stabilizers of the state, so
-the flow alone cannot cross the boundary. A product of anticommuting flows can commute
-with every collapsing operation, and that product crosses the boundary.
+operations (``BoundaryStabilizer.after_collapse``) is the part of the flow that crosses
+the boundary. A flow *anticommutes* when its Pauli string anticommutes with at least one
+collapsing operation (``BoundaryStabilizer.has_anticommuting_operations``). For example,
+a creation flow ``Z0`` that meets an ``MX 0`` or an ``MY 0`` measurement anticommutes.
+That measurement removes ``Z0`` from the stabilizers of the state, so the flow alone
+cannot cross the boundary. A product of anticommuting flows can commute with every
+collapsing operation, and that product crosses the boundary.
 
 Covers
 ~~~~~~
@@ -65,11 +64,11 @@ The steps below are done in this order.
 
    a. On each side, the anticommuting flows are merged into commuting flows. All
       anticommuting flows of one side must have the same collapsing operations. The
-      merge finds a minimal commuting cover of the product of these operations by the
-      Pauli strings of the anticommuting flows (see below). It replaces the flows of
-      the cover by one flow: the product of their Pauli strings, with their
-      measurements combined (:py:meth:`~tqecd.boundary.BoundaryStabilizer.merge`).
-      The merge repeats until no commuting cover is left.
+      merge finds a commuting cover of the product of these operations by the Pauli
+      strings of the anticommuting flows (see below). It replaces the flows of the
+      cover by one flow: the product of their Pauli strings, with their measurements
+      combined (``BoundaryStabilizer.merge``). The merge repeats until no commuting
+      cover is left.
    b. A creation flow of the left fragment is matched one-to-one with a destruction
       flow of the right fragment when they are equal after the collapsing operations.
       The two flows give one detector. Anticommuting flows are skipped.
