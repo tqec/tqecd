@@ -68,6 +68,20 @@ return a cover that is not the smallest. The details are in the docstring of the
 Y-basis transition round
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
+A Y half cube uses the in-place Y-basis construction of Gidney [Gidney2024]_. A single
+transition round changes the boundaries of the patch from XZXZ to XXZZ. This maps the Y
+observable to a known product of stabilizers, and the stabilizer rounds after it measure
+that product again and again. The paper states:
+
+    By repeatedly measuring the stabilizers of the patch, you learn this product to
+    arbitrarily high certainty… it's sufficient to measure these stabilizers d/2
+    times.
+
+The circuits of the paper are in its data record [GidneyData2022]_. The transition round
+contains ``CY`` gates, ``S`` gates and ``MY`` measurements. Near this round, some flows
+anticommute with their collapsing operations, for example with the ``MY`` measurements,
+and ``tqecd`` merges them with commuting covers.
+
 To see how the minimal commuting cover handles the transition round of a Y half cube,
 see `tqecd pull request #74 <https://github.com/tqec/tqecd/pull/74>`_.
 
@@ -100,3 +114,12 @@ the boundaries between loop copies and between a loop and its neighbouring instr
 The result has no ``REPEAT`` block, so its size grows with the number of repetitions. If
 the unrolled circuit does not satisfy the input requirements, the original exception is
 re-raised.
+
+References
+~~~~~~~~~~
+
+.. [Gidney2024] C. Gidney, "Inplace Access to the Surface Code Y Basis", Quantum 8,
+   1310 (2024). https://doi.org/10.22331/q-2024-04-08-1310, arXiv:2302.07395.
+
+.. [GidneyData2022] C. Gidney, Data for "Inplace Access to the Surface Code Y Basis",
+   Zenodo (2022). https://doi.org/10.5281/zenodo.7487893
