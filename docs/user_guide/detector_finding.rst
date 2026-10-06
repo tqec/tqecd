@@ -3,8 +3,24 @@ How detectors are found
 
 A detector is a set of measurements whose combined parity is deterministic when the
 circuit has no noise. :py:func:`~tqecd.construction.annotate_detectors_automatically`
-finds detectors by *flow matching*. This page uses the terms of :doc:`basic_concepts`:
-fragments, flows, collapsing operations and boundary stabilizers.
+finds detectors by *flow matching* and adds one ``DETECTOR`` instruction for each. It
+does not add ``OBSERVABLE_INCLUDE`` instructions. This page uses the terms of
+:doc:`basic_concepts`: fragments, flows, collapsing operations and boundary stabilizers.
+
+Why detector annotation matters
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+``stim`` [Gidney2021]_ uses the ``DETECTOR`` and ``OBSERVABLE_INCLUDE`` instructions of
+a noisy circuit to build a detector error model (DEM). For each fault, the DEM gives its
+probability, the detectors that it triggers and the observables that it flips
+[Rennela2026]_. A decoder takes the DEM as input and assumes that it is correct
+[Rennela2026]_. Thus the annotation sets what the decoder can see:
+
+- A detector that is not deterministic is not valid. By default, ``stim`` does not build
+  a DEM from a circuit that contains one.
+- A missing detector does not stop the DEM build, but it can remove the only detector
+  that a fault triggers. Then that fault is not detected, and the circuit distance can
+  decrease. :ref:`y-basis-transition-round` shows an example.
 
 Commuting and anticommuting flows
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -122,6 +138,8 @@ a cover that is not always the smallest. See
 :py:func:`~tqecd.cover.find_commuting_cover_on_target_qubits` for the search steps and
 their limits.
 
+.. _y-basis-transition-round:
+
 Y-basis transition round
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -180,3 +198,9 @@ References
 
 .. [GidneyData2022] C. Gidney, Data for "Inplace Access to the Surface Code Y Basis",
    Zenodo (2022). https://doi.org/10.5281/zenodo.7487893
+
+.. [Gidney2021] C. Gidney, "Stim: a fast stabilizer circuit simulator", Quantum 5, 497
+   (2021). https://doi.org/10.22331/q-2021-07-06-497, arXiv:2103.02202.
+
+.. [Rennela2026] M. Rennela, "Quasilinear Equivalence Checking for Detector Error
+   Models", arXiv:2606.14677 (2026). https://doi.org/10.48550/arXiv.2606.14677
