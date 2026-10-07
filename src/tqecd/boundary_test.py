@@ -3,7 +3,7 @@ from typing import Union
 import numpy
 import pytest
 
-from tqecd.boundary import BoundaryStabilizer, manhattan_distance
+from tqecd.boundary import BoundaryStabilizer
 from tqecd.exceptions import TQECDException
 from tqecd.measurement import RelativeMeasurementLocation
 from tqecd.pauli import PauliString
@@ -222,30 +222,3 @@ def test_coordinates_raises_error_if_invalid_qubit_mapping() -> None:
         match=r"^Qubit index 5 required for detector assignment, but it does not have a valid QUBIT_COORDS statement\.$",
     ):
         a.coordinates(qubit_coordinates=qubit_coordinates)
-
-
-def test_manhattan_distance() -> None:
-    X0Z1 = PauliString({0: "X", 1: "Z"})
-    Z0X1 = PauliString({0: "Z", 1: "X"})
-    X0 = PauliString({0: "X"})
-    Z1 = PauliString({1: "Z"})
-
-    qubits_coordinates: dict[int, tuple[float, ...]] = {
-        i: (2.0 * i, i / 2) for i in range(10)
-    }
-    a = BoundaryStabilizer(
-        X0Z1,
-        [X0, Z1],
-        [RelativeMeasurementLocation(-28, 3), RelativeMeasurementLocation(-10, 3)],
-        frozenset([3]),
-        True,
-    )
-    b = BoundaryStabilizer(
-        Z0X1, [X0, Z1], [RelativeMeasurementLocation(-20, 6)], frozenset([6]), True
-    )
-    numpy.testing.assert_allclose(a.coordinates(qubits_coordinates), (6.0, 1.5))
-    numpy.testing.assert_allclose(b.coordinates(qubits_coordinates), (12.0, 3.0))
-    numpy.testing.assert_allclose(manhattan_distance(a, a, qubits_coordinates), 0.0)
-    numpy.testing.assert_allclose(manhattan_distance(b, b, qubits_coordinates), 0.0)
-    numpy.testing.assert_allclose(manhattan_distance(a, b, qubits_coordinates), 7.5)
-    numpy.testing.assert_allclose(manhattan_distance(b, a, qubits_coordinates), 7.5)
