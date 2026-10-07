@@ -4,6 +4,7 @@ import pytest
 import stim
 
 from tqecd.cover import (
+    BinaryVectorBasis,
     find_commuting_cover_on_target_qubits,
     find_exact_cover,
 )
@@ -12,6 +13,25 @@ from tqecd.pauli import PauliString, pauli_product
 
 def _pss(pauli_string: str) -> PauliString:
     return PauliString.from_stim_pauli_string(stim.PauliString(pauli_string))
+
+
+@pytest.mark.parametrize("pivot_direction", ["lowest", "highest"])
+def test_binary_vector_basis_independence_and_decomposition(
+    pivot_direction: str,
+) -> None:
+    basis = BinaryVectorBasis(pivot_direction)  # type: ignore[arg-type]
+    assert basis.add(0b1010, 0b01)
+    assert basis.add(0b0110, 0b10)
+    assert not basis.add(0b1100)
+    assert basis.decompose(0b1100) == 0b11
+    assert basis.decompose(0b0001) is None
+
+
+def test_binary_vector_basis_rejects_invalid_inputs() -> None:
+    with pytest.raises(ValueError, match="pivot_direction"):
+        BinaryVectorBasis("middle")  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match="non-negative"):
+        BinaryVectorBasis().add(-1)
 
 
 @pytest.mark.parametrize(
