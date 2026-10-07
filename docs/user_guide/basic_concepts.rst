@@ -170,8 +170,14 @@ will differentiate creation and destruction flows: ``FragmentFlows`` (or
 ``FragmentLoopFlows`` for a repeated block).
 
 
-Example
-~~~~~~~
+Detector finding and example
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The notebook :doc:`../media/detectors/detector_finding_illustration` finds the
-detectors of an example circuit step by step.
+The next page explains how ``tqecd`` finds detectors with these concepts. The notebook
+finds the detectors of an example circuit step by step.
+
+.. toctree::
+   :maxdepth: 1
+
+   How detectors are found <detector_finding>
+   Example <../media/detectors/detector_finding_illustration.ipynb>
