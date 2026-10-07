@@ -37,13 +37,14 @@ of that boundary.
 
 A flow *commutes* when its Pauli string commutes with each of its collapsing operations.
 Then the collapse is defined: the Pauli string without the qubits of the collapsing
-operations (``BoundaryStabilizer.after_collapse``) is the part of the flow that crosses
-the boundary. A flow *anticommutes* when its Pauli string anticommutes with at least one
-collapsing operation (``BoundaryStabilizer.has_anticommuting_operations``). For example,
-a creation flow ``Z0`` that meets an ``MX 0`` or an ``MY 0`` measurement anticommutes.
-That measurement removes ``Z0`` from the stabilizers of the state, so the flow alone
-cannot cross the boundary. A product of anticommuting flows can commute with every
-collapsing operation, and that product crosses the boundary.
+operations (:py:attr:`~tqecd.boundary.BoundaryStabilizer.after_collapse`) is the part
+of the flow that crosses the boundary. A flow *anticommutes* when its Pauli string
+anticommutes with at least one collapsing operation
+(:py:attr:`~tqecd.boundary.BoundaryStabilizer.has_anticommuting_operations`). For
+example, a creation flow ``Z0`` that meets an ``MX 0`` or an ``MY 0`` measurement
+anticommutes. That measurement removes ``Z0`` from the stabilizers of the state, so the
+flow alone cannot cross the boundary. A product of anticommuting flows can commute with
+every collapsing operation, and that product crosses the boundary.
 
 Covers
 ~~~~~~
@@ -87,12 +88,12 @@ Flow matching runs these steps in order.
       collapsing operations. The merge finds a commuting cover of the product of
       these operations by the Pauli strings of the anticommuting flows of the list
       (:ref:`minimal-commuting-cover`). It replaces the flows of the cover by one flow
-      (``BoundaryStabilizer.merge``). The Pauli string of this flow is the product of
-      their Pauli strings. For creation flows, the merged flow keeps all their resets
-      and only the measurements on qubits where the product is not the identity. For
-      destruction flows, it keeps all their measurements and only the resets on
-      qubits where the product is not the identity. The merge repeats until no
-      commuting cover is left.
+      (:py:meth:`~tqecd.boundary.BoundaryStabilizer.merge`). The Pauli string of this
+      flow is the product of their Pauli strings. For creation flows, the merged flow
+      keeps all their resets and only the measurements on qubits where the product is
+      not the identity. For destruction flows, it keeps all their measurements and only
+      the resets on qubits where the product is not the identity. The merge repeats
+      until no commuting cover is left.
    b. A creation flow of the left fragment is matched one-to-one with a destruction
       flow of the right fragment when they are equal after the collapsing operations.
       The two flows give one detector. Anticommuting flows are skipped.
