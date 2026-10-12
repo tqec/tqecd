@@ -1,0 +1,30 @@
+tqecd.fragment.FragmentLoop
+===========================
+
+.. currentmodule:: tqecd.fragment
+
+.. autoclass:: FragmentLoop
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~FragmentLoop.__init__
+      ~FragmentLoop.with_repetitions
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~FragmentLoop.fragments
+      ~FragmentLoop.repetitions
+   
+   

@@ -1,0 +1,6 @@
+tqecd.exceptions.TQECDException
+===============================
+
+.. currentmodule:: tqecd.exceptions
+
+.. autoexception:: TQECDException

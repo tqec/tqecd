@@ -1,0 +1,30 @@
+tqecd.measurement.RelativeMeasurementLocation
+=============================================
+
+.. currentmodule:: tqecd.measurement
+
+.. autoclass:: RelativeMeasurementLocation
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~RelativeMeasurementLocation.__init__
+      ~RelativeMeasurementLocation.offset_by
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~RelativeMeasurementLocation.offset
+      ~RelativeMeasurementLocation.qubit_index
+   
+   

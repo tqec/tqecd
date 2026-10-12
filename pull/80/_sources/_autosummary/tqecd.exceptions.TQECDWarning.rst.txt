@@ -1,0 +1,6 @@
+tqecd.exceptions.TQECDWarning
+=============================
+
+.. currentmodule:: tqecd.exceptions
+
+.. autoexception:: TQECDWarning
