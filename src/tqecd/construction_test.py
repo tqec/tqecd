@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 import stim
 
-from tqecd.construction import annotate_detectors_automatically
+from tqecd.construction import _unrolled, annotate_detectors_automatically
 from tqecd.exceptions import TQECDException
 from tqecd.utils import (
     detector_to_targets_tuple,
@@ -21,14 +21,13 @@ _INVALID_TEST_FOLDER = _TEST_FOLDER / "invalid"
 
 def valid_test_circuits() -> list[tuple[str, stim.Circuit]]:
     valid_circuits: list[tuple[str, stim.Circuit]] = []
-    for filepath in _VALID_TEST_FOLDER.iterdir():
-        with open(filepath) as f:
-            valid_circuits.append(
-                (
-                    filepath.name,
-                    push_all_detectors_to_the_end(stim.Circuit(f.read())),
-                )
+    for filepath in sorted(_VALID_TEST_FOLDER.rglob("*.stim")):
+        valid_circuits.append(
+            (
+                str(filepath.relative_to(_VALID_TEST_FOLDER)),
+                push_all_detectors_to_the_end(stim.Circuit(filepath.read_text())),
             )
+        )
     return valid_circuits
 
 
@@ -45,11 +44,20 @@ def parse_invalid_circuit(text: str) -> tuple[stim.Circuit, str]:
 
 def invalid_test_circuits() -> list[tuple[str, stim.Circuit, str]]:
     invalid_circuits: list[tuple[str, stim.Circuit, str]] = []
-    for filepath in _INVALID_TEST_FOLDER.iterdir():
-        with open(filepath) as f:
-            file_content = f.read()
-        circuit, expected_error_message_regex = parse_invalid_circuit(file_content)
-        invalid_circuits.append((filepath.name, circuit, expected_error_message_regex))
+    invalid_files = sorted(
+        path for path in _INVALID_TEST_FOLDER.rglob("*") if path.is_file()
+    )
+    for filepath in invalid_files:
+        circuit, expected_error_message_regex = parse_invalid_circuit(
+            filepath.read_text()
+        )
+        invalid_circuits.append(
+            (
+                str(filepath.relative_to(_INVALID_TEST_FOLDER)),
+                circuit,
+                expected_error_message_regex,
+            )
+        )
     return invalid_circuits
 
 
@@ -76,6 +84,36 @@ def test_valid_circuits(name: str, circuit: stim.Circuit) -> None:
 
     missing_detectors = initial_detectors.difference(computed_detectors)
     assert not missing_detectors, "Detectors in original circuit are missing."
+
+
+def test_looped_y_circuit_falls_back_to_unrolled() -> None:
+    """A ``REPEAT`` body whose iterations do not share a detector set must
+    still annotate.
+
+    Matching inside a loop body requires the detector set to be identical between
+    every pair of consecutive iterations. The fixed-bulk Y half cube breaks that
+    -- its transition round makes the first and last iterations differ from the
+    bulk ones -- so the loop-body matcher raises. Unrolling removes the
+    constraint, and the annotation must fall back to it rather than fail.
+
+    Regression test: before the fallback existed this raised ``TQECDException``,
+    and only k=1 fixtures (which contain no ``REPEAT`` block at all) were
+    covered.
+    """
+    path = _VALID_TEST_FOLDER / "y_basis" / "ymem_y_init_y_meas_k2_fixed_bulk.stim"
+    looped = stim.Circuit(path.read_text())
+    assert any(isinstance(inst, stim.CircuitRepeatBlock) for inst in looped), (
+        "fixture must keep its REPEAT blocks, otherwise it does not exercise"
+        " the loop path"
+    )
+
+    from_looped = annotate_detectors_automatically(looped)
+    from_unrolled = annotate_detectors_automatically(_unrolled(looped))
+
+    assert from_looped.num_detectors > 0
+    assert set(
+        get_detectors_tuples_shallow(push_all_detectors_to_the_end(from_looped))
+    ) == set(get_detectors_tuples_shallow(push_all_detectors_to_the_end(from_unrolled)))
 
 
 @pytest.mark.parametrize("name,circuit,error_message", invalid_test_circuits())

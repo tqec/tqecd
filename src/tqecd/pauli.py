@@ -8,11 +8,12 @@ API.
 
 from __future__ import annotations
 
-from typing import Iterable, Iterator, Literal
+from typing import Iterable, Literal
 
 import numpy
 import stim
 
+from tqecd.bitops import int_to_bit_indices
 from tqecd.exceptions import TQECDException
 
 PAULI_STRING_TYPE = Literal["I", "X", "Y", "Z"]
@@ -43,11 +44,13 @@ class PauliString:
         for qubit, pauli in pauli_by_qubit.items():
             if qubit < 0:
                 raise TQECDException(
-                    f"Invalid negative qubit index {qubit}, expected a non-negative integer."
+                    f"Invalid negative qubit index {qubit}, expected a"
+                    f" non-negative integer."
                 )
             if pauli not in _IXYZ:
                 raise TQECDException(
-                    f"Invalid Pauli operator {pauli} for qubit {qubit}, expected I, X, Y, or Z."
+                    f"Invalid Pauli operator {pauli} for qubit {qubit}, expected"
+                    f" I, X, Y, or Z."
                 )
             bit = 1 << qubit
             if pauli in ("X", "Y"):
@@ -74,7 +77,7 @@ class PauliString:
 
     @property
     def qubits(self) -> Iterable[int]:
-        return _bit_indices(self._support)
+        return int_to_bit_indices(self._support)
 
     @property
     def qubit(self) -> int:
@@ -100,14 +103,15 @@ class PauliString:
         """Convert a `PauliString` to a `stim.PauliString` instance.
 
         Args:
-            length: The length of the `stim.PauliString`. If `None`, the length is set to the
-                maximum qubit index in the `PauliString` plus one.
+            length: The length of the `stim.PauliString`. If `None`, the length
+                is set to the maximum qubit index in the `PauliString` plus one.
         """
         max_qubit_index = self._support.bit_length() - 1
         length = length if length is not None else max_qubit_index + 1
         if length <= max_qubit_index:
             raise TQECDException(
-                f"The length specified {length} <= the maximum qubit index {max_qubit_index} in the pauli string."
+                f"The length specified {length} <= the maximum qubit index"
+                f" {max_qubit_index} in the pauli string."
             )
         byte_length = (length + 7) // 8
         xs = numpy.frombuffer(
@@ -307,13 +311,6 @@ class PauliString:
 
     def _as_dict(self) -> dict[int, PAULI_STRING_TYPE]:
         return {q: self[q] for q in self.qubits}
-
-
-def _bit_indices(bits: int) -> Iterator[int]:
-    while bits:
-        least_significant_bit = bits & -bits
-        yield least_significant_bit.bit_length() - 1
-        bits ^= least_significant_bit
 
 
 def pauli_literal_to_bools(
