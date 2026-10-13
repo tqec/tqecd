@@ -1,6 +1,0 @@
-tqecd.utils.has\_computation\_instruction
-=========================================
-
-.. currentmodule:: tqecd.utils
-
-.. autofunction:: has_computation_instruction
