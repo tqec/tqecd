@@ -7,6 +7,14 @@ given quantum circuit representing a quantum error corrected computation.
 An accompanying notebook showcasing the different steps to find detectors is located
 `here <../media/detectors/detector_finding_illustration.ipynb>`_.
 
+The detector-finding method assumes that each round of the circuit has a *canonical*
+shape (leading resets, then computation, then trailing measurements). Circuits whose
+syndrome-extraction schedule *interleaves* collapsing operations with computation --
+for example a depth-optimised circuit that resets an ancilla late or measures it early
+-- are also supported: they are first rescheduled into a logically-equivalent canonical
+circuit, annotated, and the resulting detectors are transplanted back. This is described
+in :ref:`interleaved-schedules-section` below.
+
 Concepts used through the package
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -51,6 +59,8 @@ For example, the circuit
     OBSERVABLE_INCLUDE(0) rec[-1]
 
 contains 4 moments.
+
+.. _fragments-section:
 
 Fragments
 ^^^^^^^^^
@@ -172,12 +182,72 @@ the other representing a destruction flow), they will be stored in a data-struct
 will differentiate creation and destruction flows: ``FragmentFlow`` (or ``FragmentLoopFlow``).
 
 
+.. _interleaved-schedules-section:
+
+Custom (interleaved) syndrome-extraction schedules
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The :ref:`fragments <fragments-section>` above only collect resets from their *leading*
+moments and measurements from their *trailing* moments. A depth-optimised circuit may
+break this shape: an X-ancilla ``RX`` sharing a moment with the two-qubit gates, or an
+ancilla measured one moment before the round boundary, is a collapsing operation that
+sits in the *middle* of a fragment. Such an operation is silently dropped by fragment
+splitting, so whole rounds are split incorrectly and many detectors are never found.
+
+For these circuits the custom schedule is only a *depth* optimisation: the ancilla that
+is reset late (or measured early) is idle up to the round boundary, so the collapsing
+operation commutes to the boundary without changing the circuit's action. ``tqecd``
+exploits this to reschedule the circuit into canonical form. For example, in the round
+
+.. code-block::
+
+    R 0 1
+    TICK
+    H 0 1
+    TICK
+    R 3                   # ancilla 3 is reset late, sharing a moment with CX 0 3
+    CX 0 3
+    TICK
+    CX 1 3
+    TICK
+    M 3
+
+the ancilla ``3`` is idle until its late reset, so the round is logically equivalent to
+the canonical round
+
+.. code-block::
+
+    R 0 1 3               # the late reset is hoisted to the round boundary
+    TICK
+    H 0 1
+    TICK
+    CX 0 3
+    TICK
+    CX 1 3
+    TICK
+    M 3
+
+which fragment splitting handles directly. The detectors found on the canonical circuit
+are then transplanted back onto the *original* circuit: this is valid because
+rescheduling preserves the measurement *record order*, so every ``rec[...]`` offset stays
+valid.
+
+This happens automatically inside :func:`~tqecd.construction.annotate_detectors_automatically`;
+circuits that are already canonical take the unchanged code path. ``stim.CircuitRepeatBlock``
+instructions are supported as well -- the bulk rounds of a memory experiment can use an
+interleaved schedule inside the ``REPEAT`` body, and the loop structure (together with the
+``SHIFT_COORDS`` bookkeeping the annotator emits) is preserved. Circuits containing
+measurement-record padding (``MPAD``) cannot be rescheduled and are rejected with a clear
+error rather than silently producing incorrect detectors. See the accompanying notebook
+for a worked example.
+
 Example
 ~~~~~~~
 
-See the accompanying notebook for an example of how to perform automatic detector computation:
+See the accompanying notebooks for examples of how to perform automatic detector computation:
 
 .. toctree::
    :maxdepth: 1
 
    ../media/detectors/detector_finding_illustration.ipynb
+   ../media/detectors/interleaved_schedule_illustration.ipynb

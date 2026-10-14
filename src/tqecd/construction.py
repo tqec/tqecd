@@ -9,6 +9,11 @@ from tqecd.flow import build_flows_from_fragments
 from tqecd.fragment import Fragment, FragmentLoop, split_stim_circuit_into_fragments
 from tqecd.match import MatchedDetector, match_detectors_from_flows_shallow
 from tqecd.predicates import is_valid_input_circuit
+from tqecd.schedule import (
+    canonicalize_collapsing_schedule,
+    fragment_schedule_needs_normalization,
+    transplant_detectors,
+)
 from tqecd.utils import remove_duplicate_detectors
 
 
@@ -63,6 +68,20 @@ def annotate_detectors_automatically(circuit: stim.Circuit) -> stim.Circuit:
     if potential_error_reason is not None:
         raise TQECDException(potential_error_reason)
 
+    # Circuits whose syndrome-extraction schedule interleaves collapsing
+    # operations with computation (so that fragment splitting would drop resets
+    # or measurements) are first rescheduled into a logically-equivalent
+    # canonical form, annotated, and the resulting detectors are transplanted
+    # back onto the original circuit. See :mod:`tqecd.schedule`.
+    if fragment_schedule_needs_normalization(circuit):
+        normalized_circuit = canonicalize_collapsing_schedule(circuit)
+        annotated_circuit = _annotate_clean_circuit(normalized_circuit)
+        return transplant_detectors(circuit, annotated_circuit)
+
+    return _annotate_clean_circuit(circuit)
+
+
+def _annotate_clean_circuit(circuit: stim.Circuit) -> stim.Circuit:
     fragments = split_stim_circuit_into_fragments(circuit)
     qubit_coords_map: dict[int, tuple[float, ...]] = {
         q: tuple(coords) for q, coords in circuit.get_final_qubit_coordinates().items()
