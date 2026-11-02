@@ -1,0 +1,6 @@
+tqecd.match.match\_boundary\_stabilizers
+========================================
+
+.. currentmodule:: tqecd.match
+
+.. autofunction:: match_boundary_stabilizers

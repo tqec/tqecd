@@ -1,0 +1,60 @@
+﻿tqecd
+=====
+
+.. automodule:: tqecd
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+
+   boundary
+
+
+   construction
+
+
+   cover
+
+
+   exceptions
+
+   flow
+
+
+   fragment
+
+
+   match
+
+   measurement
+
+
+   pauli
+
+
+   predicates
+
+   utils
+
+

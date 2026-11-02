@@ -1,0 +1,6 @@
+tqecd.utils.is\_virtual\_moment
+===============================
+
+.. currentmodule:: tqecd.utils
+
+.. autofunction:: is_virtual_moment

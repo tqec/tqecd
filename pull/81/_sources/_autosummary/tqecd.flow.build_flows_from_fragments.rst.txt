@@ -1,0 +1,6 @@
+tqecd.flow.build\_flows\_from\_fragments
+========================================
+
+.. currentmodule:: tqecd.flow
+
+.. autofunction:: build_flows_from_fragments

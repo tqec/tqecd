@@ -1,0 +1,6 @@
+tqecd.pauli.pauli\_literal\_to\_bools
+=====================================
+
+.. currentmodule:: tqecd.pauli
+
+.. autofunction:: pauli_literal_to_bools

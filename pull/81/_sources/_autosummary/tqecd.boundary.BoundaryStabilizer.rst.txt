@@ -1,0 +1,38 @@
+tqecd.boundary.BoundaryStabilizer
+=================================
+
+.. currentmodule:: tqecd.boundary
+
+.. autoclass:: BoundaryStabilizer
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~BoundaryStabilizer.__init__
+      ~BoundaryStabilizer.coordinates
+      ~BoundaryStabilizer.is_trivial
+      ~BoundaryStabilizer.merge
+      ~BoundaryStabilizer.with_measurement_offset
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~BoundaryStabilizer.after_collapse
+      ~BoundaryStabilizer.before_collapse
+      ~BoundaryStabilizer.collapsing_operations
+      ~BoundaryStabilizer.has_anticommuting_operations
+      ~BoundaryStabilizer.measurements
+      ~BoundaryStabilizer.resets_qubits
+      ~BoundaryStabilizer.source_qubits
+   
+   

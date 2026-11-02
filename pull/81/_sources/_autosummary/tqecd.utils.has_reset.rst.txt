@@ -1,0 +1,6 @@
+tqecd.utils.has\_reset
+======================
+
+.. currentmodule:: tqecd.utils
+
+.. autofunction:: has_reset
