@@ -71,8 +71,8 @@ bench = [
 
 dev = [
     "pre-commit<=4.6.0",
-    "ruff==0.16.10",
-    "ty>=0.0.1a20",
+    "ruff==0.17.0",
+    "ty==0.0.86",
 ]
 
 all = [
@@ -106,8 +106,25 @@ line-length = 100
 exclude = ["*.ipynb"]
 
 [tool.ruff.lint]
-select = ["I", "E", "W", "F", "UP", "RUF", "NPY", "PERF"]
+select = ["I", "E", "W", "D", "F", "PL", "NPY", "N", "PERF", "RUF", "UP"]
 
 ignore = [
-    "E501",
+    # D100/D104: public modules and packages don't all need docstrings yet.
+    # D101/D105: class docstrings live on __init__; magic methods are self-explanatory.
+    "D100", "D101", "D104", "D105",
+    # D203/D213: incompatible with D211/D212, which we prefer.
+    "D203", "D213",
+    # D407: "====" under a section heading is flagged as a missing underline.
+    "D407",
+    # PLR09xx / PLR2004: too many branches/arguments/statements, magic values. Not a priority.
+    "PLR0912", "PLR0913", "PLR0915", "PLR0917", "PLR2004",
+    # N802: function names with upper-case letters are intentional.
+    "N802",
 ]
+
+[tool.ruff.lint.per-file-ignores]
+# Test functions are described by their names, so docstrings add nothing.
+# N806: test variables are named after the Pauli operators they hold (X0Z1, Z0, ...).
+"**/*_test.py" = ["D103", "N806"]
+# Sphinx hook functions in the docs config don't need docstrings.
+"docs/conf.py" = ["D103"]

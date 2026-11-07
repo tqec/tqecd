@@ -38,6 +38,7 @@ def iter_stim_circuit_by_moments(
           eventually yielded by the generator returned by this function.
         - In the yield items, TICK instructions can only appear at the end of a `stim.Circuit`
           or within the body of a `stim.CircuitRepeatBlock`.
+
     """
     cur_moment = stim.Circuit()
     for inst in circuit:
@@ -57,26 +58,32 @@ def iter_stim_circuit_by_moments(
 
 
 def is_measurement(instruction: stim.CircuitInstruction) -> bool:
+    """Check if an instruction is a measurement (including measure-reset ones)."""
     return instruction.name in ["M", "MR", "MRX", "MRY", "MRZ", "MX", "MY", "MZ"]
 
 
 def is_reset(instruction: stim.CircuitInstruction) -> bool:
+    """Check if an instruction is a reset (including measure-reset ones)."""
     return stim.gate_data(instruction.name).is_reset
 
 
 def is_noisy_gate(instruction: stim.CircuitInstruction) -> bool:
+    """Check if an instruction is a noisy gate (measurements excluded)."""
     return not is_measurement(instruction) and stim.gate_data(instruction.name).is_noisy_gate
 
 
 def is_annotation(instruction: stim.CircuitInstruction) -> bool:
+    """Check if an instruction is an annotation (e.g., DETECTOR or TICK)."""
     return instruction.name in ANNOTATIONS
 
 
 def is_virtual_instruction(inst: stim.CircuitInstruction) -> bool:
+    """Check if an instruction is virtual, i.e., an annotation or a noisy gate."""
     return is_annotation(inst) or is_noisy_gate(inst)
 
 
 def is_combined_measurement_reset(instruction: stim.CircuitInstruction) -> bool:
+    """Check if an instruction implements both a measurement and a reset (e.g., MR)."""
     return is_measurement(instruction) and is_reset(instruction)
 
 
@@ -91,6 +98,7 @@ def has_combined_measurement_reset(moment: stim.Circuit) -> bool:
 
     Returns:
         `True` if the provided moment has a combined instruction, else `False`.
+
     """
     for inst in moment:
         if is_virtual_instruction(inst):  # type: ignore
@@ -108,6 +116,7 @@ def has_circuit_repeat_block(moment: stim.Circuit) -> bool:
 
     Returns:
         `True` if the provided moment has a `stim.CircuitRepeatBlock`, else `False`.
+
     """
     return any(isinstance(inst, stim.CircuitRepeatBlock) for inst in moment)
 
@@ -120,13 +129,16 @@ def has_measurement(moment: stim.Circuit) -> bool:
 
     Returns:
         `True` if the provided moment has a measurement, else `False`.
+
     """
     return any(is_measurement(inst) for inst in moment)  # type:ignore
 
 
 def has_only_measurement_or_is_virtual(moment: stim.Circuit) -> bool:
-    """Check if a `stim.Circuit` moment contains only measurement instructions
-    or is a virtual moment.
+    """Check if a `stim.Circuit` moment has only measurements or is virtual.
+
+    A moment qualifies if every instruction in it is a measurement or a virtual
+    instruction.
 
     Note:
         Annotations are ignored by this function.
@@ -135,9 +147,11 @@ def has_only_measurement_or_is_virtual(moment: stim.Circuit) -> bool:
         moment: The moment to check.
 
     Returns:
-        `True` if the provided moment has a measurement, else `False`.
+        `True` if the provided moment only has measurements (and virtual
+        instructions), else `False`.
         Note that this function returns `True` on a moment that only contains
         annotations and noisy-gates (measurements excluded).
+
     """
     for inst in moment:
         if is_virtual_instruction(inst):  # type: ignore
@@ -155,13 +169,16 @@ def has_reset(moment: stim.Circuit) -> bool:
 
     Returns:
         `True` if the provided moment has a reset, else `False`.
+
     """
     return any(is_reset(inst) for inst in moment)  # type:ignore
 
 
 def has_only_reset_or_is_virtual(moment: stim.Circuit) -> bool:
-    """Check if a `stim.Circuit` moment contains only reset instructions or is
-    a virtual moment.
+    """Check if a `stim.Circuit` moment has only resets or is virtual.
+
+    A moment qualifies if every instruction in it is a reset or a virtual
+    instruction.
 
     Note:
         Annotations are ignored by this function.
@@ -173,6 +190,7 @@ def has_only_reset_or_is_virtual(moment: stim.Circuit) -> bool:
         `True` if the provided moment has only reset instructions, else `False`.
         Note that this function returns `True` on a moment that only contains
         annotations and noisy-gates (measurements excluded).
+
     """
     for inst in moment:
         if is_virtual_instruction(inst):  # type: ignore
@@ -194,6 +212,7 @@ def is_virtual_moment(moment: stim.Circuit) -> bool:
     Returns:
         `True` if the provided circuit is only composed of virtual instructions,
         else `False`.
+
     """
     if any(isinstance(inst, stim.CircuitRepeatBlock) for inst in moment):
         raise TQECDException(
@@ -204,6 +223,7 @@ def is_virtual_moment(moment: stim.Circuit) -> bool:
 
 
 def has_computation_instruction(moment: stim.Circuit) -> bool:
+    """Check if a moment has any instruction that is not virtual, a reset or a measurement."""
     return any(
         not is_virtual_instruction(inst)  # type: ignore
         and not is_reset(inst)  # type: ignore
@@ -213,12 +233,23 @@ def has_computation_instruction(moment: stim.Circuit) -> bool:
 
 
 def is_collapsing_instruction(instruction: stim.CircuitInstruction) -> bool:
+    """Check if an instruction is a reset or a measurement."""
     return is_reset(instruction) or is_measurement(instruction)
 
 
 def pauli_string_mean_coords(
     pauli_string: PauliString, qubit_coords_map: dict[int, list[float]]
 ) -> tuple[float, ...]:
+    """Compute the mean coordinates of the qubits a Pauli string acts on.
+
+    Args:
+        pauli_string: the Pauli string whose qubits are averaged.
+        qubit_coords_map: a mapping from qubit indices to their coordinates.
+
+    Returns:
+        The mean coordinates, with a time coordinate of ``0.0`` appended.
+
+    """
     all_coords_items = [qubit_coords_map[i] for i in pauli_string.qubits]
     return (*tuple(numpy.mean(numpy.asarray(all_coords_items), axis=0)), 0.0)
 
@@ -226,8 +257,7 @@ def pauli_string_mean_coords(
 def _collapsing_inst_to_pauli_strings(
     inst: stim.CircuitInstruction,
 ) -> list[PauliString]:
-    """Create the `PauliString` instances representing the provided collapsing
-    instruction.
+    """Create the `PauliString` instances for a collapsing instruction.
 
     Args:
         inst: a collapsing instruction.
@@ -239,6 +269,7 @@ def _collapsing_inst_to_pauli_strings(
     Returns:
         a list of `PauliString` instances representing the collapsing instruction
         provided as input.
+
     """
     name = inst.name
     targets = inst.targets_copy()
@@ -260,8 +291,7 @@ def _collapsing_inst_to_pauli_strings(
 
 
 def collapse_pauli_strings_at_moment(moment: stim.Circuit) -> list[PauliString]:
-    """Compute and return the list of PauliString instances representing all
-    the collapsing operations found in the provided moment.
+    """Compute the `PauliString` instances for all collapsing operations in a moment.
 
     This function has the following pre-condition: all the instructions in the provided
     moment should be instances of `stim.CircuitInstruction`.
@@ -283,6 +313,7 @@ def collapse_pauli_strings_at_moment(moment: stim.Circuit) -> list[PauliString]:
     Returns:
         instances of `PauliString` representing each collapsing operation found in the
             provided moment, sorted by qubits.
+
     """
     # Pre-condition check
     if any(isinstance(inst, stim.CircuitRepeatBlock) for inst in moment):
@@ -307,15 +338,20 @@ def remove_annotations(
         {"DETECTOR", "MPAD", "OBSERVABLE_INCLUDE", "SHIFT_COORDS"}
     ),
 ) -> stim.Circuit:
-    """Remove all the annotations from a given circuit, except TICK
-    instructions.
+    """Remove the selected annotations from a given circuit.
+
+    Repeat blocks are processed recursively.
 
     Args:
         circuit: the circuit to remove annotations from.
+        annotations_to_remove: names of the annotation instructions to remove.
+            Defaults to DETECTOR, MPAD, OBSERVABLE_INCLUDE and SHIFT_COORDS, so
+            TICK and QUBIT_COORDS instructions are kept by default.
 
     Returns:
         a new quantum circuit that contains all the instructions from the provided
-        circuit except annotations that are not TICK instructions.`
+        circuit except the annotations listed in ``annotations_to_remove``.
+
     """
     new_circuit = stim.Circuit()
     for inst in circuit:
@@ -344,10 +380,24 @@ def _offset_detectors(
 
 
 def detector_to_targets_tuple(instruction: stim.CircuitInstruction) -> tuple[int, ...]:
+    """Return the measurement record offsets targeted by a detector instruction."""
     return tuple(t.value for t in instruction.targets_copy())
 
 
 def push_all_detectors_to_the_end(circuit: stim.Circuit) -> stim.Circuit:
+    """Move all the detectors to the end of the circuit.
+
+    Detectors are placed after the last instruction of the circuit (and of each
+    repeat block body), with their measurement record offsets adjusted
+    accordingly. They are sorted by their measurement targets, in decreasing order.
+
+    Args:
+        circuit: the circuit to rewrite.
+
+    Returns:
+        A new `stim.Circuit` with the detectors moved to the end.
+
+    """
     new_circuit = stim.Circuit()
     detectors: list[stim.CircuitInstruction] = []
     for instruction in circuit:
@@ -379,7 +429,7 @@ def remove_duplicate_detectors(circuit: stim.Circuit) -> stim.Circuit:
     targets even if the coordinates are different.
 
     Here we simplify the measurements tracking by always assuming the detectors
-    are still valid even if the repeatition count for the ``stim.CircuitRepeatBlock``
+    are still valid even if the repetition count for the ``stim.CircuitRepeatBlock``
     instructions equals one.
 
     Args:
@@ -387,6 +437,7 @@ def remove_duplicate_detectors(circuit: stim.Circuit) -> stim.Circuit:
 
     Returns:
         A new `stim.Circuit` instance with duplicate detectors removed.
+
     """
     seen_detectors: set[frozenset[int]] = set()
     num_measurements: int = 0

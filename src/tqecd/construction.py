@@ -18,10 +18,12 @@ def _detectors_to_circuit(
     """Transform a list of detectors into a circuit.
 
     Args:
-        detectors: detectors that will be included in the returned circuit.
+        detectors: Detectors that will be included in the returned circuit.
+        additional_coordinates: Additional coordinates to append to each detector.
 
     Returns:
         A ``stim.Circuit`` instance containing all the provided detectors.
+
     """
     if additional_coordinates is None:
         additional_coordinates = []
@@ -52,10 +54,11 @@ def annotate_detectors_automatically(circuit: stim.Circuit) -> stim.Circuit:
     in the documentation of :func:`split_stim_circuit_into_fragments`.
 
     Args:
-        circuit: circuit to insert detectors in.
+        circuit: Circuit to insert detectors in.
 
     Returns:
         A new ``stim.Circuit`` instance with automatically computed detectors.
+
     """
     potential_error_reason = is_valid_input_circuit(circuit)
     if potential_error_reason is not None:
@@ -71,6 +74,15 @@ def annotate_detectors_automatically(circuit: stim.Circuit) -> stim.Circuit:
 def compile_fragments_to_circuit(
     fragments: list[Fragment | FragmentLoop],
 ) -> stim.Circuit:
+    """Compile fragments into a single Stim circuit.
+
+    Args:
+        fragments: Fragments and fragment loops to compile.
+
+    Returns:
+        A Stim circuit containing the compiled fragments.
+
+    """
     circuit = stim.Circuit()
 
     for fragment in fragments:
@@ -79,6 +91,7 @@ def compile_fragments_to_circuit(
         else:  # isinstance(fragment, FragmentLoop):
             loop_body = compile_fragments_to_circuit(fragment.fragments)
             circuit += loop_body * fragment.repetitions
+
     return circuit
 
 
@@ -99,6 +112,16 @@ def compile_fragments_to_circuit_with_detectors(
     fragments: list[Fragment | FragmentLoop],
     qubit_coords_map: dict[int, tuple[float, ...]],
 ) -> stim.Circuit:
+    """Compile fragments and insert their automatically matched detectors.
+
+    Args:
+        fragments: Fragments and fragment loops to compile.
+        qubit_coords_map: Mapping from qubit indices to their coordinates.
+
+    Returns:
+        A Stim circuit containing the compiled fragments and detectors.
+
+    """
     flows = build_flows_from_fragments(fragments)
     detectors_from_flows = match_detectors_from_flows_shallow(flows, qubit_coords_map)
 
@@ -106,8 +129,10 @@ def compile_fragments_to_circuit_with_detectors(
     number_of_spatial_coordinates = len(
         next(iter(qubit_coords_map.values()), cast(tuple[float, ...], tuple()))
     )
+
     for fragment, detectors in zip(fragments, detectors_from_flows):
         detectors_circuit = _detectors_to_circuit(detectors, [0.0])
+
         if isinstance(fragment, Fragment):
             circuit += _insert_before_last_tick_instruction(fragment.circuit, detectors_circuit)
         else:  # isinstance(fragment, FragmentLoop):
@@ -119,4 +144,5 @@ def compile_fragments_to_circuit_with_detectors(
                 _insert_before_last_tick_instruction(loop_body, shift_circuit + detectors_circuit)
                 * fragment.repetitions
             )
+
     return remove_duplicate_detectors(circuit)

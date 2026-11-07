@@ -11,32 +11,42 @@ def _find_cover(
     on_qubits: frozenset[int],
     commute_with: PauliString | None = None,
 ) -> list[int] | None:
-    """Try to find a set of boundary stabilizers from ``sources`` that generate
-    ``target`` (or commute with ``target``) on qubits ``on_qubits`` (a "cover").
+    """Find a cover of ``target`` using boundary stabilizers from ``sources``.
+
+    The cover should generate ``target`` (or commute with ``target``) on qubits
+    ``on_qubits``.
 
     If multiple valid covers exist, only one will be returned. This choice is
     deterministic, but not necessarily with the lowest weight.
 
     Args:
-        target: the stabilizers to cover with stabilizers from ``sources``.
-        sources: stabilizers that can be used to cover ``target``.
-        on_qubits: qubits to consider when trying to cover ``target`` with
+        target: The stabilizers to cover with stabilizers from ``sources``.
+        sources: Stabilizers that can be used to cover ``target``.
+        on_qubits: Qubits to consider when trying to cover ``target`` with
             ``sources``.
-        commute_with: if provided, find a commuting-cover to the provided Pauli
-            string; otherwise, find an exact cover.
+        commute_with: If provided, find a commuting cover with the provided
+            Pauli string; otherwise, find an exact cover.
 
     Returns:
         A list of source indices forming the exact or commuting cover, or
         ``None`` if no such cover could be found.
+
     """
     qubit_mask = sum(1 << q for q in on_qubits)
     basis: dict[int, tuple[int, int]] = {}
+
     for i, source in enumerate(sources):
-        result = _solve_linear_system(basis, source._to_int_mask(qubit_mask, commute_with), 1 << i)
+        result = _solve_linear_system(
+            basis,
+            source._to_int_mask(qubit_mask, commute_with),
+            1 << i,
+        )
         if result is not None and commute_with is not None:
             return _int_to_bit_indices(result)
+
     if commute_with is not None:
         return None
+
     result = _solve_linear_system(
         basis,
         target._to_int_mask(qubit_mask, commute_with),
@@ -46,12 +56,11 @@ def _find_cover(
 
 
 def find_exact_cover(target: PauliString, sources: list[PauliString]) -> list[int] | None:
-    """Try to find a set of Pauli strings from ``sources`` that generate exactly
-    ``target``.
+    """Find Pauli strings from ``sources`` that generate exactly ``target``.
 
-    The Pauli strings returned (via indices over the provided ``sources``), once
-    multiplied together, should be exactly equal to ``target``. In particular, the
-    following post-condition should hold:
+    The Pauli strings returned (via indices over the provided ``sources``),
+    once multiplied together, should be exactly equal to ``target``. In
+    particular, the following post-condition should hold:
 
     .. code-block:: python
 
@@ -64,13 +73,14 @@ def find_exact_cover(target: PauliString, sources: list[PauliString]) -> list[in
         assert resulting_pauli_string == target, "Should hold"
 
     Args:
-        target: the stabilizers to cover with stabilizers from ``sources``.
-        sources: stabilizers that can be used to cover ``target``.
+        target: The stabilizers to cover with stabilizers from ``sources``.
+        sources: Stabilizers that can be used to cover ``target``.
 
     Returns:
         Either a list of indices over ``sources`` that, when combined, cover
-        exactly the provided ``target``, or ``None`` if such a list could not be
-        found.
+        exactly the provided ``target``, or ``None`` if such a list could not
+        be found.
+
     """
     # If target is the identity, pick no Pauli string.
     # Note: we might want to disallow an empty return in the future.
@@ -95,8 +105,7 @@ def find_exact_cover(target: PauliString, sources: list[PauliString]) -> list[in
 def find_commuting_cover_on_target_qubits(
     target: PauliString, sources: list[PauliString]
 ) -> list[int] | None:
-    """Try to find a set of boundary stabilizers from ``sources`` that generate a
-    superset of ``target``.
+    """Find a commuting cover of ``target`` using ``sources``.
 
     This function tries to find a set of Pauli strings from ``sources`` that
     includes ``target`` (i.e., on every qubit where ``target`` is non-trivial,
@@ -105,26 +114,34 @@ def find_commuting_cover_on_target_qubits(
 
     The differences with :func:`find_cover` are:
 
-    1. this function does not restrict the output of the product of each of
-       the returned Pauli string on qubits where ``target`` acts trivially (i.e.
-       "I"). So in practice, on qubits where ``target[qubit] == "I"``, the value
-       of the returned Pauli string can be anything.
-    2. this function does not restrict the output of the product of each of
-       the returned Pauli string to exactly match ``target`` on qubits where
+    1. This function does not restrict the output of the product of each of
+       the returned Pauli strings on qubits where ``target`` acts trivially
+       (i.e. ``"I"``). So in practice, on qubits where
+       ``target[qubit] == "I"``, the value of the returned Pauli string can be
+       anything.
+    2. This function does not restrict the output of the product of each of
+       the returned Pauli strings to exactly match ``target`` on qubits where
        it acts non-trivially, but rather requires the output to commute with
        ``target`` on those qubits.
 
     Args:
-        target: the stabilizers to cover with stabilizers from ``sources``.
-        sources: stabilizers that can be used to cover ``target``.
+        target: The stabilizers to cover with stabilizers from ``sources``.
+        sources: Stabilizers that can be used to cover ``target``.
 
     Returns:
-        Either a list of a stabilizers that, when combined, commute with
-        the provided ``target``, or ``None`` if such a list could not be found.
+        Either a list of indices that, when combined, commute with the provided
+        ``target``, or ``None`` if such a list could not be found.
+
     """
     if not sources:
         return None
-    return _find_cover(target, sources, frozenset(target.qubits), commute_with=target)
+
+    return _find_cover(
+        target,
+        sources,
+        frozenset(target.qubits),
+        commute_with=target,
+    )
 
 
 def _solve_linear_system(
@@ -133,7 +150,7 @@ def _solve_linear_system(
     mask: int = 0,
     update_basis: bool = True,
 ) -> int | None:
-    """Gaussian elimination over GF(2) to decompose ``x`` in terms of ``basis``.
+    """Perform Gaussian elimination over GF(2) to decompose ``x`` using ``basis``.
 
     Each basis element is stored as a tuple ``(vector, mask)``, keyed by the
     position of its highest set bit (the pivot). ``vector`` is the basis
@@ -142,26 +159,26 @@ def _solve_linear_system(
     bit set in ``mask`` corresponds to one source's index.
 
     The input ``x`` is reduced by repeatedly XOR-ing in the basis element
-    whose pivot matches the current highest bit of ``x``. While doing so,
-    the bookkeeping ``mask`` accumulates which source indices have been
-    combined.
+    whose pivot matches the current highest bit of ``x``. While doing so, the
+    bookkeeping ``mask`` accumulates which source indices have been combined.
 
     Args:
-        basis: the current basis, mapping each pivot bit position to a
+        basis: The current basis, mapping each pivot bit position to a
             ``(vector, mask)`` pair. Modified in place when ``update_basis``
             is ``True`` and ``x`` turns out to be linearly independent.
-        x: the bit-vector to reduce against ``basis``.
-        mask: initial mask of source indices already associated with ``x``.
+        x: The bit-vector to reduce against ``basis``.
+        mask: Initial mask of source indices already associated with ``x``.
             Pass ``1 << i`` when reducing the ``i``-th source while building
             the basis, or ``0`` when reducing an external target.
-        update_basis: if ``True`` (default), ``x`` is added to ``basis`` as
+        update_basis: If ``True`` (default), ``x`` is added to ``basis`` as
             a new basis element whenever it is found to be linearly
             independent of the current basis.
 
     Returns:
-        The final ``mask`` (a bit-set of source indices whose encoded
-        vectors XOR to the original ``x``) when ``x`` is fully reduced, or
-        ``None`` when ``x`` is linearly independent of the current basis.
+        The final ``mask`` (a bit-set of source indices whose encoded vectors
+        XOR to the original ``x``) when ``x`` is fully reduced, or ``None``
+        when ``x`` is linearly independent of the current basis.
+
     """
     while x:
         highest_bit = x.bit_length() - 1
@@ -169,19 +186,22 @@ def _solve_linear_system(
             if update_basis:
                 basis[highest_bit] = (x, mask)
             return None
+
         pivot, pivot_mask = basis[highest_bit]
         x ^= pivot
         mask ^= pivot_mask
+
     return mask
 
 
 def _int_to_bit_indices(x: int) -> list[int]:
-    """Return the positions of the bits that are set in ``x``.
+    """Return the positions of the bits set in ``x``.
 
     Args:
-        x: a non-negative integer, interpreted as a bit-vector.
+        x: A non-negative integer, interpreted as a bit-vector.
 
     Returns:
         The sorted list of indices ``i`` such that bit ``i`` of ``x`` is ``1``.
+
     """
     return [i for i in range(x.bit_length()) if (x >> i) & 1]

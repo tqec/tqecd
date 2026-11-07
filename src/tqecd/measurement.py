@@ -27,6 +27,7 @@ class RelativeMeasurementLocation:
             raise TQECDException("Relative measurement offsets should be strictly negative.")
 
     def offset_by(self, offset: int) -> RelativeMeasurementLocation:
+        """Return a measurement location with its offset adjusted by the given value."""
         return RelativeMeasurementLocation(
             offset=self.offset + offset, qubit_index=self.qubit_index
         )
@@ -35,6 +36,7 @@ class RelativeMeasurementLocation:
 def get_relative_measurement_index(
     all_measured_qubits: list[int], measured_qubit: int
 ) -> RelativeMeasurementLocation:
+    """Return the relative measurement location for the specified qubit."""
     return RelativeMeasurementLocation(
         all_measured_qubits.index(measured_qubit) - len(all_measured_qubits),
         measured_qubit,

@@ -33,6 +33,7 @@ class MatchedDetector:
         return numpy.allclose(self.coords, other.coords)
 
     def to_instruction(self) -> stim.CircuitInstruction:
+        """Convert this matched detector into a Stim circuit instruction."""
         targets = [
             stim.target_rec(m.offset)
             for m in sorted(self.measurements, key=lambda measurement: -measurement.offset)
@@ -40,6 +41,7 @@ class MatchedDetector:
         return stim.CircuitInstruction("DETECTOR", targets, list(self.coords))
 
     def with_time_coordinate(self, time_coordinate: float) -> MatchedDetector:
+        """Return a matched detector with the specified time coordinate."""
         return MatchedDetector((*self.coords, time_coordinate), self.measurements, self.resets)
 
 
@@ -96,6 +98,7 @@ def match_detectors_from_flows_shallow(
         parameter `flows`. If the last provided flow is an instance of
         :class:`FragmentLoopFlows` then the returned detectors should be inserted at
         the end of the loop body.
+
     """
     detectors: list[list[MatchedDetector]] = [
         match_detectors_within_fragment(flow, qubit_coordinates) for flow in flows
@@ -110,8 +113,9 @@ def match_detectors_within_fragment(
     flows: FragmentFlows | FragmentLoopFlows,
     qubit_coordinates: Mapping[int, tuple[float, ...]],
 ) -> list[MatchedDetector]:
-    """Match all the detectors that can be resolved without considering
-    neighbouring fragments.
+    """Match detectors that can be resolved without considering neighbouring fragments.
+
+    Some detectors only include measurements from one fragment.
 
     Some detectors only include measurements from one fragment. This is for example the
     case during the initialisation of any code: some measurements from the first round
@@ -130,6 +134,7 @@ def match_detectors_within_fragment(
 
     Returns:
         the list of all the detectors found.
+
     """
     matched_detectors: list[MatchedDetector] = []
     matched_detectors.extend(
@@ -145,10 +150,10 @@ def _match_non_propagating_non_trivial_flows_inline(
     boundary_stabilizers: list[BoundaryStabilizer],
     qubit_coordinates: Mapping[int, tuple[float, ...]],
 ) -> list[MatchedDetector]:
-    """Match all the detectors that can be trivially resolved and remove the
-    matched boundary stabilizers from the provided list.
+    """Match trivially resolvable detectors and remove their matched boundary stabilizers.
 
-    This function try to find a trivial match for each of the provided boundary
+    This function tries to find a trivial match for each of the provided boundary
+
     stabilizers. A trivial match is defined here as a flow that is fully
     collapsed by the collapsing operations it encounters, stopping its
     propagation.
@@ -183,6 +188,7 @@ def _match_non_propagating_non_trivial_flows_inline(
 
     Returns:
         all matched detectors.
+
     """
     matched_detectors: list[MatchedDetector] = []
     non_propagating_flows_indices = list(
@@ -211,9 +217,9 @@ def _match_non_propagating_non_trivial_flows_inline(
 def _find_non_propagating_non_trivial_flows(
     boundary_stabilizers: list[BoundaryStabilizer],
 ) -> Iterator[int]:
-    """Find all the boundary stabilizers that do not have any anti-commuting
-    collapsing operations and that are fully collapsed by the commuting
-    operations.
+    """Find boundary stabilizers fully collapsed by commuting operations.
+
+    The selected stabilizers must not have any anti-commuting collapsing operations.
 
     Args:
         boundary_stabilizers: the boundary stabilizers to search in.
@@ -222,6 +228,7 @@ def _find_non_propagating_non_trivial_flows(
         indices (in ascending order) of boundary stabilizers in the provided
         `boundary_stabilizers` list that are non-trivial and fully collapsed
         by the commuting operations.
+
     """
     for i, stabilizer in enumerate(boundary_stabilizers):
         if (
@@ -238,10 +245,9 @@ def match_boundary_stabilizers(
     qubit_coordinates: Mapping[int, tuple[float, ...]],
     perform_sanity_check: bool = True,
 ) -> list[MatchedDetector]:
-    """Match detectors using the boundary stabilizers between the two given
-    flows.
+    """Match detectors using boundary stabilizers between the two flows.
 
-    This function try to match detectors that will be valid at the end of
+    This function tries to match detectors that will be valid at the end of
     `right_flows` by looking at destruction boundary stabilizers back-propagated
     from measurements in `right_flows` and creation boundary stabilizers
     propagated from resets in `left_flows`.
@@ -267,6 +273,7 @@ def match_boundary_stabilizers(
 
     Returns:
         all matched detectors.
+
     """
     matched_detectors: list[MatchedDetector] = []
 
@@ -353,6 +360,7 @@ def _match_commute_stabilizers(
 
     Returns:
         the list of all the detectors found.
+
     """
     detectors: list[MatchedDetector] = []
     left_flows_indices_to_remove: list[int] = []
@@ -422,10 +430,12 @@ def _match_boundary_stabilizers_by_disjoint_cover(
             involved in the measurement forming the detector.
         target_is_creation: `True` if the provided `target_stabilizers` are
             creation stabilizers, else `False`.
+
     Returns:
         the list of all the detectors found as well as the indices of stabilizers
         from `target_stabilizers` that have been used and should be removed from
         the considered stabilizers.
+
     """
     detectors: list[MatchedDetector] = []
     targets_to_remove: list[int] = []
@@ -484,6 +494,7 @@ def _match_by_disjoint_cover(
 
     Returns:
         the list of all the detectors found.
+
     """
     # Build the correct stabilizer lists
     left_boundary_stabilizers: list[BoundaryStabilizer] = []

@@ -23,21 +23,23 @@ def _has_any_combined_gates(circuit: stim.Circuit) -> bool:
 
 
 def does_not_contain_combined_gates(circuit: stim.Circuit) -> bool:
+    """Return whether the circuit contains no combined gates."""
     return not _has_any_combined_gates(circuit)
 
 
 def does_not_contain_both_reset_and_measurement(circuit: stim.Circuit) -> bool:
+    """Return whether no moment contains both reset and measurement operations."""
     for moment in iter_stim_circuit_by_moments(circuit):
         if isinstance(moment, stim.CircuitRepeatBlock):
             if not does_not_contain_both_reset_and_measurement(moment.body_copy()):
                 return False
-        else:
-            if has_measurement(moment) and has_reset(moment):
-                return False
+        elif has_measurement(moment) and has_reset(moment):
+            return False
     return True
 
 
 def is_valid_input_circuit(circuit: stim.Circuit) -> str | None:
+    """Return an error message if the input circuit is invalid, otherwise None."""
     predicates: list[tuple[ty.Callable[[stim.Circuit], bool], str]] = [
         (
             does_not_contain_combined_gates,

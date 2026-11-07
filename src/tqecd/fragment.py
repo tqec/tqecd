@@ -25,8 +25,7 @@ from tqecd.utils import (
 
 class Fragment:
     def __init__(self, circuit: stim.Circuit):
-        """A sub-circuit guaranteed to end with a moment filled by measurement
-        instructions.
+        """Initialize a fragment ending with a measurement moment.
 
         Fragment instances represent sub-circuits that contain:
 
@@ -47,6 +46,7 @@ class Fragment:
 
         Args:
             circuit: the circuit represented by the instance.
+
         """
         if has_circuit_repeat_block(circuit):
             raise TQECDException(
@@ -100,6 +100,7 @@ class Fragment:
             all the reset instructions that appear at the beginning of the represented
             circuit, in the order of appearance, and in increasing qubit order for resets
             that are performed in parallel.
+
         """
         return self._resets
 
@@ -111,28 +112,35 @@ class Fragment:
             all the measurement instructions that appear at the end of the represented
             circuit, in the order of appearance, and in increasing qubit order for
             measurements that are performed in parallel.
+
         """
         return self._measurements
 
     @property
     def measurements_qubits(self) -> list[int]:
+        """Return the qubit indices measured by this fragment."""
         return [measurement.qubit for measurement in self.measurements]
 
     @property
     def num_measurements(self) -> int:
+        """Return the number of measurements in this fragment."""
         return len(self._measurements)
 
     @property
     def circuit(self) -> stim.Circuit:
+        """Return the circuit represented by this fragment."""
         return self._circuit
 
     def get_tableau(self) -> stim.Tableau:
+        """Return the tableau while ignoring measurements, noise, and resets."""
         return self._circuit.to_tableau(
             ignore_measurement=True, ignore_noise=True, ignore_reset=True
         )
 
     def __repr__(self) -> str:
         return f"Fragment(circuit={self._circuit!r})"
+
+    __hash__ = None
 
     def __eq__(self, other: object) -> bool:
         return isinstance(other, Fragment) and self._circuit == other._circuit
@@ -152,6 +160,7 @@ class FragmentLoop:
             )
 
     def with_repetitions(self, repetitions: int) -> FragmentLoop:
+        """Return a new fragment loop with the specified repetition count."""
         return FragmentLoop(fragments=self.fragments, repetitions=repetitions)
 
     def __repr__(self) -> str:
@@ -206,6 +215,7 @@ def split_stim_circuit_into_fragments(
 
     Returns:
         the resulting fragments.
+
     """
     potential_error_reason = is_valid_input_circuit(circuit)
     if potential_error_reason is not None:

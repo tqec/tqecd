@@ -205,7 +205,10 @@ def test_coordinates_raises_error_if_invalid_qubit_mapping() -> None:
     qubit_coordinates: dict[int, tuple[float | int, ...]] = {3: (0, 1)}
     with pytest.raises(
         TQECDException,
-        match=r"^Qubit index 5 required for detector assignment, but it does not have a valid QUBIT_COORDS statement\.$",
+        match=(
+            r"^Qubit index 5 required for detector assignment, "
+            r"but it does not have a valid QUBIT_COORDS statement\.$"
+        ),
     ):
         a.coordinates(qubit_coordinates=qubit_coordinates)
 

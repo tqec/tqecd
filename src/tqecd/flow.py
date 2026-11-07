@@ -65,6 +65,7 @@ def _try_merge_anticommuting_flows_inplace(flows: list[BoundaryStabilizer]) -> N
         TQECDException: if the provided flows have different collapsing
             operations, hinting that they are not part of the same boundary,
             in which case it makes no sense to try to merge them together.
+
     """
     # Filtering out commuting operations as they cannot make anti-commuting
     # operations commuting.
@@ -150,6 +151,7 @@ class FragmentFlows:
             in the represented :class:`Fragment`. Might be used to offset measurement
             offsets by this amount when the measurement is located on a :class:`Fragment`
             instance before the one represented by self.
+
     """
 
     creation: list[BoundaryStabilizer]
@@ -158,6 +160,7 @@ class FragmentFlows:
 
     @property
     def all_flows(self) -> ty.Iterator[BoundaryStabilizer]:
+        """Iterate over all the creation flows, then over all the destruction flows."""
         yield from self.creation
         yield from self.destruction
 
@@ -170,20 +173,29 @@ class FragmentFlows:
         )
 
     def remove_creation(self, index: int) -> None:
+        """Remove the creation flow at ``index``."""
         self.creation.pop(index)
 
     def remove_destruction(self, index: int) -> None:
+        """Remove the destruction flow at ``index``."""
         self.destruction.pop(index)
 
     def remove_creations(self, indices: ty.Iterable[int]) -> None:
+        """Remove the creation flows at the given indices."""
         for i in sorted(indices, reverse=True):
             self.remove_creation(i)
 
     def remove_destructions(self, indices: ty.Iterable[int]) -> None:
+        """Remove the destruction flows at the given indices."""
         for i in sorted(indices, reverse=True):
             self.remove_destruction(i)
 
     def without_trivial_flows(self) -> FragmentFlows:
+        """Return a new instance keeping the flows for which ``is_trivial()`` holds.
+
+        Creation and destruction flows are filtered with
+        :meth:`BoundaryStabilizer.is_trivial`.
+        """
         return FragmentFlows(
             creation=[bs for bs in self.creation if bs.is_trivial()],
             destruction=[bs for bs in self.destruction if bs.is_trivial()],
@@ -191,6 +203,10 @@ class FragmentFlows:
         )
 
     def try_merge_anticommuting_flows(self) -> None:
+        """Merge anti-commuting creation flows, and anti-commuting destruction flows.
+
+        The merge is done in-place, see :func:`_try_merge_anticommuting_flows_inplace`.
+        """
         _try_merge_anticommuting_flows_inplace(self.creation)
         _try_merge_anticommuting_flows_inplace(self.destruction)
 
@@ -210,14 +226,17 @@ class FragmentLoopFlows:
 
     @property
     def creation(self) -> list[BoundaryStabilizer]:
+        """Creation flows of the loop, i.e., those of the last fragment of its body."""
         return self.fragment_flows[-1].creation
 
     @property
     def destruction(self) -> list[BoundaryStabilizer]:
+        """Destruction flows of the loop, i.e., those of the first fragment of its body."""
         return self.fragment_flows[0].destruction
 
     @property
     def all_flows(self) -> ty.Iterator[BoundaryStabilizer]:
+        """Iterate over all the creation flows, then over all the destruction flows."""
         yield from self.creation
         yield from self.destruction
 
@@ -230,23 +249,35 @@ class FragmentLoopFlows:
 
     @property
     def total_number_of_measurements(self) -> int:
+        """Number of measurements in one iteration of the loop body.
+
+        The number of repetitions is not taken into account.
+        """
         return sum(flow.total_number_of_measurements for flow in self.fragment_flows)
 
     def remove_creation(self, index: int) -> None:
+        """Remove the creation flow at ``index`` of the last fragment of the loop body."""
         self.creation.pop(index)
 
     def remove_destruction(self, index: int) -> None:
+        """Remove the destruction flow at ``index`` of the first fragment of the loop body."""
         self.destruction.pop(index)
 
     def remove_creations(self, indices: ty.Iterable[int]) -> None:
+        """Remove the creation flows at the given indices."""
         for i in sorted(indices, reverse=True):
             self.remove_creation(i)
 
     def remove_destructions(self, indices: ty.Iterable[int]) -> None:
+        """Remove the destruction flows at the given indices."""
         for i in sorted(indices, reverse=True):
             self.remove_destruction(i)
 
     def try_merge_anticommuting_flows(self) -> None:
+        """Merge anti-commuting creation flows, and anti-commuting destruction flows.
+
+        The merge is done in-place, see :func:`_try_merge_anticommuting_flows_inplace`.
+        """
         _try_merge_anticommuting_flows_inplace(self.creation)
         _try_merge_anticommuting_flows_inplace(self.destruction)
 
@@ -276,6 +307,7 @@ def build_flows_from_fragments(
 
     Returns:
         the computed flows for each of the provided fragments.
+
     """
     return [
         _build_flows_from_fragment(fragment)

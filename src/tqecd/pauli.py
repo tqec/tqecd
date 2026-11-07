@@ -39,6 +39,16 @@ class PauliString:
     __slots__ = ("_hash", "_support", "_x_bits", "_z_bits")
 
     def __init__(self, pauli_by_qubit: dict[int, PAULI_STRING_TYPE]) -> None:
+        """Create a Pauli string from a mapping of qubit indices to Pauli operators.
+
+        Args:
+            pauli_by_qubit: a mapping from non-negative qubit indices to Pauli
+                operators ("I", "X", "Y" or "Z"). Identity entries are ignored.
+
+        Raises:
+            TQECDException: if a qubit index is negative or a Pauli operator is invalid.
+
+        """
         x_bits = 0
         z_bits = 0
         for qubit, pauli in pauli_by_qubit.items():
@@ -71,14 +81,22 @@ class PauliString:
 
     @property
     def non_trivial_pauli_count(self) -> int:
+        """Number of qubits on which this Pauli string acts non-trivially."""
         return self._support.bit_count()
 
     @property
     def qubits(self) -> Iterable[int]:
+        """Iterate, in increasing order, over the qubits with a non-identity Pauli term."""
         return _bit_indices(self._support)
 
     @property
     def qubit(self) -> int:
+        """Return the only qubit this Pauli string acts on.
+
+        Raises:
+            TQECDException: if the Pauli string does not act on exactly one qubit.
+
+        """
         non_trivial_pauli_count = self.non_trivial_pauli_count
         if non_trivial_pauli_count != 1:
             raise TQECDException(
@@ -89,8 +107,7 @@ class PauliString:
 
     @classmethod
     def from_stim_pauli_string(cls, stim_pauli_string: stim.PauliString) -> PauliString:
-        """Convert a `stim.PauliString` to a `PauliString` instance, ignoring
-        the sign."""
+        """Convert a `stim.PauliString` to a `PauliString`, ignoring the sign."""
         xs, zs = stim_pauli_string.to_numpy(bit_packed=True)
         return cls._from_bits(
             int.from_bytes(xs.tobytes(), byteorder="little"),
@@ -103,12 +120,14 @@ class PauliString:
         Args:
             length: The length of the `stim.PauliString`. If `None`, the length is set to the
                 maximum qubit index in the `PauliString` plus one.
+
         """
         max_qubit_index = self._support.bit_length() - 1
         length = length if length is not None else max_qubit_index + 1
         if length <= max_qubit_index:
             raise TQECDException(
-                f"The length specified {length} <= the maximum qubit index {max_qubit_index} in the pauli string."
+                f"The length specified {length} <= the maximum qubit index {max_qubit_index} "
+                "in the pauli string."
             )
         byte_length = (length + 7) // 8
         xs = numpy.frombuffer(
@@ -139,8 +158,7 @@ class PauliString:
         return not self.anticommutes(other)
 
     def anticommutes(self, other: PauliString) -> bool:
-        """Check if this Pauli string anticommutes with another Pauli
-        string."""
+        """Check if this Pauli string anticommutes with another Pauli string."""
         anticommutations = (self._x_bits & other._z_bits) ^ (self._z_bits & other._x_bits)
         return bool(anticommutations.bit_count() & 1)
 
@@ -184,6 +202,7 @@ class PauliString:
 
         Returns:
             a copy of self, collapsed by the provided operators.
+
         """
         x_bits = self._x_bits
         z_bits = self._z_bits
@@ -201,6 +220,16 @@ class PauliString:
         return PauliString._from_bits(x_bits, z_bits)
 
     def after(self, tableau: stim.Tableau, targets: Iterable[int]) -> PauliString:
+        """Propagate this Pauli string through a Clifford tableau.
+
+        Args:
+            tableau: the tableau to apply.
+            targets: the qubits the tableau acts on.
+
+        Returns:
+            The resulting Pauli string. The sign is ignored.
+
+        """
         target_tuple = tuple(targets)
         stim_pauli_string = self.to_stim_pauli_string(
             length=max(max(target_tuple, default=-1), self._support.bit_length() - 1) + 1
@@ -214,6 +243,7 @@ class PauliString:
         return not (differences & other._support)
 
     def overlaps(self, other: PauliString) -> bool:
+        """Check if both Pauli strings act non-trivially on at least one common qubit."""
         return bool(self._support & other._support)
 
     def __eq__(self, other: object) -> bool:
@@ -224,6 +254,7 @@ class PauliString:
 
         Returns:
             `True` if the two `PauliString` instances are equal, else False.
+
         """
         return (
             isinstance(other, PauliString)
@@ -257,6 +288,7 @@ class PauliString:
                 Pauli at that qubit. If a reference Pauli string is provided,
                 each qubit contributes 1 bit indicating whether the Pauli at
                 that qubit anti-commutes with the reference's Pauli at the same qubit.
+
         """
         if reference is None:
             result = 0
@@ -301,6 +333,16 @@ def _bit_indices(bits: int) -> Iterator[int]:
 def pauli_literal_to_bools(
     literal: PAULI_STRING_TYPE,
 ) -> tuple[bool, bool]:
+    """Convert a Pauli literal to its ``(x, z)`` bit representation.
+
+    Args:
+        literal: one of "I", "X", "Y" or "Z".
+
+    Returns:
+        A tuple of booleans telling whether the Pauli has an X component and
+        whether it has a Z component. "Y" has both.
+
+    """
     if literal == "I":
         return (False, False)
     elif literal == "X":
@@ -312,6 +354,7 @@ def pauli_literal_to_bools(
 
 
 def pauli_product(paulis: Iterable[PauliString]) -> PauliString:
+    """Multiply all the provided Pauli strings together. Phases are ignored."""
     x_bits = 0
     z_bits = 0
     for pauli in paulis:

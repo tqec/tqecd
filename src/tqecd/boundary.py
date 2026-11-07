@@ -20,8 +20,9 @@ class BoundaryStabilizer:
         *,
         _collapsing_pauli_masks: tuple[int, int, int] | None = None,
     ):
-        """Represents a stabilizer that has been propagated and is now at the
-        boundary of a :class:`~tqecd.fragment.Fragment`.
+        """Represent a stabilizer propagated to the boundary of a fragment.
+
+        The boundary is that of a :class:`~tqecd.fragment.Fragment`.
 
         Raises:
             TQECDException: if ``source_qubits`` is empty.
@@ -47,6 +48,7 @@ class BoundaryStabilizer:
                 single-qubit X, Y, and Z collapsing operations, in that order.
                 When provided, they avoid iterating over
                 ``collapsing_operations`` to test and apply the collapse.
+
         """
         self._stabilizer = stabilizer
         self._measurements = measurements
@@ -75,19 +77,21 @@ class BoundaryStabilizer:
 
     @property
     def has_anticommuting_operations(self) -> bool:
-        """Check if the instance represents a stabilizer that anti-commutes
-        with at least one of its collapsing operations.
+        """Check if the stabilizer anti-commutes with a collapsing operation.
+
+        This is ``True`` if at least one of the collapsing operations of the
+        instance anti-commutes with the stabilizer.
 
         Returns:
             ``True`` if at least one collapsing operation anti-commutes with the
             stabilizer, else ``False``.
+
         """
         return self._has_anticommuting_collapsing_operations
 
     @property
     def after_collapse(self) -> PauliString:
-        """Compute the stabilizer obtained after applying the collapsing
-        operations.
+        """Compute the stabilizer obtained after applying the collapsing operations.
 
         Raises:
             TQECDException: If any of the collapsing operation anti-commutes
@@ -96,6 +100,7 @@ class BoundaryStabilizer:
         Returns:
             The collapsed :class:`~tqecd.pauli.PauliString` that goes out of the
             :class:`~tqecd.fragment.Fragment`.
+
         """
         if self._after_collapse is None:
             raise TQECDException(
@@ -105,28 +110,32 @@ class BoundaryStabilizer:
 
     @property
     def before_collapse(self) -> PauliString:
-        """Return the stabilizer obtained before applying the collapsing
-        operations.
+        """Return the stabilizer obtained before applying the collapsing operations.
 
         Returns:
             The :class:`~tqecd.pauli.PauliString` that goes out of the
             :class:`~tqecd.fragment.Fragment`, before applying any collapsing
             operation.
+
         """
         return self._stabilizer
 
     @property
     def collapsing_operations(self) -> frozenset[PauliString]:
-        """Iterator on all the collapsing operations defining the boundary this
-        stabilizer is applied to."""
+        """Return the collapsing operations defining the boundary of this stabilizer."""
         return self._collapsing_operations
 
     @property
     def measurements(self) -> list[RelativeMeasurementLocation]:
+        """Return the measurements involved in this stabilizer.
+
+        Offsets are relative to the end of the fragment.
+        """
         return self._measurements
 
     @property
     def resets_qubits(self) -> frozenset[int]:
+        """Return the qubits on which the resets involved in this stabilizer are applied."""
         return self._reset_qubits
 
     def merge(self, other: BoundaryStabilizer) -> BoundaryStabilizer:
@@ -147,6 +156,7 @@ class BoundaryStabilizer:
             the merged boundary stabilizer, defined on the same set of collapsing
             operations (i.e., the same boundary), but with the two pre-collapsing
             stabilizers multiplied together.
+
         """
         if self._collapsing_operations != other._collapsing_operations:
             raise TQECDException(
@@ -224,6 +234,7 @@ class BoundaryStabilizer:
 
         Returns:
             the boundary stabilizer coordinates.
+
         """
         try:
             measurement_coordinates = [qubit_coordinates[source] for source in self.source_qubits]
@@ -237,6 +248,16 @@ class BoundaryStabilizer:
         return tuple(float(c) for c in numpy.mean(measurement_coordinates, axis=0))
 
     def with_measurement_offset(self, offset: int) -> BoundaryStabilizer:
+        """Return a copy of this stabilizer with shifted measurement offsets.
+
+        Args:
+            offset: the amount added to the offset of each measurement.
+
+        Returns:
+            A new :class:`BoundaryStabilizer`, identical to this one except that
+            the offset of each of its measurements is shifted by ``offset``.
+
+        """
         return BoundaryStabilizer(
             self._stabilizer,
             self.collapsing_operations,
@@ -247,6 +268,12 @@ class BoundaryStabilizer:
         )
 
     def is_trivial(self) -> bool:
+        """Check if the stabilizer acts on a single qubit and is fully collapsed.
+
+        This is ``True`` when no collapsing operation anti-commutes with the
+        stabilizer, the collapsed stabilizer is the identity, and the stabilizer
+        acts non-trivially on exactly one qubit.
+        """
         return (
             not self.has_anticommuting_operations
             and self.after_collapse.non_trivial_pauli_count == 0
@@ -255,6 +282,11 @@ class BoundaryStabilizer:
 
     @property
     def source_qubits(self) -> frozenset[int]:
+        """Return the qubits the stabilizer originates from.
+
+        These are the reset qubits for a forward stabilizer, and the qubits of
+        the involved measurements for a backward one.
+        """
         return (
             self._reset_qubits
             if self._is_forward
@@ -267,6 +299,20 @@ def manhattan_distance(
     rhs: BoundaryStabilizer,
     qubit_coordinates: dict[int, tuple[float, ...]],
 ) -> float:
+    """Compute the Manhattan distance between two boundary stabilizers.
+
+    The distance is computed between the coordinates of the stabilizers, as
+    returned by :meth:`BoundaryStabilizer.coordinates`.
+
+    Args:
+        lhs: the first boundary stabilizer.
+        rhs: the second boundary stabilizer.
+        qubit_coordinates: mapping from qubit indices to coordinates.
+
+    Returns:
+        The sum of the absolute coordinate differences.
+
+    """
     lhs_coords = lhs.coordinates(qubit_coordinates)
     rhs_coords = rhs.coordinates(qubit_coordinates)
     return sum(abs(left - right) for left, right in zip(lhs_coords, rhs_coords))
