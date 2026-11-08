@@ -1,6 +1,0 @@
-tqecd.utils.is\_combined\_measurement\_reset
-============================================
-
-.. currentmodule:: tqecd.utils
-
-.. autofunction:: is_combined_measurement_reset
