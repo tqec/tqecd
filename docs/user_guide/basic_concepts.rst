@@ -4,9 +4,6 @@ Automatic detector finding
 The ``tqecd`` package implements a method to automatically find detectors from a
 given quantum circuit representing a quantum error corrected computation.
 
-An accompanying notebook showcasing the different steps to find detectors is located
-`here <../media/detectors/detector_finding_illustration.ipynb>`_.
-
 Concepts used through the package
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -169,15 +166,18 @@ as the one described above.
 
 To distinguish between these two ``BoundaryStabilizer`` (one representing a creation flow,
 the other representing a destruction flow), they will be stored in a data-structure that
-will differentiate creation and destruction flows: ``FragmentFlow`` (or ``FragmentLoopFlow``).
+will differentiate creation and destruction flows: ``FragmentFlows`` (or
+``FragmentLoopFlows`` for a repeated block).
 
 
-Example
-~~~~~~~
+Detector finding and example
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-See the accompanying notebook for an example of how to perform automatic detector computation:
+The next page explains how ``tqecd`` finds detectors with these concepts. The notebook
+finds the detectors of an example circuit step by step.
 
 .. toctree::
    :maxdepth: 1
 
-   ../media/detectors/detector_finding_illustration.ipynb
+   How detectors are found <detector_finding>
+   Example <../media/detectors/detector_finding_illustration.ipynb>
